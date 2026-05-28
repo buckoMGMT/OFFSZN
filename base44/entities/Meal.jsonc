@@ -1,0 +1,62 @@
+{
+  "name": "Meal",
+  "type": "object",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "daily_log_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "calories": {
+      "type": "number"
+    },
+    "protein_g": {
+      "type": "number"
+    },
+    "carbs_g": {
+      "type": "number"
+    },
+    "fats_g": {
+      "type": "number"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "scan_source": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "ai_scan",
+        "search"
+      ],
+      "default": "manual"
+    },
+    "estimated_cost_usd": {
+      "type": "number"
+    },
+    "meal_time": {
+      "type": "string",
+      "enum": [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "snack",
+        "pre_workout",
+        "post_workout"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "athlete_id",
+    "name",
+    "calories"
+  ]
+}

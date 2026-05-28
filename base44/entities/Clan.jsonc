@@ -1,0 +1,65 @@
+{
+  "name": "Clan",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "high_school",
+        "club",
+        "college",
+        "other"
+      ]
+    },
+    "sport": {
+      "type": "string"
+    },
+    "school_name": {
+      "type": "string"
+    },
+    "admin_id": {
+      "type": "string"
+    },
+    "member_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "description": {
+      "type": "string"
+    },
+    "emblem_url": {
+      "type": "string"
+    },
+    "total_points": {
+      "type": "number",
+      "default": 0
+    },
+    "wins": {
+      "type": "number",
+      "default": 0
+    },
+    "losses": {
+      "type": "number",
+      "default": 0
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true
+    },
+    "join_code": {
+      "type": "string"
+    },
+    "announcement": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ]
+}

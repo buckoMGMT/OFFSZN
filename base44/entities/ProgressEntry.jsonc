@@ -1,0 +1,38 @@
+{
+  "name": "ProgressEntry",
+  "type": "object",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "weight_lbs": {
+      "type": "number"
+    },
+    "body_fat_pct": {
+      "type": "number"
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "weekly_avg_sleep": {
+      "type": "number"
+    },
+    "weekly_macro_adherence_pct": {
+      "type": "number"
+    },
+    "weekly_workout_count": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "athlete_id",
+    "date"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "name": "StretchProgram",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "sport": {
+      "type": "string"
+    },
+    "position": {
+      "type": "string"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    "duration_minutes": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "is_premium": {
+      "type": "boolean",
+      "default": false
+    },
+    "exercises": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "stretch",
+              "fascia",
+              "strength",
+              "mobility",
+              "activation"
+            ]
+          },
+          "duration_seconds": {
+            "type": "number"
+          },
+          "sets": {
+            "type": "number"
+          },
+          "reps": {
+            "type": "number"
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "muscle_group": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ncaa_benchmark_focus": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title",
+    "sport"
+  ]
+}

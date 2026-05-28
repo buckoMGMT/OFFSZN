@@ -1,0 +1,73 @@
+{
+  "name": "DailyLog",
+  "type": "object",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "calories_consumed": {
+      "type": "number",
+      "default": 0
+    },
+    "protein_g": {
+      "type": "number",
+      "default": 0
+    },
+    "carbs_g": {
+      "type": "number",
+      "default": 0
+    },
+    "fats_g": {
+      "type": "number",
+      "default": 0
+    },
+    "water_oz": {
+      "type": "number",
+      "default": 0
+    },
+    "weight_lbs": {
+      "type": "number"
+    },
+    "sleep_hours": {
+      "type": "number"
+    },
+    "sleep_quality": {
+      "type": "string",
+      "enum": [
+        "poor",
+        "fair",
+        "good",
+        "excellent"
+      ]
+    },
+    "bedtime": {
+      "type": "string"
+    },
+    "wake_time": {
+      "type": "string"
+    },
+    "workout_complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "streak_day": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    },
+    "points_earned": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "athlete_id",
+    "date"
+  ]
+}

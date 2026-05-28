@@ -1,0 +1,66 @@
+{
+  "name": "ClanChallenge",
+  "type": "object",
+  "properties": {
+    "challenger_clan_id": {
+      "type": "string"
+    },
+    "challenger_clan_name": {
+      "type": "string"
+    },
+    "opponent_clan_id": {
+      "type": "string"
+    },
+    "opponent_clan_name": {
+      "type": "string"
+    },
+    "metric": {
+      "type": "string",
+      "enum": [
+        "macro_streak",
+        "sleep_score",
+        "workout_completion",
+        "total_points",
+        "water_intake"
+      ]
+    },
+    "duration_days": {
+      "type": "number"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "challenger_score": {
+      "type": "number",
+      "default": 0
+    },
+    "opponent_score": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "completed",
+        "declined"
+      ],
+      "default": "pending"
+    },
+    "winner_clan_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "challenger_clan_id",
+    "opponent_clan_id",
+    "metric",
+    "duration_days"
+  ]
+}
