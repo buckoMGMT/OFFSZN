@@ -67,53 +67,50 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header / Hero */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-gold opacity-10" />
-        <div className="relative px-4 pt-14 pb-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-20 h-20 rounded-2xl bg-secondary border-2 border-primary/40 flex items-center justify-center overflow-hidden">
+      {/* Header */}
+      <div className="px-4 pt-14 pb-5 border-b border-border">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-16 h-16 rounded-full bg-secondary border border-border flex items-center justify-center overflow-hidden">
               {athlete.avatar_url ? (
                 <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-3xl font-display text-primary">
+                <span className="text-2xl font-bold text-primary">
                   {(athlete.display_name || "A")[0].toUpperCase()}
                 </span>
               )}
             </div>
-            <div className="flex flex-col items-end gap-2">
-              {isPremium ? (
-                <GoldBadge><Crown size={10} />Premium</GoldBadge>
-              ) : (
-                <button className="text-xs font-barlow font-bold text-primary uppercase bg-primary/15 border border-primary/30 px-3 py-1.5 rounded-full hover:bg-primary/25 transition-colors">
-                  Upgrade to Premium
-                </button>
-              )}
-              <button onClick={() => setEditing(!editing)} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Edit2 size={12} />
-                Edit Profile
-              </button>
+            <div>
+              <h1 className="text-lg font-bold text-foreground">{athlete.display_name || "Athlete"}</h1>
+              <p className="text-xs text-muted-foreground capitalize">
+                {[athlete.sport, athlete.position, athlete.grade].filter(Boolean).join(" · ")}
+              </p>
+              {athlete.school && <p className="text-xs text-muted-foreground">{athlete.school}</p>}
             </div>
           </div>
+          <button onClick={() => setEditing(!editing)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary text-muted-foreground text-xs font-medium">
+            <Edit2 size={12} />
+            Edit
+          </button>
+        </div>
 
-          <h1 className="text-3xl font-barlow font-bold text-foreground uppercase">{athlete.display_name || "Athlete"}</h1>
-          <p className="text-sm text-muted-foreground font-barlow uppercase tracking-wide mt-0.5">
-            {athlete.sport || "Select sport"} {athlete.position ? `· ${athlete.position}` : ""} {athlete.grade ? `· ${athlete.grade}` : ""}
-          </p>
-          {athlete.school && <p className="text-xs text-muted-foreground mt-0.5">{athlete.school}</p>}
-
-          <div className="flex items-center gap-3 mt-3">
-            {athlete.current_streak_days > 0 && <StreakBadge days={athlete.current_streak_days} />}
-            <div className="flex items-center gap-1.5 bg-primary/15 border border-primary/30 rounded-full px-3 py-1">
-              <Trophy size={12} className="text-primary" />
-              <span className="text-primary text-xs font-barlow font-bold">{athlete.total_points || 0} pts</span>
-            </div>
+        <div className="flex items-center gap-3">
+          {athlete.current_streak_days > 0 && <StreakBadge days={athlete.current_streak_days} />}
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Trophy size={12} className="text-primary" />
+            <span className="font-semibold text-foreground">{athlete.total_points || 0}</span> pts
           </div>
+          {isPremium ? (
+            <GoldBadge><Crown size={10} />Premium</GoldBadge>
+          ) : (
+            <button className="text-xs text-primary font-medium">Upgrade</button>
+          )}
         </div>
       </div>
 
       {/* Section Tabs */}
-      <div className="flex gap-1 mx-4 bg-secondary rounded-xl p-1 mb-4">
+      <div className="flex border-b border-border px-4">
         {[
           { id: "stats", label: "Stats" },
           { id: "badges", label: "Badges" },
@@ -121,8 +118,8 @@ export default function Profile() {
           { id: "about", label: "About" },
         ].map(s => (
           <button key={s.id} onClick={() => setActiveSection(s.id)}
-            className={`flex-1 py-2 rounded-lg text-xs font-barlow font-bold uppercase transition-all ${
-              activeSection === s.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            className={`flex-1 py-3 text-xs font-medium transition-colors border-b-2 ${
+              activeSection === s.id ? "border-primary text-primary" : "border-transparent text-muted-foreground"
             }`}>
             {s.label}
           </button>
@@ -132,8 +129,8 @@ export default function Profile() {
       <div className="px-4 pb-6">
         {/* Edit Mode */}
         {editing && (
-          <div className="gradient-card border border-primary/30 rounded-2xl p-4 mb-4 space-y-3">
-            <h3 className="text-sm font-barlow font-bold text-primary uppercase">Edit Profile</h3>
+          <div className="bg-card border border-border rounded-xl p-4 mb-4 space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">Edit Profile</h3>
             <input className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none"
               placeholder="Display name" value={form.display_name || ""} onChange={e => setForm(p => ({ ...p, display_name: e.target.value }))} />
             <input className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none"
@@ -157,35 +154,35 @@ export default function Profile() {
             <textarea className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none resize-none h-16"
               placeholder="Bio" value={form.bio || ""} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} />
             <div className="flex gap-2">
-              <button onClick={() => setEditing(false)} className="flex-1 py-3 bg-secondary rounded-xl text-sm font-barlow font-bold uppercase text-muted-foreground">Cancel</button>
-              <button onClick={save} disabled={saving} className="flex-1 py-3 gradient-gold rounded-xl text-sm font-barlow font-bold uppercase text-primary-foreground disabled:opacity-50">{saving ? "Saving..." : "Save"}</button>
+              <button onClick={() => setEditing(false)} className="flex-1 py-2.5 bg-secondary rounded-lg text-sm font-medium text-muted-foreground">Cancel</button>
+              <button onClick={save} disabled={saving} className="flex-1 py-2.5 bg-primary rounded-lg text-sm font-semibold text-primary-foreground disabled:opacity-40">{saving ? "Saving…" : "Save"}</button>
             </div>
           </div>
         )}
 
         {activeSection === "stats" && (
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="gradient-card border border-border rounded-2xl p-4">
-                <p className="text-3xl font-barlow font-bold text-foreground">{athlete.current_streak_days || 0}</p>
-                <p className="text-xs text-muted-foreground font-barlow uppercase tracking-wide">Day Streak</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-card border border-border rounded-xl p-4">
+                <p className="text-3xl font-bold text-foreground">{athlete.current_streak_days || 0}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Day Streak</p>
               </div>
-              <div className="gradient-card border border-border rounded-2xl p-4">
-                <p className="text-3xl font-barlow font-bold text-primary">{athlete.total_points || 0}</p>
-                <p className="text-xs text-muted-foreground font-barlow uppercase tracking-wide">Total Points</p>
+              <div className="bg-card border border-border rounded-xl p-4">
+                <p className="text-3xl font-bold text-primary">{athlete.total_points || 0}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Total Points</p>
               </div>
-              <div className="gradient-card border border-border rounded-2xl p-4">
-                <p className="text-3xl font-barlow font-bold text-foreground">{athlete.weight_lbs || "--"}</p>
-                <p className="text-xs text-muted-foreground font-barlow uppercase tracking-wide">Current lbs</p>
+              <div className="bg-card border border-border rounded-xl p-4">
+                <p className="text-3xl font-bold text-foreground">{athlete.weight_lbs || "--"}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Current lbs</p>
               </div>
-              <div className="gradient-card border border-border rounded-2xl p-4">
-                <p className="text-3xl font-barlow font-bold text-foreground">{athlete.goal_weight_lbs || "--"}</p>
-                <p className="text-xs text-muted-foreground font-barlow uppercase tracking-wide">Goal lbs</p>
+              <div className="bg-card border border-border rounded-xl p-4">
+                <p className="text-3xl font-bold text-foreground">{athlete.goal_weight_lbs || "--"}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Goal lbs</p>
               </div>
             </div>
             {athlete.bio && (
-              <div className="gradient-card border border-border rounded-2xl p-4">
-                <p className="text-xs text-muted-foreground font-barlow uppercase tracking-wide mb-2">Bio</p>
+              <div className="bg-card border border-border rounded-xl p-4">
+                <p className="text-xs text-muted-foreground mb-2">Bio</p>
                 <p className="text-sm text-foreground leading-relaxed">{athlete.bio}</p>
               </div>
             )}
@@ -196,8 +193,8 @@ export default function Profile() {
 
         {activeSection === "goals" && (
           <div className="space-y-3">
-            <div className="gradient-card border border-border rounded-2xl p-4 space-y-3">
-              <h3 className="text-sm font-barlow font-bold text-foreground uppercase">Macro Goals</h3>
+            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Macro Goals</h3>
               {[
                 { label: "Daily Calories", field: "goal_calories", unit: "kcal" },
                 { label: "Protein", field: "goal_protein_g", unit: "g" },
@@ -219,8 +216,8 @@ export default function Profile() {
                 </div>
               ))}
             </div>
-            <div className="gradient-card border border-border rounded-2xl p-4 space-y-3">
-              <h3 className="text-sm font-barlow font-bold text-foreground uppercase">Body Goals</h3>
+            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Body Goals</h3>
               {[
                 { label: "Target Weight", field: "goal_weight_lbs", unit: "lbs" },
                 { label: "Weekly Food Budget", field: "weekly_budget_usd", unit: "$" },

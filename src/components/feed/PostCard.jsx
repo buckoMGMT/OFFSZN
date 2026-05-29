@@ -56,14 +56,14 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
   };
 
   return (
-    <div className="gradient-card border border-border rounded-2xl overflow-hidden mb-3">
+    <div className="border-b border-border py-4">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 pb-3">
-        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
           {post.athlete_avatar ? (
             <img src={post.athlete_avatar} alt="" className="w-full h-full object-cover" />
           ) : (
-            <span className="text-sm font-barlow font-bold text-primary">
+            <span className="text-xs font-semibold text-primary">
               {(post.athlete_name || "A")[0].toUpperCase()}
             </span>
           )}
@@ -72,68 +72,57 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
           <p className="text-sm font-semibold text-foreground truncate">{post.athlete_name || "Athlete"}</p>
           <p className="text-xs text-muted-foreground">{timeAgo}</p>
         </div>
-        <div className={`p-2 rounded-xl ${config.bg}`}>
-          <Icon size={16} className={config.color} />
-        </div>
+        <Icon size={14} className={config.color} />
       </div>
 
       {/* Content */}
-      <div className="px-4 pb-3">
-        <p className="text-sm text-foreground leading-relaxed">{post.content}</p>
-        {post.metric_value && !post.metric_value.includes("http") && (
-          <div className="mt-2 inline-block bg-secondary rounded-lg px-3 py-1">
-            <span className="text-primary font-barlow font-bold text-sm">{post.metric_value}</span>
-          </div>
-        )}
-        {post.metric_value && post.metric_value.includes("http") && (
-          <VideoPlayer url={post.metric_value} />
-        )}
-      </div>
-
+      <p className="text-sm text-foreground leading-relaxed mb-2">{post.content}</p>
+      {post.metric_value && !post.metric_value.includes("http") && (
+        <span className="text-primary text-sm font-semibold">{post.metric_value}</span>
+      )}
+      {post.metric_value && post.metric_value.includes("http") && (
+        <div className="mb-2"><VideoPlayer url={post.metric_value} /></div>
+      )}
       {post.image_url && (
-        <div className="px-4 pb-3">
-          <img src={post.image_url} alt="" className="w-full rounded-xl object-cover max-h-64" />
-        </div>
+        <img src={post.image_url} alt="" className="w-full rounded-lg object-cover max-h-60 mb-2" />
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 px-4 py-3 border-t border-border">
-        <button onClick={handleLike} className={`flex items-center gap-1.5 transition-colors ${liked ? "text-red-400" : "text-muted-foreground hover:text-red-400"}`}>
-          <Heart size={18} fill={liked ? "currentColor" : "none"} />
-          <span className="text-xs font-medium">{post.likes || 0}</span>
+      <div className="flex items-center gap-5 mt-2">
+        <button onClick={handleLike} className={`flex items-center gap-1.5 transition-colors ${liked ? "text-red-400" : "text-muted-foreground hover:text-foreground"}`}>
+          <Heart size={16} fill={liked ? "currentColor" : "none"} />
+          <span className="text-xs">{post.likes || 0}</span>
         </button>
         <button onClick={() => setCommenting(!commenting)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
-          <MessageCircle size={18} />
-          <span className="text-xs font-medium">{(post.comments || []).length}</span>
+          <MessageCircle size={16} />
+          <span className="text-xs">{(post.comments || []).length}</span>
         </button>
       </div>
 
       {/* Comments */}
       {(post.comments || []).length > 0 && (
-        <div className="px-4 pb-3 space-y-2">
+        <div className="mt-2 space-y-1">
           {post.comments.slice(-2).map((c, i) => (
-            <div key={i} className="text-xs text-muted-foreground">
-              <span className="text-foreground font-semibold">{c.author_name}</span>{" "}
+            <p key={i} className="text-xs text-muted-foreground">
+              <span className="text-foreground font-medium">{c.author_name} </span>
               {c.text}
-            </div>
+            </p>
           ))}
         </div>
       )}
 
       {commenting && (
-        <div className="px-4 pb-3 flex gap-2">
+        <div className="mt-3 flex gap-2">
           <input
-            className="flex-1 bg-secondary rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-            placeholder="Add a comment..."
+            className="flex-1 bg-secondary rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            placeholder="Add a comment…"
             value={commentText}
             onChange={e => setCommentText(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleComment()}
+            autoFocus
           />
-          <button
-            onClick={handleComment}
-            disabled={loading}
-            className="bg-primary text-primary-foreground px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase"
-          >
+          <button onClick={handleComment} disabled={loading}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-semibold">
             Post
           </button>
         </div>

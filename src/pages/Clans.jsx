@@ -87,64 +87,56 @@ export default function Clans() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 pt-12 pb-4">
+      <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-barlow font-bold text-foreground uppercase">Clans</h1>
-            <p className="text-xs text-muted-foreground font-barlow uppercase tracking-widest">Compete together. Win together.</p>
+            <h1 className="text-xl font-bold text-foreground">Clans</h1>
+            {!myClan && (
+              <button onClick={() => setShowCreate(true)}
+                className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold">
+                <Plus size={15} />Create
+              </button>
+            )}
           </div>
-          {!myClan && (
-            <button onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 gradient-gold text-primary-foreground px-4 py-2.5 rounded-xl font-barlow font-bold uppercase text-sm gold-glow">
-              <Plus size={16} />Create
-            </button>
-          )}
-        </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-secondary rounded-xl p-1">
-          {[
-            { id: "discover", label: "Discover" },
-            { id: "leaderboard", label: "Rankings" },
-            { id: "challenges", label: "Challenges" },
-          ].map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex-1 py-2 rounded-lg text-xs font-barlow font-bold uppercase transition-all ${
-                tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+          {/* Tabs */}
+          <div className="flex border-b border-border">
+            {[
+              { id: "discover", label: "Discover" },
+              { id: "leaderboard", label: "Rankings" },
+              { id: "challenges", label: "Challenges" },
+            ].map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)}
+                className={`flex-1 py-2.5 text-xs font-medium border-b-2 transition-colors ${
+                  tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground"
+                }`}>
+                {t.label}
+              </button>
+            ))}
+          </div>
       </div>
 
       <div className="px-4 py-4">
         {/* My Clan Banner */}
         {myClan && (
-          <div className="gradient-card border border-primary/40 rounded-2xl p-4 mb-4">
+          <div className="bg-card border border-border rounded-xl p-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center">
-                <Shield size={24} className="text-primary" />
+              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                <Shield size={18} className="text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] text-primary font-barlow uppercase font-bold tracking-wider mb-0.5">My Clan</p>
-                <h3 className="text-lg font-barlow font-bold text-foreground uppercase">{myClan.name}</h3>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Users size={10} />{(myClan.member_ids || []).length} members</span>
-                  <span className="text-xs text-primary font-barlow font-bold flex items-center gap-1"><Trophy size={10} />{myClan.total_points} pts</span>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">My Clan</p>
+                <h3 className="text-base font-semibold text-foreground">{myClan.name}</h3>
+                <div className="flex items-center gap-3 mt-0.5">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Users size={10} />{(myClan.member_ids || []).length}</span>
+                  <span className="text-xs text-primary flex items-center gap-1"><Trophy size={10} />{myClan.total_points} pts</span>
                 </div>
               </div>
-              <button onClick={leaveClan} className="p-2 rounded-xl bg-destructive/15 text-destructive">
-                <X size={16} />
+              <button onClick={leaveClan} className="p-1.5 rounded-lg bg-secondary text-muted-foreground">
+                <X size={15} />
               </button>
             </div>
             {myClan.announcement && (
-              <div className="mt-3 pt-3 border-t border-border">
-                <p className="text-xs text-muted-foreground">{myClan.announcement}</p>
-              </div>
+              <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">{myClan.announcement}</p>
             )}
           </div>
         )}

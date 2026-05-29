@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Bell, Image, Video } from "lucide-react";
+import { Plus, Image, Video } from "lucide-react";
 import PostCard from "@/components/feed/PostCard";
-import GoldBadge from "@/components/ui/GoldBadge";
 import StreakBadge from "@/components/ui/StreakBadge";
 
 export default function Feed() {
@@ -63,19 +62,13 @@ export default function Feed() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 pt-12 pb-4">
+      <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-display text-primary gold-text-glow tracking-widest">THE PLAYBOOK</h1>
-            <p className="text-xs text-muted-foreground font-barlow uppercase tracking-widest">Proverbs 3:5-6</p>
-          </div>
-          <div className="flex items-center gap-3">
+          <h1 className="text-xl font-display text-primary tracking-widest">THE PLAYBOOK</h1>
+          <div className="flex items-center gap-2">
             {athlete?.current_streak_days > 0 && (
               <StreakBadge days={athlete.current_streak_days} />
             )}
-            <button className="p-2 rounded-xl bg-secondary text-muted-foreground">
-              <Bell size={18} />
-            </button>
           </div>
         </div>
       </div>
@@ -83,24 +76,24 @@ export default function Feed() {
       <div className="px-4 py-4">
         {/* Compose */}
         {athlete && (
-          <div className="gradient-card border border-border rounded-2xl p-4 mb-4">
+          <div className="border border-border rounded-xl p-3 mb-4 bg-card">
             {showCompose ? (
               <div className="space-y-3">
                 <textarea
-                  className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none resize-none h-24"
-                  placeholder="Share your progress, achievement, or motivate your squad..."
+                  className="w-full bg-secondary rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none resize-none h-20"
+                  placeholder="Share your progress..."
                   value={newPost}
                   onChange={e => setNewPost(e.target.value)}
+                  autoFocus
                 />
-                {/* Media attachments */}
                 <div className="flex gap-2">
-                  <label className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-xl cursor-pointer hover:bg-secondary/80 transition-colors flex-1 justify-center">
-                    <Image size={14} className="text-muted-foreground" />
-                    <span className="text-xs font-barlow text-muted-foreground uppercase">{uploading ? "Uploading..." : postImageUrl ? "Photo Added ✓" : "Photo"}</span>
+                  <label className="flex items-center gap-1.5 px-3 py-2 bg-secondary rounded-lg cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <Image size={13} className="text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">{uploading ? "Uploading…" : postImageUrl ? "✓ Photo" : "Photo"}</span>
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                   </label>
-                  <label className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-xl cursor-pointer hover:bg-secondary/80 transition-colors flex-1 justify-center">
-                    <Video size={14} className="text-muted-foreground" />
+                  <div className="flex items-center gap-1.5 px-3 py-2 bg-secondary rounded-lg flex-1">
+                    <Video size={13} className="text-muted-foreground flex-shrink-0" />
                     <input
                       type="text"
                       placeholder="YouTube link"
@@ -108,31 +101,31 @@ export default function Feed() {
                       value={postVideoUrl}
                       onChange={e => setPostVideoUrl(e.target.value)}
                     />
-                  </label>
+                  </div>
                 </div>
                 {postImageUrl && (
-                  <img src={postImageUrl} alt="preview" className="w-full rounded-xl object-cover max-h-40" />
+                  <img src={postImageUrl} alt="preview" className="w-full rounded-lg object-cover max-h-40" />
                 )}
                 <div className="flex gap-2">
-                  <button onClick={() => { setShowCompose(false); setPostImageUrl(""); setPostVideoUrl(""); }} className="flex-1 py-2.5 rounded-xl bg-secondary text-muted-foreground text-sm font-barlow font-bold uppercase">
+                  <button onClick={() => { setShowCompose(false); setPostImageUrl(""); setPostVideoUrl(""); }}
+                    className="flex-1 py-2 rounded-lg bg-secondary text-muted-foreground text-sm font-medium">
                     Cancel
                   </button>
-                  <button onClick={submitPost} disabled={posting || !newPost.trim()} className="flex-1 py-2.5 rounded-xl gradient-gold text-primary-foreground text-sm font-barlow font-bold uppercase disabled:opacity-50">
-                    {posting ? "Posting..." : "Post"}
+                  <button onClick={submitPost} disabled={posting || !newPost.trim()}
+                    className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-40">
+                    {posting ? "Posting…" : "Post"}
                   </button>
                 </div>
               </div>
             ) : (
               <button onClick={() => setShowCompose(true)} className="w-full flex items-center gap-3 text-left">
-                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center">
-                  <span className="text-xs font-barlow font-bold text-primary">
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-semibold text-primary">
                     {(athlete.display_name || "A")[0].toUpperCase()}
                   </span>
                 </div>
-                <span className="text-sm text-muted-foreground flex-1">Share your progress...</span>
-                <div className="p-2 rounded-xl bg-primary/15">
-                  <Plus size={16} className="text-primary" />
-                </div>
+                <span className="text-sm text-muted-foreground flex-1">What's your win today?</span>
+                <Plus size={16} className="text-muted-foreground" />
               </button>
             )}
           </div>

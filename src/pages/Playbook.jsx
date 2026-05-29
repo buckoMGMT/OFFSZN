@@ -187,9 +187,9 @@ export default function Playbook() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 pt-12 pb-4">
-        <h1 className="text-3xl font-barlow font-bold text-foreground uppercase mb-1">The Playbook</h1>
-        <p className="text-xs text-muted-foreground font-barlow uppercase tracking-widest">Sport-Specific Performance Programs</p>
+      <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
+        <h1 className="text-xl font-bold text-foreground">Playbook</h1>
+        <p className="text-xs text-muted-foreground">Sport-specific performance programs</p>
       </div>
 
       <div className="px-4 py-4">
@@ -217,14 +217,11 @@ export default function Playbook() {
         </div>
 
         {/* Info Banner */}
-        <div className="gradient-card border border-primary/20 rounded-2xl p-4 mb-4 flex gap-3">
-          <Zap size={18} className="text-primary flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-barlow font-bold text-primary uppercase mb-0.5">Knowledge is the Playbook</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              These are the overlooked details — fascia work, facial strengthening, sleep protocols — that most athletes never know. This is what unlocks the ceiling.
-            </p>
-          </div>
+        <div className="border border-border rounded-xl p-4 mb-4 flex gap-3 bg-card">
+          <Zap size={15} className="text-primary flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            The overlooked details — fascia work, facial strengthening, sleep protocols — that most athletes never know.
+          </p>
         </div>
 
         <div className="space-y-3">

@@ -94,17 +94,17 @@ export default function Track() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border px-4 pt-12 pb-4">
+      <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-barlow font-bold text-foreground uppercase">Daily Track</h1>
-            <p className="text-xs text-muted-foreground font-barlow uppercase tracking-widest">{format(new Date(), "EEEE, MMMM d")}</p>
+            <h1 className="text-xl font-bold text-foreground">Track</h1>
+            <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMMM d")}</p>
           </div>
           <button
             onClick={() => setShowAddMeal(true)}
-            className="flex items-center gap-2 gradient-gold text-primary-foreground px-4 py-2.5 rounded-xl font-barlow font-bold uppercase text-sm gold-glow"
+            className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold"
           >
-            <Plus size={16} />
+            <Plus size={15} />
             Log Meal
           </button>
         </div>
@@ -112,22 +112,21 @@ export default function Track() {
 
       <div className="px-4 py-4 space-y-4">
         {/* Calorie Ring + Macros */}
-        <div className="gradient-card border border-border rounded-2xl p-5">
-          <div className="flex items-center gap-6 mb-5">
-            <StatRing value={log?.calories_consumed || 0} max={calGoal} label="Calories" size={96} />
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="flex items-center gap-5 mb-4">
+            <StatRing value={log?.calories_consumed || 0} max={calGoal} label="Calories" size={88} />
             <div className="flex-1">
-              <p className="text-3xl font-barlow font-bold text-foreground">
+              <p className="text-3xl font-bold text-foreground">
                 {Math.round(log?.calories_consumed || 0)}
-                <span className="text-lg text-muted-foreground font-normal">/{calGoal}</span>
+                <span className="text-base text-muted-foreground font-normal"> / {calGoal}</span>
               </p>
-              <p className="text-xs text-muted-foreground font-barlow uppercase tracking-wide mt-0.5">Calories today</p>
-              <p className="text-sm text-primary font-barlow font-bold mt-1">
+              <p className="text-xs text-muted-foreground mt-0.5">Calories today</p>
+              <p className="text-sm text-primary font-semibold mt-1">
                 {Math.max(0, calGoal - (log?.calories_consumed || 0))} remaining
               </p>
             </div>
           </div>
-
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <MacroBar label="Protein" consumed={log?.protein_g || 0} goal={proteinGoal} color="protein" />
             <MacroBar label="Carbs" consumed={log?.carbs_g || 0} goal={carbsGoal} color="carbs" />
             <MacroBar label="Fats" consumed={log?.fats_g || 0} goal={fatsGoal} color="fats" />
@@ -135,73 +134,64 @@ export default function Track() {
         </div>
 
         {/* Quick Stats Row */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {/* Water */}
-          <div className="gradient-card border border-border rounded-2xl p-4">
-            <Droplets size={20} className="text-blue-400 mb-2" />
-            <p className="text-2xl font-barlow font-bold text-foreground">{log?.water_oz || 0}</p>
-            <p className="text-[10px] text-muted-foreground font-barlow uppercase tracking-wide">oz water</p>
-            <div className="flex gap-1 mt-2">
-              <button onClick={() => updateLog({ water_oz: (log?.water_oz || 0) + 8 })}
-                className="flex-1 bg-blue-500/20 text-blue-400 rounded-lg py-1 text-xs font-barlow font-bold">+8oz</button>
-            </div>
+          <div className="bg-card border border-border rounded-xl p-3">
+            <Droplets size={16} className="text-blue-400 mb-2" />
+            <p className="text-2xl font-bold text-foreground">{log?.water_oz || 0}</p>
+            <p className="text-[10px] text-muted-foreground mb-2">oz water</p>
+            <button onClick={() => updateLog({ water_oz: (log?.water_oz || 0) + 8 })}
+              className="w-full bg-secondary text-muted-foreground rounded-md py-1 text-xs font-medium">+8oz</button>
           </div>
 
           {/* Sleep */}
-          <div className="gradient-card border border-border rounded-2xl p-4">
-            <Moon size={20} className="text-purple-400 mb-2" />
-            <p className="text-2xl font-barlow font-bold text-foreground">{log?.sleep_hours || "--"}</p>
-            <p className="text-[10px] text-muted-foreground font-barlow uppercase tracking-wide">hrs sleep</p>
-            <div className="flex gap-1 mt-2">
-              {["6", "7", "8", "9"].map(h => (
-                <button
-                  key={h}
-                  onClick={() => updateLog({ sleep_hours: Number(h) })}
-                  className={`flex-1 rounded-lg py-1 text-[10px] font-barlow font-bold transition-colors ${
-                    log?.sleep_hours === Number(h) ? "bg-purple-500 text-white" : "bg-purple-500/20 text-purple-400"
-                  }`}
-                >
-                  {h}
-                </button>
+          <div className="bg-card border border-border rounded-xl p-3">
+            <Moon size={16} className="text-purple-400 mb-2" />
+            <p className="text-2xl font-bold text-foreground">{log?.sleep_hours || "--"}</p>
+            <p className="text-[10px] text-muted-foreground mb-2">hrs sleep</p>
+            <div className="flex gap-0.5">
+              {["7", "8", "9"].map(h => (
+                <button key={h} onClick={() => updateLog({ sleep_hours: Number(h) })}
+                  className={`flex-1 rounded-md py-1 text-[10px] font-medium transition-colors ${
+                    log?.sleep_hours === Number(h) ? "bg-purple-500 text-white" : "bg-secondary text-muted-foreground"
+                  }`}>{h}</button>
               ))}
             </div>
           </div>
 
           {/* Workout */}
-          <div className="gradient-card border border-border rounded-2xl p-4">
+          <div className="bg-card border border-border rounded-xl p-3">
             <button onClick={() => updateLog({ workout_complete: !log?.workout_complete })} className="w-full h-full flex flex-col items-start">
               {log?.workout_complete
-                ? <CheckCircle size={20} className="text-green-400 mb-2" />
-                : <Circle size={20} className="text-muted-foreground mb-2" />
+                ? <CheckCircle size={16} className="text-green-400 mb-2" />
+                : <Circle size={16} className="text-muted-foreground mb-2" />
               }
-              <p className="text-2xl font-barlow font-bold text-foreground">
-                {log?.workout_complete ? "Done" : "No"}
-              </p>
-              <p className="text-[10px] text-muted-foreground font-barlow uppercase tracking-wide">workout</p>
+              <p className="text-2xl font-bold text-foreground">{log?.workout_complete ? "✓" : "–"}</p>
+              <p className="text-[10px] text-muted-foreground">workout</p>
             </button>
           </div>
         </div>
 
         {/* Weight Log */}
-        <div className="gradient-card border border-border rounded-2xl p-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-card border border-border rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Scale size={18} className="text-primary" />
-              <span className="text-sm font-barlow font-bold text-foreground uppercase">Today's Weight</span>
+              <Scale size={15} className="text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">Today's Weight</span>
             </div>
+            {athlete?.goal_weight_lbs && (
+              <span className="text-xs text-muted-foreground">Goal: {athlete.goal_weight_lbs} lbs</span>
+            )}
           </div>
-          <div className="flex items-center gap-3 mt-3">
+          <div className="flex items-center gap-2">
             <input
               type="number"
-              className="flex-1 bg-secondary rounded-xl px-4 py-2.5 text-foreground text-sm outline-none"
-              placeholder="Enter lbs..."
+              className="flex-1 bg-secondary rounded-lg px-3 py-2 text-foreground text-sm outline-none"
+              placeholder="Enter lbs…"
               value={log?.weight_lbs || ""}
               onChange={e => updateLog({ weight_lbs: Number(e.target.value) || null })}
             />
-            <span className="text-sm text-muted-foreground font-barlow">lbs</span>
-            {athlete?.goal_weight_lbs && (
-              <span className="text-xs text-primary font-barlow font-bold">Goal: {athlete.goal_weight_lbs}</span>
-            )}
+            <span className="text-sm text-muted-foreground">lbs</span>
           </div>
         </div>
 
@@ -210,13 +200,12 @@ export default function Track() {
         {/* Meals */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-barlow font-bold text-foreground uppercase">Meals Logged</h2>
-            <span className="text-xs text-muted-foreground">{meals.length} items</span>
+            <h2 className="text-base font-semibold text-foreground">Meals</h2>
+            <span className="text-xs text-muted-foreground">{meals.length} logged</span>
           </div>
           {meals.length === 0 ? (
-            <div className="gradient-card border border-dashed border-border rounded-2xl p-8 text-center">
-              <p className="text-muted-foreground text-sm">No meals logged yet today.</p>
-              <p className="text-muted-foreground text-xs mt-1">Tap "Log Meal" to start tracking.</p>
+            <div className="border border-dashed border-border rounded-xl p-8 text-center">
+              <p className="text-muted-foreground text-sm">No meals yet — tap Log Meal.</p>
             </div>
           ) : (
             <div className="space-y-2">
