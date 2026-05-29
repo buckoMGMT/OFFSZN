@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Heart, MessageCircle, Flame, Trophy, Dumbbell, Moon } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { formatDistanceToNow } from "date-fns";
+import VideoPlayer from "@/components/feed/VideoPlayer";
 
 const typeConfig = {
   achievement: { icon: Trophy, color: "text-primary", bg: "bg-primary/15" },
@@ -79,10 +80,13 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
       {/* Content */}
       <div className="px-4 pb-3">
         <p className="text-sm text-foreground leading-relaxed">{post.content}</p>
-        {post.metric_value && (
+        {post.metric_value && !post.metric_value.includes("http") && (
           <div className="mt-2 inline-block bg-secondary rounded-lg px-3 py-1">
             <span className="text-primary font-barlow font-bold text-sm">{post.metric_value}</span>
           </div>
+        )}
+        {post.metric_value && post.metric_value.includes("http") && (
+          <VideoPlayer url={post.metric_value} />
         )}
       </div>
 

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ChevronRight, Flame, Trophy, Crown, Edit2, CheckCircle, BookOpen } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Trophy, Crown, Edit2, CheckCircle, BookOpen, Camera } from "lucide-react";
 import GoldBadge from "@/components/ui/GoldBadge";
 import StreakBadge from "@/components/ui/StreakBadge";
+import BadgesSection from "@/components/profile/BadgesSection";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -116,6 +116,7 @@ export default function Profile() {
       <div className="flex gap-1 mx-4 bg-secondary rounded-xl p-1 mb-4">
         {[
           { id: "stats", label: "Stats" },
+          { id: "badges", label: "Badges" },
           { id: "goals", label: "Goals" },
           { id: "about", label: "About" },
         ].map(s => (
@@ -135,6 +136,8 @@ export default function Profile() {
             <h3 className="text-sm font-barlow font-bold text-primary uppercase">Edit Profile</h3>
             <input className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none"
               placeholder="Display name" value={form.display_name || ""} onChange={e => setForm(p => ({ ...p, display_name: e.target.value }))} />
+            <input className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none"
+              placeholder="Profile picture URL" value={form.avatar_url || ""} onChange={e => setForm(p => ({ ...p, avatar_url: e.target.value }))} />
             <input className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none"
               placeholder="School name" value={form.school || ""} onChange={e => setForm(p => ({ ...p, school: e.target.value }))} />
             <div className="grid grid-cols-2 gap-3">
@@ -188,6 +191,8 @@ export default function Profile() {
             )}
           </div>
         )}
+
+        {activeSection === "badges" && <BadgesSection athlete={athlete} />}
 
         {activeSection === "goals" && (
           <div className="space-y-3">

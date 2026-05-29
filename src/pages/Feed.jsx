@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Bell } from "lucide-react";
+import { Plus, Bell, Image, Video } from "lucide-react";
 import PostCard from "@/components/feed/PostCard";
 import GoldBadge from "@/components/ui/GoldBadge";
 import StreakBadge from "@/components/ui/StreakBadge";
@@ -11,6 +11,9 @@ export default function Feed() {
   const [loading, setLoading] = useState(true);
   const [showCompose, setShowCompose] = useState(false);
   const [newPost, setNewPost] = useState("");
+  const [postImageUrl, setPostImageUrl] = useState("");
+  const [postVideoUrl, setPostVideoUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
 
   const load = useCallback(async () => {
@@ -25,6 +28,15 @@ export default function Feed() {
 
   useEffect(() => { load(); }, [load]);
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setPostImageUrl(file_url);
+    setUploading(false);
+  };
+
   const submitPost = async () => {
     if (!newPost.trim() || !athlete) return;
     setPosting(true);
@@ -34,11 +46,15 @@ export default function Feed() {
       athlete_avatar: athlete.avatar_url,
       type: "achievement",
       content: newPost.trim(),
+      image_url: postImageUrl || undefined,
+      metric_value: postVideoUrl || undefined,
       likes: 0,
       liked_by: [],
       comments: [],
     });
     setNewPost("");
+    setPostImageUrl("");
+    setPostVideoUrl("");
     setShowCompose(false);
     setPosting(false);
     load();
@@ -76,8 +92,29 @@ export default function Feed() {
                   value={newPost}
                   onChange={e => setNewPost(e.target.value)}
                 />
+                {/* Media attachments */}
                 <div className="flex gap-2">
-                  <button onClick={() => setShowCompose(false)} className="flex-1 py-2.5 rounded-xl bg-secondary text-muted-foreground text-sm font-barlow font-bold uppercase">
+                  <label className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-xl cursor-pointer hover:bg-secondary/80 transition-colors flex-1 justify-center">
+                    <Image size={14} className="text-muted-foreground" />
+                    <span className="text-xs font-barlow text-muted-foreground uppercase">{uploading ? "Uploading..." : postImageUrl ? "Photo Added ✓" : "Photo"}</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                  </label>
+                  <label className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-xl cursor-pointer hover:bg-secondary/80 transition-colors flex-1 justify-center">
+                    <Video size={14} className="text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="YouTube link"
+                      className="bg-transparent text-xs text-foreground outline-none w-full"
+                      value={postVideoUrl}
+                      onChange={e => setPostVideoUrl(e.target.value)}
+                    />
+                  </label>
+                </div>
+                {postImageUrl && (
+                  <img src={postImageUrl} alt="preview" className="w-full rounded-xl object-cover max-h-40" />
+                )}
+                <div className="flex gap-2">
+                  <button onClick={() => { setShowCompose(false); setPostImageUrl(""); setPostVideoUrl(""); }} className="flex-1 py-2.5 rounded-xl bg-secondary text-muted-foreground text-sm font-barlow font-bold uppercase">
                     Cancel
                   </button>
                   <button onClick={submitPost} disabled={posting || !newPost.trim()} className="flex-1 py-2.5 rounded-xl gradient-gold text-primary-foreground text-sm font-barlow font-bold uppercase disabled:opacity-50">

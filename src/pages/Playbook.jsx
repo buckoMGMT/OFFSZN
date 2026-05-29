@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { ChevronLeft, CheckCircle, Lock, Zap } from "lucide-react";
 import ProgramCard from "@/components/playbook/ProgramCard";
 import GoldBadge from "@/components/ui/GoldBadge";
+import VideoPlayer from "@/components/feed/VideoPlayer";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "other"];
 
@@ -163,6 +164,9 @@ export default function Playbook() {
                       {ex.muscle_group && <span className="text-xs text-purple-400 font-barlow">{ex.muscle_group}</span>}
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">{ex.instructions}</p>
+                    {ex.video_url && completedExercises[i] === false && (
+                      <VideoPlayer url={ex.video_url} />
+                    )}
                   </div>
                 </button>
               ))}

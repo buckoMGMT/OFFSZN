@@ -6,6 +6,7 @@ import StatRing from "@/components/ui/StatRing";
 import MacroBar from "@/components/tracking/MacroBar";
 import MealCard from "@/components/tracking/MealCard";
 import AddMealModal from "@/components/tracking/AddMealModal";
+import DailyChallenges from "@/components/tracking/DailyChallenges";
 
 export default function Track() {
   const [athlete, setAthlete] = useState(null);
@@ -203,6 +204,8 @@ export default function Track() {
             )}
           </div>
         </div>
+
+        <DailyChallenges log={log} athlete={athlete} />
 
         {/* Meals */}
         <div>
