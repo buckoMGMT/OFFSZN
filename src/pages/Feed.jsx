@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Image, Video } from "lucide-react";
+import { Plus, Image, Video, Users, Globe } from "lucide-react";
 import PostCard from "@/components/feed/PostCard";
 import StreakBadge from "@/components/ui/StreakBadge";
 
@@ -14,6 +14,7 @@ export default function Feed() {
   const [postVideoUrl, setPostVideoUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [feedFilter, setFeedFilter] = useState("all"); // "all" | "friends"
 
   const load = useCallback(async () => {
     const [athleteList, postList] = await Promise.all([
@@ -63,13 +64,30 @@ export default function Feed() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-display text-primary tracking-widest">THE PLAYBOOK</h1>
-          <div className="flex items-center gap-2">
-            {athlete?.current_streak_days > 0 && (
-              <StreakBadge days={athlete.current_streak_days} />
-            )}
-          </div>
+          {athlete?.current_streak_days > 0 && (
+            <StreakBadge days={athlete.current_streak_days} />
+          )}
+        </div>
+        {/* Feed Filter Tabs */}
+        <div className="flex gap-1 bg-secondary rounded-lg p-1">
+          <button
+            onClick={() => setFeedFilter("all")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              feedFilter === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            }`}
+          >
+            <Globe size={12} /> All Athletes
+          </button>
+          <button
+            onClick={() => setFeedFilter("friends")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              feedFilter === "friends" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            }`}
+          >
+            <Users size={12} /> Friends
+          </button>
         </div>
       </div>
 
@@ -119,10 +137,14 @@ export default function Feed() {
               </div>
             ) : (
               <button onClick={() => setShowCompose(true)} className="w-full flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-primary">
-                    {(athlete.display_name || "A")[0].toUpperCase()}
-                  </span>
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {athlete.avatar_url ? (
+                    <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs font-semibold text-primary">
+                      {(athlete.display_name || "A")[0].toUpperCase()}
+                    </span>
+                  )}
                 </div>
                 <span className="text-sm text-muted-foreground flex-1">What's your win today?</span>
                 <Plus size={16} className="text-muted-foreground" />
@@ -132,6 +154,13 @@ export default function Feed() {
         )}
 
         {/* Feed */}
+        {!loading && feedFilter === "friends" && (athlete?.friends || []).length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 text-center mb-4">
+            <div className="text-4xl mb-3">👥</div>
+            <h3 className="text-base font-semibold text-foreground mb-1">No Friends Yet</h3>
+            <p className="text-xs text-muted-foreground max-w-xs">Join a clan and follow athletes to see their posts here.</p>
+          </div>
+        )}
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
@@ -158,14 +187,23 @@ export default function Feed() {
           </div>
         ) : (
           <div>
-            {posts.map(post => (
-              <PostCard
-                key={post.id}
-                post={post}
-                currentAthleteId={athlete?.id}
-                onUpdate={load}
-              />
-            ))}
+            {posts
+              .filter(post => {
+                if (feedFilter === "friends") {
+                  const friends = athlete?.friends || [];
+                  return friends.includes(post.athlete_id) || post.athlete_id === athlete?.id;
+                }
+                return true;
+              })
+              .map(post => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  currentAthleteId={athlete?.id}
+                  onUpdate={load}
+                />
+              ))
+            }
           </div>
         )}
       </div>

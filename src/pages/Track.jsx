@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Droplets, Moon, Scale, CheckCircle, Circle } from "lucide-react";
+import { Plus, Droplets, Moon, Scale, CheckCircle, Circle, Heart } from "lucide-react";
 import { format } from "date-fns";
 import StatRing from "@/components/ui/StatRing";
 import MacroBar from "@/components/tracking/MacroBar";
 import MealCard from "@/components/tracking/MealCard";
 import AddMealModal from "@/components/tracking/AddMealModal";
 import DailyChallenges from "@/components/tracking/DailyChallenges";
+import AppleHealthBanner from "@/components/tracking/AppleHealthBanner";
 
 export default function Track() {
   const [athlete, setAthlete] = useState(null);
@@ -111,6 +112,9 @@ export default function Track() {
       </div>
 
       <div className="px-4 py-4 space-y-4">
+        {/* Apple Health Sync Banner */}
+        <AppleHealthBanner log={log} onSync={(data) => updateLog(data)} />
+
         {/* Calorie Ring + Macros */}
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center gap-5 mb-4">

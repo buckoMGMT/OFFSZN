@@ -4,6 +4,8 @@ import { Trophy, Crown, Edit2, CheckCircle, BookOpen, Camera } from "lucide-reac
 import GoldBadge from "@/components/ui/GoldBadge";
 import StreakBadge from "@/components/ui/StreakBadge";
 import BadgesSection from "@/components/profile/BadgesSection";
+import StrengthMaxes from "@/components/profile/StrengthMaxes";
+import HighlightReel from "@/components/profile/HighlightReel";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -161,7 +163,15 @@ export default function Profile() {
         )}
 
         {activeSection === "stats" && (
-          <div className="space-y-3">
+          <div className="space-y-3 mt-3">
+            {/* Pinned Highlight */}
+            <HighlightReel athlete={athlete} onUpdate={() => {
+              base44.entities.Athlete.list("-created_date", 1).then(list => {
+                if (list[0]) { setAthlete(list[0]); setForm(list[0]); }
+              });
+            }} />
+
+            {/* Key Stats */}
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-card border border-border rounded-xl p-4">
                 <p className="text-3xl font-bold text-foreground">{athlete.current_streak_days || 0}</p>
@@ -180,6 +190,14 @@ export default function Profile() {
                 <p className="text-xs text-muted-foreground mt-0.5">Goal lbs</p>
               </div>
             </div>
+
+            {/* Strength Maxes */}
+            <StrengthMaxes athlete={athlete} onUpdate={() => {
+              base44.entities.Athlete.list("-created_date", 1).then(list => {
+                if (list[0]) { setAthlete(list[0]); setForm(list[0]); }
+              });
+            }} />
+
             {athlete.bio && (
               <div className="bg-card border border-border rounded-xl p-4">
                 <p className="text-xs text-muted-foreground mb-2">Bio</p>

@@ -91,6 +91,28 @@
     "onboarding_complete": {
       "type": "boolean",
       "default": false
+    },
+    "bench_press_lbs": {
+      "type": "number"
+    },
+    "squat_lbs": {
+      "type": "number"
+    },
+    "deadlift_lbs": {
+      "type": "number"
+    },
+    "mile_time_seconds": {
+      "type": "number"
+    },
+    "highlight_url": {
+      "type": "string"
+    },
+    "friends": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     }
   },
   "required": [
