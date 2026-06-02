@@ -98,7 +98,7 @@ export default function Track() {
       <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-foreground">Stats</h1>
+            <h1 className="text-xl font-bold text-foreground">Track</h1>
             <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE, MMMM d")}</p>
           </div>
           <button

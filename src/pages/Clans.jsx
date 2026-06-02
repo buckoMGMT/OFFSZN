@@ -89,7 +89,7 @@ export default function Clans() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-foreground">Teams</h1>
+            <h1 className="text-xl font-bold text-foreground">Clans</h1>
             {!myClan && (
               <button onClick={() => setShowCreate(true)}
                 className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold">

@@ -65,7 +65,7 @@ export default function Feed() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-display text-primary tracking-widest">THE FIELD</h1>
+          <h1 className="text-xl font-display text-primary tracking-widest">THE PLAYBOOK</h1>
           {athlete?.current_streak_days > 0 && (
             <StreakBadge days={athlete.current_streak_days} />
           )}

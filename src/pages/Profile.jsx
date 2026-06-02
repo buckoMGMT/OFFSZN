@@ -55,7 +55,7 @@ export default function Profile() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 text-center">
         <div className="text-6xl mb-6">🏈</div>
-        <h1 className="text-3xl font-barlow font-bold text-foreground uppercase mb-2">Welcome to The Field</h1>
+        <h1 className="text-3xl font-barlow font-bold text-foreground uppercase mb-2">Welcome to The Playbook</h1>
         <p className="text-sm text-muted-foreground mb-8 max-w-xs">Every champion has a playbook. Create your athlete profile to get started.</p>
         <button onClick={createProfile} disabled={saving}
           className="gradient-gold text-primary-foreground px-8 py-4 rounded-2xl font-barlow font-bold uppercase text-lg gold-glow disabled:opacity-50">

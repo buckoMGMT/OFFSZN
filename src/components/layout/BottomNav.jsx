@@ -2,11 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, BarChart2, BookOpen, Trophy, User } from "lucide-react";
 
 const tabs = [
-  { icon: Home, label: "Field", path: "/" },
-  { icon: BarChart2, label: "Stats", path: "/track" },
+  { icon: Home, label: "Feed", path: "/" },
+  { icon: BarChart2, label: "Track", path: "/track" },
   { icon: BookOpen, label: "Playbook", path: "/playbook" },
-  { icon: Trophy, label: "Teams", path: "/clans" },
-  { icon: User, label: "Player", path: "/profile" },
+  { icon: Trophy, label: "Clans", path: "/clans" },
+  { icon: User, label: "Profile", path: "/profile" },
 ];
 
 export default function BottomNav() {
