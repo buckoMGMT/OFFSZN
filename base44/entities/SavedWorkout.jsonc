@@ -1,0 +1,16 @@
+{
+  "name": "SavedWorkout",
+  "type": "object",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "program_id": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "athlete_id",
+    "program_id"
+  ]
+}

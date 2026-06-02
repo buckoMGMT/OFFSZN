@@ -89,7 +89,7 @@ export default function Clans() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-foreground">Clans</h1>
+            <h1 className="text-xl font-bold text-foreground">Teams</h1>
             {!myClan && (
               <button onClick={() => setShowCreate(true)}
                 className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold">
@@ -124,7 +124,7 @@ export default function Clans() {
                 <Shield size={18} className="text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">My Clan</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">My Team</p>
                 <h3 className="text-base font-semibold text-foreground">{myClan.name}</h3>
                 <div className="flex items-center gap-3 mt-0.5">
                   <span className="text-xs text-muted-foreground flex items-center gap-1"><Users size={10} />{(myClan.member_ids || []).length}</span>
@@ -156,8 +156,8 @@ export default function Clans() {
             {filtered.length === 0 ? (
               <div className="text-center py-16">
                 <Shield size={48} className="text-muted-foreground mx-auto mb-4 opacity-40" />
-                <h3 className="text-xl font-barlow font-bold text-foreground uppercase mb-2">No Clans Found</h3>
-                <p className="text-sm text-muted-foreground">Be the first to create a clan for your school.</p>
+                <h3 className="text-xl font-barlow font-bold text-foreground uppercase mb-2">No Teams Found</h3>
+                <p className="text-sm text-muted-foreground">Be the first to create a team for your school.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -219,16 +219,16 @@ export default function Clans() {
         {tab === "challenges" && (
           <div className="text-center py-16">
             <Swords size={48} className="text-muted-foreground mx-auto mb-4 opacity-40" />
-            <h3 className="text-xl font-barlow font-bold text-foreground uppercase mb-2">Clan Challenges</h3>
+            <h3 className="text-xl font-barlow font-bold text-foreground uppercase mb-2">Team Challenges</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
-              Challenge rival clans to head-to-head battles on macros, sleep, or workout streaks.
+              Challenge rival teams to head-to-head battles on macros, sleep, or workout streaks.
             </p>
             {myClan ? (
               <button className="gradient-gold text-primary-foreground px-8 py-3 rounded-xl font-barlow font-bold uppercase text-base gold-glow">
                 Send a Challenge
               </button>
             ) : (
-              <p className="text-xs text-muted-foreground">Join a clan first to issue challenges.</p>
+              <p className="text-xs text-muted-foreground">Join a team first to issue challenges.</p>
             )}
           </div>
         )}
@@ -239,14 +239,14 @@ export default function Clans() {
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
           <div className="w-full max-w-lg bg-card rounded-t-3xl border-t border-border p-6 animate-slide-up max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-barlow font-bold text-foreground uppercase">Create Clan</h2>
+              <h2 className="text-2xl font-barlow font-bold text-foreground uppercase">Create Team</h2>
               <button onClick={() => setShowCreate(false)} className="p-2 rounded-xl bg-secondary text-muted-foreground">
                 <X size={20} />
               </button>
             </div>
             <div className="space-y-3">
               <input className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-                placeholder="Clan name *" value={createForm.name} onChange={e => setCreateForm(p => ({ ...p, name: e.target.value }))} />
+                placeholder="Team name *" value={createForm.name} onChange={e => setCreateForm(p => ({ ...p, name: e.target.value }))} />
               <select className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none"
                 value={createForm.type} onChange={e => setCreateForm(p => ({ ...p, type: e.target.value }))}>
                 {TYPES.map(t => <option key={t} value={t}>{t.replace("_", " ").toUpperCase()}</option>)}

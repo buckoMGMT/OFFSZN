@@ -1,0 +1,26 @@
+{
+  "name": "Playlist",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "athlete_id": {
+      "type": "string"
+    },
+    "program_ids": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "name",
+    "athlete_id"
+  ]
+}
