@@ -6,6 +6,7 @@ import StreakBadge from "@/components/ui/StreakBadge";
 import BadgesSection from "@/components/profile/BadgesSection";
 import StrengthMaxes from "@/components/profile/StrengthMaxes";
 import HighlightReel from "@/components/profile/HighlightReel";
+import CoachTier from "@/components/profile/CoachTier";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -117,6 +118,7 @@ export default function Profile() {
           { id: "stats", label: "Stats" },
           { id: "badges", label: "Badges" },
           { id: "goals", label: "Goals" },
+          { id: "coach", label: "Coach" },
           { id: "about", label: "About" },
         ].map(s => (
           <button key={s.id} onClick={() => setActiveSection(s.id)}
@@ -255,6 +257,16 @@ export default function Profile() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {activeSection === "coach" && (
+          <div className="mt-3">
+            <CoachTier athlete={athlete} onUpdate={() => {
+              base44.entities.Athlete.list("-created_date", 1).then(list => {
+                if (list[0]) { setAthlete(list[0]); setForm(list[0]); }
+              });
+            }} />
           </div>
         )}
 

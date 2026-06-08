@@ -113,6 +113,18 @@
         "type": "string"
       },
       "default": []
+    },
+    "approved_video_count": {
+      "type": "number",
+      "default": 0
+    },
+    "total_video_views": {
+      "type": "number",
+      "default": 0
+    },
+    "is_coach_verified": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

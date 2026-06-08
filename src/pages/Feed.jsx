@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Plus, Image, Video, Users, Globe } from "lucide-react";
 import PostCard from "@/components/feed/PostCard";
 import StreakBadge from "@/components/ui/StreakBadge";
+import ClanFeed from "@/components/feed/ClanFeed";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
@@ -14,7 +15,7 @@ export default function Feed() {
   const [postVideoUrl, setPostVideoUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
-  const [feedFilter, setFeedFilter] = useState("all"); // "all" | "friends"
+  const [feedFilter, setFeedFilter] = useState("all"); // "all" | "friends" | "clan"
 
   const load = useCallback(async () => {
     const [athleteList, postList] = await Promise.all([
@@ -78,7 +79,7 @@ export default function Feed() {
               feedFilter === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
             }`}
           >
-            <Globe size={12} /> All Athletes
+            <Globe size={12} /> All
           </button>
           <button
             onClick={() => setFeedFilter("friends")}
@@ -88,12 +89,25 @@ export default function Feed() {
           >
             <Users size={12} /> Friends
           </button>
+          <button
+            onClick={() => setFeedFilter("clan")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              feedFilter === "clan" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            }`}
+          >
+            🛡️ Team
+          </button>
         </div>
       </div>
 
       <div className="px-4 py-4">
+        {/* Clan Feed */}
+        {feedFilter === "clan" && (
+          <ClanFeed athlete={athlete} />
+        )}
+
         {/* Compose */}
-        {athlete && (
+        {feedFilter !== "clan" && athlete && (
           <div className="border border-border rounded-xl p-3 mb-4 bg-card">
             {showCompose ? (
               <div className="space-y-3">
@@ -154,14 +168,14 @@ export default function Feed() {
         )}
 
         {/* Feed */}
-        {!loading && feedFilter === "friends" && (athlete?.friends || []).length === 0 && (
+        {feedFilter !== "clan" && !loading && feedFilter === "friends" && (athlete?.friends || []).length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center mb-4">
             <div className="text-4xl mb-3">👥</div>
             <h3 className="text-base font-semibold text-foreground mb-1">No Friends Yet</h3>
             <p className="text-xs text-muted-foreground max-w-xs">Join a clan and follow athletes to see their posts here.</p>
           </div>
         )}
-        {loading ? (
+        {feedFilter !== "clan" && loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
               <div key={i} className="gradient-card border border-border rounded-2xl p-4 animate-pulse">
@@ -177,7 +191,7 @@ export default function Feed() {
               </div>
             ))}
           </div>
-        ) : posts.length === 0 ? (
+        ) : feedFilter !== "clan" && posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="text-6xl mb-4">🏆</div>
             <h3 className="text-xl font-barlow font-bold text-foreground uppercase mb-2">The Feed Awaits</h3>
@@ -185,7 +199,7 @@ export default function Feed() {
               Join a clan and start tracking your progress. Your wins will show up here.
             </p>
           </div>
-        ) : (
+        ) : feedFilter !== "clan" ? (
           <div>
             {posts
               .filter(post => {
@@ -205,7 +219,7 @@ export default function Feed() {
               ))
             }
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

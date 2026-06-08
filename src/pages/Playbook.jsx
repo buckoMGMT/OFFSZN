@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Lock, Play, Clock, Target, Flame, Bookmark, BookmarkCheck, Plus, X, ChevronRight, ListVideo } from "lucide-react";
 import PlaybookFilters from "@/components/playbook/PlaybookFilters";
+import VideoPlayer from "@/components/feed/VideoPlayer";
 
-const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming"];
+const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming", "Lacrosse"];
 
 const PROGRAMS = [
   { id: 1, title: "Elite Linebacker Training", sport: "Football", duration: 45, isPremium: false, category: "Strength", aim: "Build explosive power and tackle force", targeted_areas: ["Legs", "Core", "Upper Body"], difficulty: "Advanced", description: "Full-body power program designed for linebackers.", cover: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&q=80", timing: "Pre-workout" },
@@ -18,6 +19,12 @@ const PROGRAMS = [
   { id: 10, title: "Post Player Footwork", sport: "Basketball", duration: 35, isPremium: false, category: "Skill", aim: "Dominate the paint with elite footwork", targeted_areas: ["Legs", "Core"], difficulty: "Beginner", description: "Dominate the paint with elite footwork patterns.", cover: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&q=80", timing: "Anytime" },
   { id: 11, title: "WR Route Running Mastery", sport: "Football", duration: 25, isPremium: false, category: "Speed", aim: "Perfect release and separation techniques", targeted_areas: ["Legs", "Glutes", "Core"], difficulty: "Intermediate", description: "Run sharper routes and create separation at the line.", cover: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&q=80", timing: "Pre-workout" },
   { id: 12, title: "Core Stability Foundation", sport: "Track", duration: 18, isPremium: false, category: "Strength", aim: "Build a rock-solid athletic core", targeted_areas: ["Core"], difficulty: "Beginner", description: "A foundational core program for all athletes.", cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80", timing: "Anytime" },
+  { id: 13, title: "Top 5 Speed Drills — Football", sport: "Football", duration: 14, isPremium: false, category: "Speed", aim: "Explosive sprint starts & acceleration for skill positions", targeted_areas: ["Legs", "Glutes", "Core"], difficulty: "Intermediate", description: "Coach Dane Miller's 5 bodyweight speed exercises built for RBs, WRs, DBs, and LBs. A-Skips, Dions, Bounds, Tuck Jumps & Hill Sprints — zero equipment needed.", cover: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&q=80", timing: "Pre-workout", video_url: "https://www.youtube.com/watch?v=tHv9DcfawsA", positions: "RB, WR, DB, LB" },
+  { id: 14, title: "Top 5 Speed Drills — Soccer", sport: "Soccer", duration: 14, isPremium: false, category: "Speed", aim: "Sprint speed and acceleration for all positions on the pitch", targeted_areas: ["Legs", "Glutes", "Core"], difficulty: "Intermediate", description: "5 bodyweight sprint drills to dominate the pitch. Improve sprint starts, acceleration, and top-end speed without any gym equipment.", cover: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&q=80", timing: "Pre-workout", video_url: "https://www.youtube.com/watch?v=tHv9DcfawsA", positions: "All Positions" },
+  { id: 15, title: "Top 5 Speed Drills — Basketball", sport: "Basketball", duration: 14, isPremium: false, category: "Speed", aim: "First-step quickness and sprint speed for guards and wings", targeted_areas: ["Legs", "Glutes", "Core"], difficulty: "Intermediate", description: "Improve court speed and transition explosiveness. These bodyweight drills directly translate to faster first steps and better chase-down ability.", cover: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&q=80", timing: "Pre-workout", video_url: "https://www.youtube.com/watch?v=tHv9DcfawsA", positions: "Guards, Wings" },
+  { id: 16, title: "Top 5 Speed Drills — Baseball", sport: "Baseball", duration: 14, isPremium: false, category: "Speed", aim: "Base-running speed and outfield acceleration", targeted_areas: ["Legs", "Glutes", "Core"], difficulty: "Intermediate", description: "Bodyweight sprint mechanics for faster base running and quicker break-in-direction reaction in the field. No equipment required.", cover: "https://images.unsplash.com/photo-1508344928928-7165b67de128?w=400&q=80", timing: "Pre-workout", video_url: "https://www.youtube.com/watch?v=tHv9DcfawsA", positions: "Base Runners, Fielders" },
+  { id: 17, title: "Top 5 Speed Drills — Lacrosse", sport: "Lacrosse", duration: 14, isPremium: false, category: "Speed", aim: "Field speed and acceleration for lacrosse athletes", targeted_areas: ["Legs", "Glutes", "Core"], difficulty: "Intermediate", description: "Improve field speed, sprint mechanics, and explosive acceleration for lacrosse athletes. These bodyweight-only drills can be done anywhere.", cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80", timing: "Pre-workout", video_url: "https://www.youtube.com/watch?v=tHv9DcfawsA", positions: "All Positions" },
+  { id: 18, title: "Top 5 Speed Drills — Track", sport: "Track", duration: 14, isPremium: false, category: "Speed", aim: "Sprint mechanics and acceleration for sprinters", targeted_areas: ["Legs", "Glutes", "Core"], difficulty: "Intermediate", description: "A-Skips, Dions, Single-Leg Bounds, Tuck Jumps, and Hill Sprints for sprinters looking to shave time and refine mechanics.", cover: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80", timing: "Pre-workout", video_url: "https://www.youtube.com/watch?v=tHv9DcfawsA", positions: "Sprinters" },
 ];
 
 const CATEGORY_COLORS = {
@@ -144,6 +151,7 @@ export default function Playbook() {
             <span className="flex items-center gap-1"><Clock size={11} /> {selected.duration} min</span>
             <span className="flex items-center gap-1"><Flame size={11} /> {selected.timing}</span>
             <span className={`font-semibold ${DIFFICULTY_COLORS[selected.difficulty]}`}>{selected.difficulty}</span>
+            {selected.positions && <span>· {selected.positions}</span>}
           </div>
 
           {/* Aim */}
@@ -165,7 +173,13 @@ export default function Playbook() {
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{selected.description}</p>
+          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{selected.description}</p>
+
+          {selected.video_url && (
+            <div className="mb-6 rounded-xl overflow-hidden border border-border">
+              <VideoPlayer url={selected.video_url} />
+            </div>
+          )}
 
           {selected.isPremium && !isPremium ? (
             <div className="gradient-gold rounded-2xl p-5 text-center gold-glow">

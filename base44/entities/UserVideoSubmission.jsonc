@@ -1,0 +1,97 @@
+{
+  "name": "UserVideoSubmission",
+  "type": "object",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "video_url": {
+      "type": "string"
+    },
+    "sport": {
+      "type": "string",
+      "enum": [
+        "football",
+        "basketball",
+        "baseball",
+        "soccer",
+        "track",
+        "volleyball",
+        "wrestling",
+        "swimming",
+        "lacrosse",
+        "tennis",
+        "softball",
+        "cross_country",
+        "other"
+      ]
+    },
+    "position": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "workout",
+        "tutorial",
+        "form_check",
+        "progress",
+        "challenge"
+      ]
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    "muscle_groups": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "duration_minutes": {
+      "type": "number"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "moderation_notes": {
+      "type": "string"
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "views": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "athlete_id",
+    "title",
+    "video_url"
+  ]
+}
