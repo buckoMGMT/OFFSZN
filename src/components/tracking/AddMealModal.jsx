@@ -1,40 +1,49 @@
 import { useState } from "react";
-import { X, Camera, Sparkles, Lock } from "lucide-react";
+import { X, Zap, Search } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
 
 const MEAL_TIMES = ["breakfast", "lunch", "dinner", "snack", "pre_workout", "post_workout"];
 
-export default function AddMealModal({ onClose, onSaved, athleteId, logId, isPremium }) {
+const QUICK_FOODS = [
+  { name: "Grilled Chicken Breast", calories: 165, protein_g: 31, carbs_g: 0, fats_g: 3.6 },
+  { name: "White Rice (1 cup)", calories: 206, protein_g: 4, carbs_g: 45, fats_g: 0.4 },
+  { name: "Eggs (2 large)", calories: 143, protein_g: 13, carbs_g: 1, fats_g: 10 },
+  { name: "Protein Shake", calories: 160, protein_g: 30, carbs_g: 8, fats_g: 2 },
+  { name: "Oatmeal (1 cup)", calories: 166, protein_g: 6, carbs_g: 28, fats_g: 4 },
+  { name: "Banana", calories: 89, protein_g: 1, carbs_g: 23, fats_g: 0.3 },
+  { name: "Greek Yogurt (6oz)", calories: 100, protein_g: 17, carbs_g: 6, fats_g: 0.7 },
+  { name: "Peanut Butter (2 tbsp)", calories: 188, protein_g: 8, carbs_g: 6, fats_g: 16 },
+  { name: "Sweet Potato", calories: 103, protein_g: 2, carbs_g: 24, fats_g: 0.1 },
+  { name: "Almonds (1 oz)", calories: 164, protein_g: 6, carbs_g: 6, fats_g: 14 },
+  { name: "Salmon (4 oz)", calories: 208, protein_g: 29, carbs_g: 0, fats_g: 10 },
+  { name: "Whole Milk (1 cup)", calories: 149, protein_g: 8, carbs_g: 12, fats_g: 8 },
+  { name: "Ground Beef 80/20 (4oz)", calories: 287, protein_g: 19, carbs_g: 0, fats_g: 23 },
+  { name: "Bread (2 slices)", calories: 160, protein_g: 6, carbs_g: 30, fats_g: 2 },
+];
+
+export default function AddMealModal({ onClose, onSaved, athleteId, logId }) {
   const [form, setForm] = useState({
     name: "", calories: "", protein_g: "", carbs_g: "", fats_g: "",
     meal_time: "lunch", scan_source: "manual", estimated_cost_usd: "",
   });
-  const [scanning, setScanning] = useState(false);
+  const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
-  const [scanMode, setScanMode] = useState(false);
-  const [prompt, setPrompt] = useState("");
 
-  const scanFood = async () => {
-    if (!isPremium) return;
-    setScanning(true);
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are a sports nutrition AI. Estimate macros for this food: "${prompt}". Return JSON with: name, calories (number), protein_g (number), carbs_g (number), fats_g (number), estimated_cost_usd (number, budget meal price). Be accurate for a high school athlete.`,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          calories: { type: "number" },
-          protein_g: { type: "number" },
-          carbs_g: { type: "number" },
-          fats_g: { type: "number" },
-          estimated_cost_usd: { type: "number" },
-        }
-      }
-    });
-    setForm(prev => ({ ...prev, ...result, scan_source: "ai_scan" }));
-    setScanMode(false);
-    setScanning(false);
+  const filtered = search.length > 0
+    ? QUICK_FOODS.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
+    : QUICK_FOODS;
+
+  const quickFill = (food) => {
+    setForm(p => ({
+      ...p,
+      name: food.name,
+      calories: food.calories,
+      protein_g: food.protein_g,
+      carbs_g: food.carbs_g,
+      fats_g: food.fats_g,
+    }));
+    setSearch("");
   };
 
   const save = async () => {
@@ -57,92 +66,100 @@ export default function AddMealModal({ onClose, onSaved, athleteId, logId, isPre
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-card rounded-t-3xl border-t border-border p-6 animate-slide-up max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-barlow font-bold text-foreground uppercase">Log Meal</h2>
-          <button onClick={onClose} className="p-2 rounded-xl bg-secondary text-muted-foreground hover:text-foreground">
-            <X size={20} />
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm">
+      <div className="w-full max-w-lg bg-card rounded-t-3xl border-t border-border p-6 animate-slide-up max-h-[92vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-2xl font-barlow font-bold text-foreground uppercase tracking-wide">Log Meal</h2>
+          <button onClick={onClose} className="p-2 rounded-xl bg-secondary text-muted-foreground">
+            <X size={18} />
           </button>
         </div>
 
-        {/* AI Scan Toggle */}
-        <button
-          onClick={() => isPremium ? setScanMode(!scanMode) : null}
-          className={`w-full flex items-center gap-3 p-3 rounded-xl border mb-4 transition-all ${
-            isPremium ? "border-primary/40 bg-primary/10 hover:bg-primary/20" : "border-border bg-secondary/50 opacity-60"
-          }`}
-        >
-          {isPremium ? <Sparkles size={18} className="text-primary" /> : <Lock size={18} className="text-muted-foreground" />}
-          <span className={`font-barlow font-bold uppercase text-sm tracking-wide ${isPremium ? "text-primary" : "text-muted-foreground"}`}>
-            {isPremium ? "AI Food Scanner" : "AI Scanner — Premium Only"}
-          </span>
-        </button>
-
-        {scanMode && isPremium && (
-          <div className="mb-4 p-4 bg-primary/10 rounded-xl border border-primary/30">
-            <p className="text-xs text-muted-foreground mb-2 font-barlow uppercase tracking-wide">Describe your meal or food</p>
+        {/* Quick Search */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 bg-secondary border border-border rounded-xl px-4 py-3 mb-3">
+            <Search size={14} className="text-muted-foreground flex-shrink-0" />
             <input
-              className="w-full bg-secondary rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none mb-3"
-              placeholder="e.g. Grilled chicken breast with rice..."
-              value={prompt}
-              onChange={e => setPrompt(e.target.value)}
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+              placeholder="Search common athlete foods…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
             />
-            <button
-              onClick={scanFood}
-              disabled={scanning || !prompt.trim()}
-              className="w-full bg-primary text-primary-foreground py-2.5 rounded-xl font-barlow font-bold uppercase text-sm tracking-wide disabled:opacity-50"
-            >
-              {scanning ? "Analyzing..." : "Scan & Fill Macros"}
-            </button>
+            {search && (
+              <button onClick={() => setSearch("")} className="text-muted-foreground">
+                <X size={12} />
+              </button>
+            )}
           </div>
-        )}
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {filtered.slice(0, 8).map(food => (
+              <button
+                key={food.name}
+                onClick={() => quickFill(food)}
+                className="flex-shrink-0 flex flex-col items-start px-3 py-2 bg-secondary border border-border rounded-xl text-left hover:border-primary/50 transition-all"
+              >
+                <span className="text-xs font-medium text-foreground whitespace-nowrap">{food.name}</span>
+                <span className="text-[10px] font-mono text-primary tabular-nums">{food.calories} kcal · {food.protein_g}g P</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[10px] font-barlow uppercase tracking-widest text-muted-foreground">Or Enter Manually</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
 
         <div className="space-y-3">
           <input
-            className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/40 transition-colors"
             placeholder="Meal name *"
             value={form.name}
             onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
           />
           <select
-            className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none"
+            className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-sm text-foreground outline-none"
             value={form.meal_time}
             onChange={e => setForm(p => ({ ...p, meal_time: e.target.value }))}
           >
             {MEAL_TIMES.map(t => (
-              <option key={t} value={t}>{t.replace("_", " ").toUpperCase()}</option>
+              <option key={t} value={t}>{t.replace(/_/g, " ").toUpperCase()}</option>
             ))}
           </select>
-          <div className="grid grid-cols-2 gap-3">
-            <input className="bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              placeholder="Calories *" type="number" value={form.calories}
-              onChange={e => setForm(p => ({ ...p, calories: e.target.value }))} />
-            <input className="bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              placeholder="Protein (g)" type="number" value={form.protein_g}
-              onChange={e => setForm(p => ({ ...p, protein_g: e.target.value }))} />
-            <input className="bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              placeholder="Carbs (g)" type="number" value={form.carbs_g}
-              onChange={e => setForm(p => ({ ...p, carbs_g: e.target.value }))} />
-            <input className="bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              placeholder="Fats (g)" type="number" value={form.fats_g}
-              onChange={e => setForm(p => ({ ...p, fats_g: e.target.value }))} />
+
+          {/* Macro Grid */}
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: "Calories", field: "calories", unit: "kcal" },
+              { label: "Protein", field: "protein_g", unit: "g" },
+              { label: "Carbs", field: "carbs_g", unit: "g" },
+              { label: "Fats", field: "fats_g", unit: "g" },
+            ].map(({ label, field, unit }) => (
+              <div key={field} className="bg-secondary border border-border rounded-xl px-3 py-2.5">
+                <span className="text-[9px] font-barlow uppercase tracking-widest text-muted-foreground block mb-1">{label}</span>
+                <div className="flex items-baseline gap-1">
+                  <input
+                    className="flex-1 bg-transparent text-base font-mono font-semibold text-foreground outline-none w-full tabular-nums"
+                    placeholder="0"
+                    type="number"
+                    value={form[field]}
+                    onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))}
+                  />
+                  <span className="text-[10px] text-muted-foreground font-mono">{unit}</span>
+                </div>
+              </div>
+            ))}
           </div>
-          <input
-            className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-            placeholder="Estimated cost ($)"
-            type="number"
-            value={form.estimated_cost_usd}
-            onChange={e => setForm(p => ({ ...p, estimated_cost_usd: e.target.value }))}
-          />
         </div>
 
         <button
           onClick={save}
           disabled={saving || !form.name || !form.calories}
-          className="w-full mt-6 gradient-gold text-primary-foreground py-4 rounded-2xl font-barlow font-bold uppercase text-lg tracking-widest gold-glow disabled:opacity-50 transition-all"
+          className="w-full mt-5 gradient-gold text-primary-foreground py-4 rounded-2xl font-barlow font-bold uppercase text-lg tracking-widest gold-glow disabled:opacity-40 transition-all"
         >
-          {saving ? "Saving..." : "Log Meal"}
+          {saving ? "Logging…" : "Log Meal"}
         </button>
       </div>
     </div>

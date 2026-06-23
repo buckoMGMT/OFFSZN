@@ -87,9 +87,9 @@ export default function Clans() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-foreground">Teams</h1>
+            <h1 className="text-2xl font-barlow font-bold uppercase tracking-wide text-foreground">Teams</h1>
             {!myClan && (
               <button onClick={() => setShowCreate(true)}
                 className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold">
@@ -185,30 +185,40 @@ export default function Clans() {
 
         {tab === "leaderboard" && (
           <div>
-            <h2 className="text-xl font-barlow font-bold text-foreground uppercase mb-3">Global Rankings</h2>
+            <h2 className="text-xl font-barlow font-bold text-foreground uppercase mb-3 tracking-wide">Global Rankings</h2>
             <div className="space-y-2">
-              {clans.map((clan, i) => (
-                <div key={clan.id} className={`gradient-card border rounded-xl p-4 flex items-center gap-4 ${
-                  myClan?.id === clan.id ? "border-primary/40" : "border-border"
-                }`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-barlow font-bold text-sm ${
-                    i === 0 ? "bg-primary text-primary-foreground" :
-                    i === 1 ? "bg-secondary text-foreground" :
-                    i === 2 ? "bg-orange-500/20 text-orange-400" :
-                    "bg-secondary text-muted-foreground"
+              {clans.map((clan, i) => {
+                const isMe = myClan?.id === clan.id;
+                const isFirst = i === 0;
+                return (
+                  <div key={clan.id} className={`bg-card border rounded-2xl p-4 flex items-center gap-4 elevation-1 transition-all ${
+                    isMe ? "border-primary/40 bg-primary/5" :
+                    isFirst ? "border-border rank-pulse" :
+                    "border-border"
                   }`}>
-                    {i + 1}
+                    {/* Rank # */}
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-sm flex-shrink-0 ${
+                      i === 0 ? "bg-primary text-primary-foreground green-glow" :
+                      i === 1 ? "bg-secondary text-foreground" :
+                      i === 2 ? "bg-accent/20 text-accent" :
+                      "bg-secondary/60 text-muted-foreground"
+                    }`}>
+                      {i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-barlow font-bold text-foreground uppercase truncate">{clan.name}</p>
+                        {isMe && <span className="text-[9px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-barlow font-bold uppercase">You</span>}
+                      </div>
+                      <p className="text-[10px] font-mono text-muted-foreground tabular-nums">{(clan.member_ids || []).length} members</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-base font-mono font-bold text-primary tabular-nums">{(clan.total_points || 0).toLocaleString()}</p>
+                      <p className="text-[9px] font-barlow uppercase tracking-widest text-muted-foreground">pts</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-barlow font-bold text-foreground uppercase truncate">{clan.name}</p>
-                    <p className="text-xs text-muted-foreground">{(clan.member_ids || []).length} members</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-barlow font-bold text-primary">{clan.total_points || 0}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase">pts</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {clans.length === 0 && (
                 <div className="text-center py-12 text-muted-foreground text-sm">No clans yet. Create the first one!</div>
               )}

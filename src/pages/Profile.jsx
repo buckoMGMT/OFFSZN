@@ -71,7 +71,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="px-4 pt-14 pb-5 border-b border-border">
+      <div className="px-4 pt-14 pb-5 border-b border-border bg-card/50">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-16 h-16 rounded-full bg-secondary border border-border flex items-center justify-center overflow-hidden">
@@ -84,7 +84,7 @@ export default function Profile() {
               )}
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">{athlete.display_name || "Athlete"}</h1>
+              <h1 className="text-lg font-barlow font-bold text-foreground uppercase tracking-wide">{athlete.display_name || "Athlete"}</h1>
               <p className="text-xs text-muted-foreground capitalize">
                 {[athlete.sport, athlete.position, athlete.grade].filter(Boolean).join(" · ")}
               </p>
@@ -102,7 +102,8 @@ export default function Profile() {
           {athlete.current_streak_days > 0 && <StreakBadge days={athlete.current_streak_days} />}
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Trophy size={12} className="text-primary" />
-            <span className="font-semibold text-foreground">{athlete.total_points || 0}</span> pts
+            <span className="font-mono font-bold text-foreground tabular-nums">{athlete.total_points || 0}</span>
+            <span className="text-[10px] font-barlow uppercase tracking-widest">pts</span>
           </div>
           {isPremium ? (
             <GoldBadge><Crown size={10} />Premium</GoldBadge>
@@ -175,21 +176,21 @@ export default function Profile() {
 
             {/* Key Stats */}
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-card border border-border rounded-xl p-4">
-                <p className="text-3xl font-bold text-foreground">{athlete.current_streak_days || 0}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Day Streak</p>
+              <div className="bg-card border border-border rounded-2xl p-4 elevation-1">
+                <p className="text-[9px] font-barlow uppercase tracking-widest text-muted-foreground mb-1">Day Streak</p>
+                <p className="text-3xl font-mono font-bold text-foreground tabular-nums">{athlete.current_streak_days || 0}</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-4">
-                <p className="text-3xl font-bold text-primary">{athlete.total_points || 0}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Total Points</p>
+              <div className="bg-card border border-primary/30 rounded-2xl p-4 elevation-1">
+                <p className="text-[9px] font-barlow uppercase tracking-widest text-muted-foreground mb-1">Total Points</p>
+                <p className="text-3xl font-mono font-bold text-primary tabular-nums">{(athlete.total_points || 0).toLocaleString()}</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-4">
-                <p className="text-3xl font-bold text-foreground">{athlete.weight_lbs || "--"}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Current lbs</p>
+              <div className="bg-card border border-border rounded-2xl p-4 elevation-1">
+                <p className="text-[9px] font-barlow uppercase tracking-widest text-muted-foreground mb-1">Current lbs</p>
+                <p className="text-3xl font-mono font-bold text-foreground tabular-nums">{athlete.weight_lbs || "--"}</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-4">
-                <p className="text-3xl font-bold text-foreground">{athlete.goal_weight_lbs || "--"}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Goal lbs</p>
+              <div className="bg-card border border-border rounded-2xl p-4 elevation-1">
+                <p className="text-[9px] font-barlow uppercase tracking-widest text-muted-foreground mb-1">Goal lbs</p>
+                <p className="text-3xl font-mono font-bold text-foreground tabular-nums">{athlete.goal_weight_lbs || "--"}</p>
               </div>
             </div>
 

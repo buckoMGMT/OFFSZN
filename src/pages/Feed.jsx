@@ -64,39 +64,32 @@ export default function Feed() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border px-4 pt-12 pb-3">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-display text-primary tracking-widest">THE PLAYBOOK</h1>
+          <h1 className="text-2xl font-display text-primary tracking-wider gold-text-glow">THE PLAYBOOK</h1>
           {athlete?.current_streak_days > 0 && (
             <StreakBadge days={athlete.current_streak_days} />
           )}
         </div>
         {/* Feed Filter Tabs */}
-        <div className="flex gap-1 bg-secondary rounded-lg p-1">
-          <button
-            onClick={() => setFeedFilter("all")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
-              feedFilter === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-            }`}
-          >
-            <Globe size={12} /> All
-          </button>
-          <button
-            onClick={() => setFeedFilter("friends")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
-              feedFilter === "friends" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-            }`}
-          >
-            <Users size={12} /> Friends
-          </button>
-          <button
-            onClick={() => setFeedFilter("clan")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
-              feedFilter === "clan" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-            }`}
-          >
-            🛡️ Team
-          </button>
+        <div className="flex border-b border-border">
+          {[
+            { id: "all", icon: <Globe size={11} />, label: "All" },
+            { id: "friends", icon: <Users size={11} />, label: "Friends" },
+            { id: "clan", icon: <span className="text-[11px]">🛡️</span>, label: "Team" },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setFeedFilter(tab.id)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-barlow font-bold uppercase tracking-wide border-b-2 transition-all ${
+                feedFilter === tab.id
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground"
+              }`}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
