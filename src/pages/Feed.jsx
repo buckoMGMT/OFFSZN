@@ -62,7 +62,7 @@ export default function Feed() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen turf-bg">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 pt-12 pb-3">
         <div className="flex items-center justify-between mb-3">

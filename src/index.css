@@ -59,32 +59,31 @@
 }
 
 @layer utilities {
-  /* Green glow — primary CTA & active states */
+  /* No glow effects — clean matte finish */
   .gold-glow {
-    box-shadow: 0 0 24px hsla(145, 100%, 39%, 0.3), 0 4px 12px hsla(145, 100%, 39%, 0.15);
+    box-shadow: none;
   }
 
   .gold-text-glow {
-    text-shadow: 0 0 20px hsla(145, 100%, 39%, 0.55);
+    text-shadow: none;
   }
 
   .green-glow {
-    box-shadow: 0 0 24px hsla(145, 100%, 39%, 0.3), 0 4px 12px hsla(145, 100%, 39%, 0.15);
+    box-shadow: none;
   }
 
-  /* Orange — urgency only */
   .orange-glow {
-    box-shadow: 0 0 20px hsla(16, 100%, 60%, 0.4);
+    box-shadow: none;
   }
 
-  /* Rank 1 leaderboard pulse */
+  /* Rank 1 leaderboard pulse — subtle border only */
   .rank-pulse {
-    animation: rankPulse 2.5s ease-in-out infinite;
+    animation: rankPulse 3s ease-in-out infinite;
   }
 
   @keyframes rankPulse {
-    0%, 100% { box-shadow: 0 0 0 0 hsla(145, 100%, 39%, 0); }
-    50% { box-shadow: 0 0 0 6px hsla(145, 100%, 39%, 0.12), 0 0 20px hsla(145, 100%, 39%, 0.2); }
+    0%, 100% { border-color: hsl(var(--border)); }
+    50% { border-color: hsla(145, 100%, 39%, 0.5); }
   }
 
   .card-glass {
@@ -111,6 +110,74 @@
 
   .elevation-2 {
     box-shadow: 0 4px 12px hsla(212, 53%, 4%, 0.6), 0 8px 24px hsla(212, 53%, 4%, 0.3);
+  }
+
+  /* Turf texture overlay — Field page background */
+  .turf-bg {
+    background-color: hsl(var(--background));
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 38px,
+        rgba(255,255,255,0.018) 38px,
+        rgba(255,255,255,0.018) 40px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 38px,
+        rgba(255,255,255,0.012) 38px,
+        rgba(255,255,255,0.012) 40px
+      ),
+      repeating-linear-gradient(
+        45deg,
+        rgba(255,255,255,0.006) 0px,
+        rgba(255,255,255,0.006) 1px,
+        transparent 1px,
+        transparent 8px
+      );
+  }
+
+  /* Track/field stripe bands — Stats page */
+  .track-bg {
+    background-color: hsl(var(--background));
+    background-image:
+      repeating-linear-gradient(
+        180deg,
+        transparent,
+        transparent 48px,
+        rgba(255,255,255,0.02) 48px,
+        rgba(255,255,255,0.02) 50px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 58px,
+        rgba(255,255,255,0.015) 58px,
+        rgba(255,255,255,0.015) 60px
+      );
+  }
+
+  /* Playbook page — notebook lines */
+  .playbook-bg {
+    background-color: hsl(var(--background));
+    background-image:
+      repeating-linear-gradient(
+        180deg,
+        transparent,
+        transparent 28px,
+        rgba(255,255,255,0.025) 28px,
+        rgba(255,255,255,0.025) 29px
+      );
+  }
+
+  /* Nav tab active indicator  */
+  .nav-tab-active-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: hsl(var(--primary));
   }
 
   .scrollbar-hide::-webkit-scrollbar {
