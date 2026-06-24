@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@300;400;500;600&family=Special+Elite&family=Permanent+Marker&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,185 +6,238 @@
 
 @layer base {
   :root {
-    --background: 212 53% 10%;
-    --foreground: 210 20% 96%;
-    --card: 211 47% 14%;
-    --card-foreground: 210 20% 96%;
-    --popover: 211 47% 14%;
-    --popover-foreground: 210 20% 96%;
-    --primary: 145 100% 39%;
-    --primary-foreground: 212 53% 8%;
-    --secondary: 211 38% 20%;
-    --secondary-foreground: 210 20% 85%;
-    --muted: 211 38% 18%;
-    --muted-foreground: 210 16% 50%;
-    --accent: 16 100% 60%;
-    --accent-foreground: 212 53% 8%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 211 32% 23%;
-    --input: 211 38% 18%;
-    --ring: 145 100% 39%;
-    --radius: 0.75rem;
-    --gold: 145 100% 39%;
-    --surface: 211 47% 14%;
-    --surface-raised: 211 38% 20%;
+    /* Floor / shell */
+    --background:       215 8% 6%;      /* #0D0D0F near-black */
+    --foreground:       220 5% 10%;     /* #15151A ink on page surfaces */
+
+    /* Cover surfaces — nav, headers, footers */
+    --cover:            220 5% 11%;     /* #1B1B1D */
+    --cover-lift:       220 4% 15%;     /* #272729 */
+
+    /* Page surfaces — main content area */
+    --page:             216 6% 93%;     /* #EDEEF0 chalk white */
+    --page-alt:         216 6% 87%;     /* #DCDEE1 card within page */
+
+    /* Primary accent: Athletic Red */
+    --primary:          351 71% 51%;    /* #D7263D */
+    --primary-foreground: 0 0% 100%;
+
+    /* Chrome / steel */
+    --chrome-light:     210 7% 65%;     /* #9BA3AC */
+    --chrome-dark:      210 6% 39%;     /* #5E646B */
+
+    /* Ink */
+    --ink:              240 5% 10%;     /* #15151A */
+    --ink-soft:         218 4% 37%;     /* #5A5D63 */
+
+    /* Yellow — sticky note ONLY */
+    --sticky:           45 100% 62%;    /* #FFD93D */
+
+    /* shadcn token aliases */
+    --card:             216 6% 93%;
+    --card-foreground:  240 5% 10%;
+    --popover:          216 6% 93%;
+    --popover-foreground: 240 5% 10%;
+    --secondary:        216 6% 87%;
+    --secondary-foreground: 240 5% 10%;
+    --muted:            216 6% 87%;
+    --muted-foreground: 218 4% 37%;
+    --accent:           351 71% 51%;
+    --accent-foreground: 0 0% 100%;
+    --destructive:      351 71% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border:           210 6% 39%;
+    --input:            216 6% 87%;
+    --ring:             351 71% 51%;
+    --radius:           0.5rem;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
+  * { @apply border-border outline-ring/50; }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    background: #0D0D0F;
+    color: #15151A;
+    font-family: 'Work Sans', sans-serif;
   }
 
-  h1, h2 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-  }
+  /* Typography roles */
+  .font-anton   { font-family: 'Anton', sans-serif; letter-spacing: 0.03em; }
+  .font-elite   { font-family: 'Special Elite', cursive; }
+  .font-marker  { font-family: 'Permanent Marker', cursive; }
+  .font-work    { font-family: 'Work Sans', sans-serif; }
 
-  .font-display {
-    font-family: 'Anton', sans-serif;
-    letter-spacing: 0.04em;
-  }
-
-  .font-barlow {
-    font-family: 'Barlow Condensed', sans-serif;
-  }
+  h1, h2 { font-family: 'Anton', sans-serif; letter-spacing: 0.03em; }
 }
 
 @layer utilities {
-  /* No glow effects — clean matte finish */
-  .gold-glow {
-    box-shadow: none;
+  /* ── Page surface ── */
+  .page-surface {
+    background: #EDEEF0;
+    color: #15151A;
+  }
+  .page-alt {
+    background: #DCDEE1;
   }
 
-  .gold-text-glow {
-    text-shadow: none;
+  /* ── Cover surface ── */
+  .cover-surface {
+    background: linear-gradient(180deg, #1B1B1D 0%, #272729 100%);
   }
 
-  .green-glow {
-    box-shadow: none;
+  /* ── Stamp button — core signature interaction ── */
+  .btn-stamp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    font-family: 'Special Elite', cursive;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #D7263D;
+    border: 3px solid #D7263D;
+    background: transparent;
+    border-radius: 4px;
+    padding: 0.5rem 1.25rem;
+    transform: rotate(-2deg);
+    transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease;
+  }
+  .btn-stamp:active, .btn-stamp.stamped {
+    transform: rotate(0deg);
+    background: #D7263D;
+    color: #fff;
   }
 
-  .orange-glow {
-    box-shadow: none;
+  /* ── Binder ring holes ── */
+  .binder-rings::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 22px,
+      #9BA3AC 22px,
+      #9BA3AC 23px,
+      transparent 23px,
+      transparent 28px
+    );
   }
 
-  /* Rank 1 leaderboard pulse — subtle border only */
-  .rank-pulse {
-    animation: rankPulse 3s ease-in-out infinite;
+  /* Small punched circles running down left margin */
+  .ring-holes {
+    position: relative;
+  }
+  .ring-holes::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 24px;
+    bottom: 24px;
+    width: 12px;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 26px,
+      #9BA3AC44 26px,
+      #9BA3AC44 38px,
+      transparent 38px,
+      transparent 64px
+    );
+    background-size: 12px 64px;
+    border-radius: 6px;
   }
 
-  @keyframes rankPulse {
-    0%, 100% { border-color: hsl(var(--border)); }
-    50% { border-color: hsla(145, 100%, 39%, 0.5); }
-  }
-
-  .card-glass {
-    background: hsla(211, 47%, 14%, 0.88);
-    backdrop-filter: blur(14px);
-    border: 1px solid hsla(211, 32%, 23%, 0.8);
-  }
-
-  .gradient-gold {
-    background: hsl(145, 100%, 39%);
-  }
-
-  .gradient-dark {
-    background: hsl(212, 53%, 10%);
-  }
-
-  .gradient-card {
-    background: hsl(211, 47%, 14%);
-  }
-
-  .elevation-1 {
-    box-shadow: 0 1px 4px hsla(212, 53%, 4%, 0.5), 0 2px 8px hsla(212, 53%, 4%, 0.3);
-  }
-
-  .elevation-2 {
-    box-shadow: 0 4px 12px hsla(212, 53%, 4%, 0.6), 0 8px 24px hsla(212, 53%, 4%, 0.3);
-  }
-
-  /* Turf texture overlay — Field page background */
-  .turf-bg {
-    background-color: hsl(var(--background));
+  /* ── Graph paper background for charts ── */
+  .graph-paper {
+    background-color: #EDEEF0;
     background-image:
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 38px,
-        rgba(255,255,255,0.018) 38px,
-        rgba(255,255,255,0.018) 40px
-      ),
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 38px,
-        rgba(255,255,255,0.012) 38px,
-        rgba(255,255,255,0.012) 40px
-      ),
-      repeating-linear-gradient(
-        45deg,
-        rgba(255,255,255,0.006) 0px,
-        rgba(255,255,255,0.006) 1px,
-        transparent 1px,
-        transparent 8px
-      );
+      linear-gradient(rgba(91,100,107,0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,100,107,0.15) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 
-  /* Track/field stripe bands — Stats page */
-  .track-bg {
-    background-color: hsl(var(--background));
-    background-image:
-      repeating-linear-gradient(
-        180deg,
-        transparent,
-        transparent 48px,
-        rgba(255,255,255,0.02) 48px,
-        rgba(255,255,255,0.02) 50px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 58px,
-        rgba(255,255,255,0.015) 58px,
-        rgba(255,255,255,0.015) 60px
-      );
+  /* ── Redacted bar for locked premium content ── */
+  .redacted {
+    position: relative;
+    color: transparent !important;
+    user-select: none;
+  }
+  .redacted::after {
+    content: '';
+    position: absolute;
+    inset: 0 -2px;
+    background: #15151A;
+    border-radius: 2px;
   }
 
-  /* Playbook page — notebook lines */
-  .playbook-bg {
-    background-color: hsl(var(--background));
-    background-image:
-      repeating-linear-gradient(
-        180deg,
-        transparent,
-        transparent 28px,
-        rgba(255,255,255,0.025) 28px,
-        rgba(255,255,255,0.025) 29px
-      );
+  /* ── Ink stamp badge ── */
+  .ink-stamp {
+    font-family: 'Special Elite', cursive;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #D7263D;
+    border: 2px solid #D7263D;
+    padding: 1px 5px;
+    border-radius: 3px;
+    transform: rotate(-4deg);
+    display: inline-block;
   }
 
-  /* Nav tab active indicator  */
-  .nav-tab-active-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: hsl(var(--primary));
+  /* ── Red coach oval annotation ── */
+  @keyframes coachCircle {
+    0%   { stroke-dashoffset: 300; opacity: 0; }
+    40%  { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+  }
+  .coach-circle {
+    animation: coachCircle 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+    stroke-dasharray: 300;
   }
 
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  /* ── Play diagram route draw-in ── */
+  @keyframes drawRoute {
+    from { stroke-dashoffset: 200; }
+    to   { stroke-dashoffset: 0; }
   }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  .draw-route {
+    stroke-dasharray: 200;
+    animation: drawRoute 0.9s ease-out forwards;
+  }
+
+  /* ── Page-number label ── */
+  .page-number {
+    font-family: 'Special Elite', cursive;
+    font-size: 0.6rem;
+    color: #5A5D63;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ── Binder tab shapes ── */
+  .binder-tab {
+    clip-path: polygon(0% 30%, 8% 0%, 92% 0%, 100% 30%, 100% 100%, 0% 100%);
+    transition: all 0.15s ease;
+  }
+
+  /* Utilities */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Sticky note yellow — use sparingly */
+  .sticky-note {
+    background: #FFD93D;
+    font-family: 'Permanent Marker', cursive;
+    color: #15151A;
+    padding: 0.5rem 0.75rem;
+    transform: rotate(1.5deg);
+    border-radius: 2px;
+    box-shadow: 2px 3px 6px rgba(0,0,0,0.25);
   }
 }

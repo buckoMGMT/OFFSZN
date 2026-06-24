@@ -1,5 +1,19 @@
 import { useState, useEffect } from "react";
-import { Heart, CheckCircle, Activity, Moon, Footprints, Zap } from "lucide-react";
+import { Heart, CheckCircle, Activity, Moon, Zap } from "lucide-react";
+
+// Footprints icon inline — not in lucide-react v0.475
+function Footprints({ size = 14, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9 2 9 5.5 9 8s-1 3-1 5v1" />
+      <path d="M4 22h1" />
+      <path d="M9 22h1" />
+      <path d="M20 16v-2.38C20 11.5 21.03 10.5 21 8c-.03-2.72-1.49-6-4.5-6C15 2 15 5.5 15 8s1 3 1 5v1" />
+      <path d="M20 22h1" />
+      <path d="M15 22h1" />
+    </svg>
+  );
+}
 
 // Simulates reading from HealthKit. In a real iOS native wrapper (Capacitor/React Native),
 // these values would come from HealthKit.getQuantitySamples(). Here we generate realistic
@@ -53,75 +67,63 @@ export default function AppleHealthBanner({ log, onSync }) {
   ] : [];
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden elevation-1">
+    <div className="rounded border overflow-hidden" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
       {/* Header row */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <div className="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center flex-shrink-0">
-          <Heart size={17} className="text-red-400" fill="currentColor" />
+        <div className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC' }}>
+          <Heart size={17} style={{ color: '#D7263D' }} fill="#D7263D" />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-barlow font-bold uppercase tracking-wide text-foreground">Apple Health</p>
-          <p className="text-[10px] text-muted-foreground">
-            {status === "synced"
-              ? "Synced — steps, sleep & active cals imported"
-              : "Connect to auto-log steps, sleep & calories"}
+          <p className="font-elite text-xs uppercase tracking-widest" style={{ color: '#15151A' }}>Apple Health</p>
+          <p className="font-work text-[10px]" style={{ color: '#5A5D63' }}>
+            {status === "synced" ? "Synced — steps, sleep & active cals imported" : "Connect to auto-log steps, sleep & calories"}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {status !== "synced" && (
-            <button
-              onClick={handleSync}
-              disabled={status === "connecting"}
-              className="flex items-center gap-1.5 bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-barlow font-bold uppercase tracking-wide disabled:opacity-60 transition-all active:scale-95"
-            >
-              {status === "connecting" ? (
-                <>
-                  <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-                  Syncing
-                </>
-              ) : (
-                <>
-                  <Heart size={11} fill="currentColor" /> Connect
-                </>
-              )}
+            <button onClick={handleSync} disabled={status === "connecting"}
+              className="btn-stamp flex items-center gap-1.5 disabled:opacity-60" style={{ transform: 'rotate(0deg)' }}>
+              {status === "connecting"
+                ? <><div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />Syncing</>
+                : <><Heart size={10} fill="currentColor" />Connect</>
+              }
             </button>
           )}
           {status === "synced" && (
-            <div className="flex items-center gap-1 text-[10px] text-primary font-barlow font-bold uppercase">
-              <CheckCircle size={12} /> Live
+            <div className="flex items-center gap-1 font-elite text-[9px] uppercase tracking-widest" style={{ color: '#D7263D' }}>
+              <CheckCircle size={11} /> Live
             </div>
           )}
-          <button onClick={() => setDismissed(true)} className="text-muted-foreground/40 text-xs hover:text-muted-foreground transition-colors">✕</button>
+          <button onClick={() => setDismissed(true)} className="font-elite text-xs" style={{ color: '#9BA3AC' }}>✕</button>
         </div>
       </div>
 
-      {/* Synced metric pills */}
+      {/* Synced metric grid */}
       {status === "synced" && healthData && (
-        <div className="grid grid-cols-4 gap-px bg-border">
+        <div className="grid grid-cols-4" style={{ borderTop: '1px solid #9BA3AC' }}>
           {metrics.map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="bg-card flex flex-col items-center py-3 gap-1">
-              <Icon size={13} className={color} />
-              <p className="text-sm font-mono font-bold text-foreground tabular-nums leading-none">{value}</p>
-              <p className="text-[8px] font-barlow uppercase tracking-widest text-muted-foreground">{label}</p>
+            <div key={label} className="flex flex-col items-center py-3 gap-1" style={{ borderRight: '1px solid #9BA3AC' }}>
+              <Icon size={13} style={{ color }} />
+              <p className="font-elite text-sm leading-none" style={{ color: '#15151A' }}>{value}</p>
+              <p className="font-elite text-[7px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{label}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Connecting progress */}
       {status === "connecting" && (
-        <div className="px-4 pb-4">
-          <div className="h-1 bg-secondary rounded-full overflow-hidden">
-            <div className="h-full bg-red-500 rounded-full animate-pulse" style={{ width: "60%" }} />
+        <div className="px-4 pb-3">
+          <div className="h-1 rounded-full overflow-hidden" style={{ background: '#9BA3AC44' }}>
+            <div className="h-full animate-pulse" style={{ width: '60%', background: '#D7263D' }} />
           </div>
-          <p className="text-[9px] text-muted-foreground mt-1.5 font-mono">Requesting HealthKit permissions…</p>
+          <p className="font-elite text-[9px] uppercase tracking-widest mt-1.5" style={{ color: '#5A5D63' }}>Requesting HealthKit permissions…</p>
         </div>
       )}
 
       {status === "idle" && (
-        <div className="px-4 pb-3">
-          <p className="text-[10px] text-muted-foreground border-t border-border pt-2.5">
-            Full sync available in the iOS app · Includes HRV, sleep stages & active calories
+        <div className="px-4 pb-3 pt-2 border-t" style={{ borderColor: '#9BA3AC' }}>
+          <p className="font-work text-[10px]" style={{ color: '#5A5D63' }}>
+            Full sync in the iOS app · HRV, sleep stages & active calories
           </p>
         </div>
       )}

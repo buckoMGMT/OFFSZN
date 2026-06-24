@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Image, Video, Users, Globe } from "lucide-react";
 import PostCard from "@/components/feed/PostCard";
-import StreakBadge from "@/components/ui/StreakBadge";
 import ClanFeed from "@/components/feed/ClanFeed";
+import PageLabel from "@/components/ui/PageLabel";
+import PlayDiagram from "@/components/ui/PlayDiagram";
+import StampButton from "@/components/ui/StampButton";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
@@ -12,10 +14,9 @@ export default function Feed() {
   const [showCompose, setShowCompose] = useState(false);
   const [newPost, setNewPost] = useState("");
   const [postImageUrl, setPostImageUrl] = useState("");
-  const [postVideoUrl, setPostVideoUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
-  const [feedFilter, setFeedFilter] = useState("all"); // "all" | "friends" | "clan"
+  const [feedFilter, setFeedFilter] = useState("all");
 
   const load = useCallback(async () => {
     const [athleteList, postList] = await Promise.all([
@@ -48,171 +49,129 @@ export default function Feed() {
       type: "achievement",
       content: newPost.trim(),
       image_url: postImageUrl || undefined,
-      metric_value: postVideoUrl || undefined,
       likes: 0,
       liked_by: [],
       comments: [],
     });
-    setNewPost("");
-    setPostImageUrl("");
-    setPostVideoUrl("");
-    setShowCompose(false);
-    setPosting(false);
+    setNewPost(""); setPostImageUrl(""); setShowCompose(false); setPosting(false);
     load();
   };
 
   return (
-    <div className="min-h-screen turf-bg">
+    <div className="min-h-screen" style={{ background: '#EDEEF0', color: '#15151A' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 pt-12 pb-3">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-2xl font-display text-primary tracking-wider gold-text-glow">THE PLAYBOOK</h1>
-          {athlete?.current_streak_days > 0 && (
-            <StreakBadge days={athlete.current_streak_days} />
-          )}
+      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: '#EDEEF0', borderColor: '#9BA3AC' }}>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="font-anton text-3xl uppercase" style={{ color: '#15151A' }}>The Field</h1>
+          <PageLabel number={1} />
         </div>
-        {/* Feed Filter Tabs */}
-        <div className="flex border-b border-border">
+        <p className="font-elite text-xs mb-3" style={{ color: '#5A5D63' }}>GAME FEED — LIVE REPORTS</p>
+
+        {/* Filter tabs */}
+        <div className="flex border-b" style={{ borderColor: '#9BA3AC' }}>
           {[
-            { id: "all", icon: <Globe size={11} />, label: "All" },
-            { id: "friends", icon: <Users size={11} />, label: "Friends" },
-            { id: "clan", icon: <span className="text-[11px]">🛡️</span>, label: "Team" },
+            { id: "all", label: "All" },
+            { id: "friends", label: "Friends" },
+            { id: "clan", label: "Team" },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setFeedFilter(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-barlow font-bold uppercase tracking-wide border-b-2 transition-all ${
-                feedFilter === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground"
-              }`}
+              className="flex-1 py-2 font-elite text-xs uppercase tracking-widest transition-all"
+              style={{
+                color: feedFilter === tab.id ? '#D7263D' : '#5A5D63',
+                borderBottom: feedFilter === tab.id ? '2px solid #D7263D' : '2px solid transparent',
+              }}
             >
-              {tab.icon} {tab.label}
+              {tab.label}
             </button>
           ))}
         </div>
       </div>
 
       <div className="px-4 py-4">
-        {/* Clan Feed */}
-        {feedFilter === "clan" && (
-          <ClanFeed athlete={athlete} />
-        )}
+        {/* Clan feed */}
+        {feedFilter === "clan" && <ClanFeed athlete={athlete} />}
 
         {/* Compose */}
         {feedFilter !== "clan" && athlete && (
-          <div className="border border-border rounded-xl p-3 mb-4 bg-card">
+          <div className="mb-4 border rounded p-3" style={{ borderColor: '#9BA3AC', background: '#DCDEE1' }}>
             {showCompose ? (
               <div className="space-y-3">
                 <textarea
-                  className="w-full bg-secondary rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none resize-none h-20"
-                  placeholder="Share your progress..."
+                  className="w-full rounded px-3 py-2.5 text-sm outline-none resize-none h-20 font-work"
+                  style={{ background: '#EDEEF0', color: '#15151A', border: '1px solid #9BA3AC' }}
+                  placeholder="What's your win today?"
                   value={newPost}
                   onChange={e => setNewPost(e.target.value)}
                   autoFocus
                 />
                 <div className="flex gap-2">
-                  <label className="flex items-center gap-1.5 px-3 py-2 bg-secondary rounded-lg cursor-pointer hover:bg-secondary/80 transition-colors">
-                    <Image size={13} className="text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">{uploading ? "Uploading…" : postImageUrl ? "✓ Photo" : "Photo"}</span>
+                  <label className="flex items-center gap-1.5 px-3 py-2 rounded cursor-pointer text-xs font-elite" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#5A5D63' }}>
+                    <Image size={13} />
+                    {uploading ? "Uploading…" : postImageUrl ? "✓ Photo" : "Photo"}
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                   </label>
-                  <div className="flex items-center gap-1.5 px-3 py-2 bg-secondary rounded-lg flex-1">
-                    <Video size={13} className="text-muted-foreground flex-shrink-0" />
-                    <input
-                      type="text"
-                      placeholder="YouTube link"
-                      className="bg-transparent text-xs text-foreground outline-none w-full"
-                      value={postVideoUrl}
-                      onChange={e => setPostVideoUrl(e.target.value)}
-                    />
-                  </div>
                 </div>
-                {postImageUrl && (
-                  <img src={postImageUrl} alt="preview" className="w-full rounded-lg object-cover max-h-40" />
-                )}
+                {postImageUrl && <img src={postImageUrl} alt="preview" className="w-full rounded object-cover max-h-40" />}
                 <div className="flex gap-2">
-                  <button onClick={() => { setShowCompose(false); setPostImageUrl(""); setPostVideoUrl(""); }}
-                    className="flex-1 py-2 rounded-lg bg-secondary text-muted-foreground text-sm font-medium">
+                  <button onClick={() => { setShowCompose(false); setPostImageUrl(""); }}
+                    className="flex-1 py-2 rounded font-elite text-xs uppercase" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#5A5D63' }}>
                     Cancel
                   </button>
-                  <button onClick={submitPost} disabled={posting || !newPost.trim()}
-                    className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-40">
-                    {posting ? "Posting…" : "Post"}
-                  </button>
+                  <StampButton onClick={submitPost} disabled={posting || !newPost.trim()} className="flex-1">
+                    {posting ? "Posting…" : "Post It"}
+                  </StampButton>
                 </div>
               </div>
             ) : (
               <button onClick={() => setShowCompose(true)} className="w-full flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {athlete.avatar_url ? (
-                    <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xs font-semibold text-primary">
-                      {(athlete.display_name || "A")[0].toUpperCase()}
-                    </span>
-                  )}
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: '#9BA3AC' }}>
+                  {athlete.avatar_url
+                    ? <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
+                    : <span className="text-xs font-elite text-white">{(athlete.display_name || "A")[0].toUpperCase()}</span>
+                  }
                 </div>
-                <span className="text-sm text-muted-foreground flex-1">What's your win today?</span>
-                <Plus size={16} className="text-muted-foreground" />
+                <span className="text-sm font-work flex-1" style={{ color: '#5A5D63' }}>Log a win…</span>
+                <Plus size={15} style={{ color: '#D7263D' }} />
               </button>
             )}
           </div>
         )}
 
-        {/* Feed */}
-        {feedFilter !== "clan" && !loading && feedFilter === "friends" && (athlete?.friends || []).length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center mb-4">
-            <div className="text-4xl mb-3">👥</div>
-            <h3 className="text-base font-semibold text-foreground mb-1">No Friends Yet</h3>
-            <p className="text-xs text-muted-foreground max-w-xs">Join a clan and follow athletes to see their posts here.</p>
+        {/* Loading state — play diagram instead of spinner */}
+        {feedFilter !== "clan" && loading && (
+          <div className="flex flex-col items-center justify-center py-16">
+            <PlayDiagram size={160} />
+            <p className="font-elite text-xs mt-4" style={{ color: '#5A5D63' }}>Loading the field…</p>
           </div>
         )}
-        {feedFilter !== "clan" && loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="gradient-card border border-border rounded-2xl p-4 animate-pulse">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-secondary" />
-                  <div className="space-y-2 flex-1">
-                    <div className="h-3 bg-secondary rounded w-1/3" />
-                    <div className="h-2 bg-secondary rounded w-1/5" />
-                  </div>
-                </div>
-                <div className="h-4 bg-secondary rounded mb-2" />
-                <div className="h-4 bg-secondary rounded w-3/4" />
-              </div>
-            ))}
+
+        {/* Empty */}
+        {feedFilter !== "clan" && !loading && posts.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <PlayDiagram size={160} />
+            <h3 className="font-anton text-xl uppercase mt-4 mb-1" style={{ color: '#15151A' }}>The Feed Awaits</h3>
+            <p className="text-sm font-work max-w-xs" style={{ color: '#5A5D63' }}>Join a team. Log your first win. Show up on the board.</p>
           </div>
-        ) : feedFilter !== "clan" && posts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="text-6xl mb-4">🏆</div>
-            <h3 className="text-xl font-barlow font-bold text-foreground uppercase mb-2">The Feed Awaits</h3>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Join a clan and start tracking your progress. Your wins will show up here.
-            </p>
-          </div>
-        ) : feedFilter !== "clan" ? (
+        )}
+
+        {/* Posts */}
+        {feedFilter !== "clan" && !loading && posts.length > 0 && (
           <div>
             {posts
               .filter(post => {
                 if (feedFilter === "friends") {
-                  const friends = athlete?.friends || [];
-                  return friends.includes(post.athlete_id) || post.athlete_id === athlete?.id;
+                  return (athlete?.friends || []).includes(post.athlete_id) || post.athlete_id === athlete?.id;
                 }
                 return true;
               })
               .map(post => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  currentAthleteId={athlete?.id}
-                  onUpdate={load}
-                />
+                <PostCard key={post.id} post={post} currentAthleteId={athlete?.id} onUpdate={load} />
               ))
             }
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );
