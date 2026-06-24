@@ -1,0 +1,47 @@
+{
+  "name": "Redemption",
+  "type": "object",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "reward_item_id": {
+      "type": "string"
+    },
+    "reward_name": {
+      "type": "string"
+    },
+    "reward_type": {
+      "type": "string",
+      "enum": [
+        "merch",
+        "gift_card"
+      ]
+    },
+    "points_spent": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "shipping_address": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "athlete_id",
+    "reward_item_id",
+    "points_spent"
+  ]
+}

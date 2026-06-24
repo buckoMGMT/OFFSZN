@@ -1,0 +1,48 @@
+{
+  "name": "RewardItem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "merch",
+        "gift_card"
+      ]
+    },
+    "points_required": {
+      "type": "number"
+    },
+    "real_world_value_usd": {
+      "type": "number"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "stock_count": {
+      "type": "number",
+      "default": 999
+    },
+    "brand": {
+      "type": "string"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "points_required"
+  ]
+}

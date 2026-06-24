@@ -12,6 +12,7 @@ import Track from '@/pages/Track';
 import Playbook from '@/pages/Playbook';
 import Clans from '@/pages/Clans';
 import Profile from '@/pages/Profile';
+import Rewards from '@/pages/Rewards';
 import PlaybookSplash from '@/components/PlaybookSplash';
 
 const AuthenticatedApp = () => {
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
         <Route path="/track" element={<Track />} />
         <Route path="/playbook" element={<Playbook />} />
         <Route path="/clans" element={<Clans />} />
+        <Route path="/rewards" element={<Rewards />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />

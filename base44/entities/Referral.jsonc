@@ -1,0 +1,43 @@
+{
+  "name": "Referral",
+  "type": "object",
+  "properties": {
+    "referrer_athlete_id": {
+      "type": "string"
+    },
+    "referrer_name": {
+      "type": "string"
+    },
+    "referred_email": {
+      "type": "string"
+    },
+    "referred_athlete_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "joined",
+        "bonus_earned"
+      ],
+      "default": "pending"
+    },
+    "workouts_logged_by_referred": {
+      "type": "number",
+      "default": 0
+    },
+    "starter_pack_awarded": {
+      "type": "boolean",
+      "default": false
+    },
+    "recruiter_bonus_awarded": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "referrer_athlete_id",
+    "referred_email"
+  ]
+}
