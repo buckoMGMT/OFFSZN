@@ -26,8 +26,8 @@ function PlayDiagram() {
         [90, 122], [130, 122]
       ].map(([cx, cy], i) => (
         <g key={i}>
-          <line x1={cx-5} y1={cy-5} x2={cx+5} y2={cy+5} stroke="hsl(145,100%,39%)" strokeWidth="2" opacity="0.85" />
-          <line x1={cx+5} y1={cy-5} x2={cx-5} y2={cy+5} stroke="hsl(145,100%,39%)" strokeWidth="2" opacity="0.85" />
+          <line x1={cx-5} y1={cy-5} x2={cx+5} y2={cy+5} stroke="#D7263D" strokeWidth="2" opacity="0.85" />
+          <line x1={cx+5} y1={cy-5} x2={cx-5} y2={cy+5} stroke="#D7263D" strokeWidth="2" opacity="0.85" />
         </g>
       ))}
 
@@ -38,11 +38,11 @@ function PlayDiagram() {
       <path d="M125 90 L140 65" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeDasharray="3 3" />
 
       {/* Arrow QB to receiver */}
-      <path d="M105 70 L65 42" stroke="hsl(145,100%,39%)" strokeWidth="2" fill="none" opacity="0.8" markerEnd="url(#garrow)" />
+      <path d="M105 70 L65 42" stroke="#D7263D" strokeWidth="2" fill="none" opacity="0.8" markerEnd="url(#garrow)" />
 
       <defs>
         <marker id="garrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-          <path d="M0,0 L6,3 L0,6 Z" fill="hsl(145,100%,39%)" opacity="0.8" />
+          <path d="M0,0 L6,3 L0,6 Z" fill="#D7263D" opacity="0.8" />
         </marker>
       </defs>
     </svg>
