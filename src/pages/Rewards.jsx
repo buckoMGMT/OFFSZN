@@ -31,8 +31,9 @@ function PointsBar({ current, target, label }) {
 }
 
 function RewardCard({ item, athletePoints, onRedeem }) {
-  const canAfford = athletePoints >= item.points_required;
   const isMerch = item.type === "merch";
+  const isUnavailable = isMerch;
+  const canAfford = !isUnavailable && athletePoints >= item.points_required;
   const savings = item.real_world_value_usd
     ? `$${item.real_world_value_usd} value`
     : null;
@@ -44,30 +45,38 @@ function RewardCard({ item, athletePoints, onRedeem }) {
         background: '#DCDEE1',
         borderColor: item.is_featured ? '#D7263D' : '#9BA3AC',
         borderWidth: item.is_featured ? 2 : 1,
-        opacity: canAfford ? 1 : 0.75,
+        opacity: isUnavailable ? 0.6 : (canAfford ? 1 : 0.75),
       }}
     >
-      {item.is_featured && (
+      {isUnavailable && (
+        <div className="absolute top-2 left-2 z-10 ink-stamp" style={{ fontSize: 8, transform: 'rotate(-3deg)' }}>
+          Coming Soon
+        </div>
+      )}
+      {!isUnavailable && item.is_featured && (
         <div className="absolute top-2 left-2 z-10 ink-stamp" style={{ fontSize: 8, transform: 'rotate(-3deg)' }}>
           Featured
         </div>
       )}
       {isMerch && (
         <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded font-elite text-[8px] uppercase tracking-wide"
-          style={{ background: '#D7263D', color: '#fff', transform: 'rotate(2deg)' }}>
+          style={{ background: '#5E646B', color: '#fff', transform: 'rotate(2deg)' }}>
           Brand
         </div>
       )}
 
       <div className="relative h-36 overflow-hidden">
-        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+        {item.image_url
+          ? <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+          : <div className="w-full h-full" style={{ background: '#9BA3AC22' }} />
+        }
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(21,21,26,0.8) 0%, transparent 60%)' }} />
         {savings && (
           <div className="absolute bottom-2 left-2">
             <span className="font-elite text-[9px] uppercase" style={{ color: '#fff' }}>{savings}</span>
           </div>
         )}
-        {!canAfford && (
+        {(isUnavailable || !canAfford) && (
           <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(13,13,15,0.45)' }}>
             <Lock size={22} style={{ color: '#fff' }} />
           </div>
@@ -86,13 +95,15 @@ function RewardCard({ item, athletePoints, onRedeem }) {
             <span className="font-elite text-sm" style={{ color: '#D7263D' }}>{item.points_required.toLocaleString()}</span>
             <span className="font-elite text-[9px]" style={{ color: '#9BA3AC' }}>pts</span>
           </div>
-          {canAfford
-            ? <StampButton onClick={() => onRedeem(item)} className="text-[10px] px-3 py-1">Redeem</StampButton>
-            : (
-              <span className="font-elite text-[9px] uppercase" style={{ color: '#9BA3AC' }}>
-                {(item.points_required - athletePoints).toLocaleString()} more
-              </span>
-            )
+          {isUnavailable
+            ? <span className="font-elite text-[9px] uppercase" style={{ color: '#9BA3AC' }}>Unavailable</span>
+            : canAfford
+              ? <StampButton onClick={() => onRedeem(item)} className="text-[10px] px-3 py-1">Redeem</StampButton>
+              : (
+                <span className="font-elite text-[9px] uppercase" style={{ color: '#9BA3AC' }}>
+                  {(item.points_required - athletePoints).toLocaleString()} more
+                </span>
+              )
           }
         </div>
       </div>
@@ -238,7 +249,7 @@ export default function Rewards() {
                 <div>
                   <p className="font-elite text-[10px] uppercase tracking-widest mb-0.5" style={{ color: '#D7263D' }}>Rep the Brand → Earn Faster</p>
                   <p className="font-work text-xs" style={{ color: '#5A5D63' }}>
-                    Merch items cost <strong>40% fewer points</strong> than gift cards — and you become a walking billboard for Playbook Pro.
+                    Merch items cost <strong>40% fewer points</strong> than gift cards — and you become a walking billboard for The Playbook.
                   </p>
                 </div>
               </div>
