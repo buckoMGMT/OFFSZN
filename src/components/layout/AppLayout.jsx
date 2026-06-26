@@ -10,8 +10,8 @@ export default function AppLayout() {
       <div
         className="mx-auto relative ring-holes"
         style={{
-          background: darkMode ? '#1B1B1D' : '#EDEEF0',
-          color: darkMode ? '#EDEEF0' : '#15151A',
+          background: 'var(--theme-bg)',
+          color: 'var(--theme-ink)',
           minHeight: '100vh',
           maxWidth: 480,
           paddingBottom: 72,

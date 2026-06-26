@@ -88,18 +88,18 @@ export default function Clans() {
   );
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: '#EDEEF0' }}>
+    <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: 'var(--theme-bg)' }}>
       <PlayDiagram size={150} />
-      <p className="font-elite text-xs mt-4" style={{ color: '#5A5D63' }}>Loading teams…</p>
+      <p className="font-elite text-xs mt-4" style={{ color: 'var(--theme-ink-soft)' }}>Loading teams…</p>
     </div>
   );
 
   return (
-    <div className="min-h-screen" style={{ background: '#EDEEF0', color: '#15151A' }}>
+    <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: '#EDEEF0', borderColor: '#9BA3AC' }}>
+      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
         <div className="flex items-center justify-between mb-1">
-          <h1 className="font-anton text-3xl uppercase" style={{ color: '#15151A' }}>Teams</h1>
+          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>Teams</h1>
           <div className="flex items-center gap-3">
             <PageLabel number={4} />
             {!myClan && (
@@ -111,7 +111,7 @@ export default function Clans() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b mt-2" style={{ borderColor: '#9BA3AC' }}>
+        <div className="flex border-b mt-2" style={{ borderColor: 'var(--theme-border)' }}>
           {[
             { id: "discover", label: "Discover" },
             { id: "leaderboard", label: "Roster" },
@@ -132,26 +132,26 @@ export default function Clans() {
       <div className="px-4 py-4">
         {/* My Clan Banner */}
         {myClan && (
-          <div className="rounded border p-4 mb-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+          <div className="rounded border p-4 mb-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC' }}>
+              <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)' }}>
                 <Shield size={18} style={{ color: '#D7263D' }} />
               </div>
               <div className="flex-1">
-                <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>My Team</p>
-                <h3 className="font-anton text-lg uppercase" style={{ color: '#15151A' }}>{myClan.name}</h3>
+                <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>My Team</p>
+                <h3 className="font-anton text-lg uppercase" style={{ color: 'var(--theme-ink)' }}>{myClan.name}</h3>
                 <div className="flex items-center gap-3 mt-0.5">
                   <span className="font-elite text-[9px]" style={{ color: '#5A5D63' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length} members</span>
                   <span className="font-elite text-[9px]" style={{ color: '#D7263D' }}><Trophy size={9} className="inline mr-0.5" />{myClan.total_points} pts</span>
                 </div>
               </div>
-              <button onClick={leaveClan} className="p-1.5 rounded" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC' }}>
-                <X size={14} style={{ color: '#5A5D63' }} />
+              <button onClick={leaveClan} className="p-1.5 rounded" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)' }}>
+                <X size={14} style={{ color: 'var(--theme-ink-soft)' }} />
               </button>
             </div>
             {myClan.announcement && (
-              <div className="mt-3 pt-3 border-t" style={{ borderColor: '#9BA3AC' }}>
-                <p className="font-marker text-sm" style={{ color: '#15151A', transform: 'rotate(-0.5deg)' }}>{myClan.announcement}</p>
+              <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+                <p className="font-marker text-sm" style={{ color: 'var(--theme-ink)', transform: 'rotate(-0.5deg)' }}>{myClan.announcement}</p>
               </div>
             )}
           </div>
@@ -159,17 +159,17 @@ export default function Clans() {
 
         {tab === "discover" && (
           <>
-            <div className="flex items-center gap-3 rounded px-4 py-3 mb-4 border" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <Search size={15} style={{ color: '#9BA3AC' }} />
-              <input className="flex-1 bg-transparent text-sm font-work outline-none" style={{ color: '#15151A' }}
+            <div className="flex items-center gap-3 rounded px-4 py-3 mb-4 border" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+              <Search size={15} style={{ color: 'var(--theme-ink-soft)' }} />
+              <input className="flex-1 bg-transparent text-sm font-work outline-none" style={{ color: 'var(--theme-ink)' }}
                 placeholder="Search by school or team name…"
                 value={search} onChange={e => setSearch(e.target.value)} />
             </div>
             {filtered.length === 0 ? (
               <div className="text-center py-16">
                 <PlayDiagram size={140} />
-                <h3 className="font-anton text-xl uppercase mt-4 mb-2" style={{ color: '#15151A' }}>No Teams Found</h3>
-                <p className="font-work text-sm" style={{ color: '#5A5D63' }}>Be the first to create a team.</p>
+                <h3 className="font-anton text-xl uppercase mt-4 mb-2" style={{ color: 'var(--theme-ink)' }}>No Teams Found</h3>
+                <p className="font-work text-sm" style={{ color: 'var(--theme-ink-soft)' }}>Be the first to create a team.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -189,7 +189,7 @@ export default function Clans() {
         {tab === "leaderboard" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-anton text-2xl uppercase" style={{ color: '#15151A' }}>Global Roster</h2>
+              <h2 className="font-anton text-2xl uppercase" style={{ color: 'var(--theme-ink)' }}>Global Roster</h2>
               {/* Barbell graphic — visual clip */}
               <svg width="48" height="18" viewBox="0 0 48 18" fill="none">
                 <rect x="4" y="7" width="40" height="4" rx="2" fill="#9BA3AC" />
@@ -206,30 +206,30 @@ export default function Clans() {
                 return (
                   <div key={clan.id} className="relative rounded border p-4 flex items-center gap-4"
                     style={{
-                      background: isMe ? '#D7263D10' : '#DCDEE1',
-                      borderColor: isMe ? '#D7263D' : '#9BA3AC',
+                      background: isMe ? '#D7263D10' : 'var(--theme-surface)',
+                      borderColor: isMe ? '#D7263D' : 'var(--theme-border)',
                     }}>
                     {isCircled && <CoachCircle />}
 
                     {/* Rank */}
                     <div className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0 font-elite text-base"
                       style={{
-                        background: i === 0 ? '#D7263D' : '#EDEEF0',
-                        color: i === 0 ? '#fff' : '#15151A',
-                        border: '1px solid #9BA3AC',
+                        background: i === 0 ? '#D7263D' : 'var(--theme-surface-alt)',
+                        color: i === 0 ? '#fff' : 'var(--theme-ink)',
+                        border: '1px solid var(--theme-border)',
                       }}>
                       {i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-work font-semibold truncate" style={{ color: '#15151A' }}>
+                      <p className="font-work font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>
                         {formatName(clan.name)}
                         {isMe && <span className="ink-stamp ml-2" style={{ fontSize: 8 }}>You</span>}
                       </p>
-                      <p className="font-elite text-[9px] uppercase tracking-wide" style={{ color: '#5A5D63' }}>{(clan.member_ids || []).length} members</p>
+                      <p className="font-elite text-[9px] uppercase tracking-wide" style={{ color: 'var(--theme-ink-soft)' }}>{(clan.member_ids || []).length} members</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-elite text-lg" style={{ color: i === 0 ? '#D7263D' : '#15151A' }}>{(clan.total_points || 0).toLocaleString()}</p>
-                      <p className="font-elite text-[8px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>pts</p>
+                      <p className="font-elite text-lg" style={{ color: i === 0 ? '#D7263D' : 'var(--theme-ink)' }}>{(clan.total_points || 0).toLocaleString()}</p>
+                      <p className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>pts</p>
                     </div>
                   </div>
                 );
@@ -237,7 +237,7 @@ export default function Clans() {
               {clans.length === 0 && (
                 <div className="text-center py-12">
                   <PlayDiagram size={130} />
-                  <p className="font-work text-sm mt-4" style={{ color: '#5A5D63' }}>No teams on the board. Create the first one.</p>
+                  <p className="font-work text-sm mt-4" style={{ color: 'var(--theme-ink-soft)' }}>No teams on the board. Create the first one.</p>
                 </div>
               )}
             </div>
@@ -247,8 +247,8 @@ export default function Clans() {
         {tab === "challenges" && (
           <div className="text-center py-16">
             <Swords size={40} style={{ color: '#9BA3AC' }} className="mx-auto mb-4" />
-            <h3 className="font-anton text-2xl uppercase mb-2" style={{ color: '#15151A' }}>Team Challenges</h3>
-            <p className="font-work text-sm mb-6 max-w-xs mx-auto" style={{ color: '#5A5D63' }}>
+            <h3 className="font-anton text-2xl uppercase mb-2" style={{ color: 'var(--theme-ink)' }}>Team Challenges</h3>
+            <p className="font-work text-sm mb-6 max-w-xs mx-auto" style={{ color: 'var(--theme-ink-soft)' }}>
               Head-to-head on macros, sleep, or workout streaks.
             </p>
             {myClan
@@ -263,11 +263,11 @@ export default function Clans() {
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
           <div className="w-full max-w-lg rounded-t-2xl border-t border-l border-r p-6 animate-slide-up max-h-[85vh] overflow-y-auto"
-            style={{ background: '#EDEEF0', borderColor: '#9BA3AC' }}>
+            style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-anton text-2xl uppercase" style={{ color: '#15151A' }}>Create Team</h2>
-              <button onClick={() => setShowCreate(false)} className="p-2 rounded" style={{ background: '#DCDEE1', border: '1px solid #9BA3AC' }}>
-                <X size={18} style={{ color: '#5A5D63' }} />
+              <h2 className="font-anton text-2xl uppercase" style={{ color: 'var(--theme-ink)' }}>Create Team</h2>
+              <button onClick={() => setShowCreate(false)} className="p-2 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }}>
+                <X size={18} style={{ color: 'var(--theme-ink-soft)' }} />
               </button>
             </div>
             <div className="space-y-3">
@@ -276,23 +276,23 @@ export default function Clans() {
                 { placeholder: "School / Organization", field: "school_name", type: "text" },
               ].map(({ placeholder, field }) => (
                 <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
-                  style={{ background: '#DCDEE1', border: '1px solid #9BA3AC', color: '#15151A' }}
+                  style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
                   placeholder={placeholder}
                   value={createForm[field]}
                   onChange={e => setCreateForm(p => ({ ...p, [field]: e.target.value }))} />
               ))}
               <select className="w-full rounded px-4 py-3 text-sm font-work outline-none"
-                style={{ background: '#DCDEE1', border: '1px solid #9BA3AC', color: '#15151A' }}
+                style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
                 value={createForm.type} onChange={e => setCreateForm(p => ({ ...p, type: e.target.value }))}>
                 {TYPES.map(t => <option key={t} value={t}>{t.replace("_", " ").toUpperCase()}</option>)}
               </select>
               <select className="w-full rounded px-4 py-3 text-sm font-work outline-none"
-                style={{ background: '#DCDEE1', border: '1px solid #9BA3AC', color: '#15151A' }}
+                style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
                 value={createForm.sport} onChange={e => setCreateForm(p => ({ ...p, sport: e.target.value }))}>
                 {SPORTS.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
               </select>
               <textarea className="w-full rounded px-4 py-3 text-sm font-work outline-none resize-none h-20"
-                style={{ background: '#DCDEE1', border: '1px solid #9BA3AC', color: '#15151A' }}
+                style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
                 placeholder="Description (optional)"
                 value={createForm.description}
                 onChange={e => setCreateForm(p => ({ ...p, description: e.target.value }))} />

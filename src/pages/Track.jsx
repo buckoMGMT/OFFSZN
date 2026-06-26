@@ -128,9 +128,9 @@ export default function Track() {
   };
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: '#EDEEF0' }}>
+    <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: 'var(--theme-bg)' }}>
       <PlayDiagram size={150} />
-      <p className="font-elite text-xs mt-4" style={{ color: '#5A5D63' }}>Loading stats…</p>
+      <p className="font-elite text-xs mt-4" style={{ color: 'var(--theme-ink-soft)' }}>Loading stats…</p>
     </div>
   );
 
@@ -143,13 +143,13 @@ export default function Track() {
   const waterPct = Math.min(100, ((log?.water_oz || 0) / 128) * 100);
 
   return (
-    <div className="min-h-screen" style={{ background: '#EDEEF0', color: '#15151A' }}>
+    <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-4 border-b" style={{ background: '#EDEEF0', borderColor: '#9BA3AC' }}>
+      <div className="sticky top-0 z-40 px-4 pt-12 pb-4 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-anton text-3xl uppercase" style={{ color: '#15151A' }}>Stats</h1>
-            <p className="font-elite text-[10px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{format(new Date(), "EEE, MMM d")}</p>
+            <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>Stats</h1>
+            <p className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{format(new Date(), "EEE, MMM d")}</p>
           </div>
           <div className="flex items-center gap-3">
             <PageLabel number={2} />
@@ -164,18 +164,18 @@ export default function Track() {
         <AppleHealthBanner log={log} onSync={(data) => updateLog(data)} />
 
         {/* Main Calorie Dashboard — stopwatch rings */}
-        <div className="rounded border p-5" style={{ background: '#DCDEE1', borderColor: '#9BA3AC', boxShadow: '1px 2px 6px rgba(0,0,0,0.08)' }}>
+        <div className="rounded border p-5" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)', boxShadow: '1px 2px 6px rgba(0,0,0,0.08)' }}>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>Calories Today</p>
-              <p className="font-anton text-4xl" style={{ color: '#15151A' }}>{Math.round(cal).toLocaleString()}</p>
-              <p className="font-elite text-[10px]" style={{ color: '#5A5D63' }}>{remaining.toLocaleString()} remaining of {calGoal.toLocaleString()}</p>
+              <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Calories Today</p>
+              <p className="font-anton text-4xl" style={{ color: 'var(--theme-ink)' }}>{Math.round(cal).toLocaleString()}</p>
+              <p className="font-elite text-[10px]" style={{ color: 'var(--theme-ink-soft)' }}>{remaining.toLocaleString()} remaining of {calGoal.toLocaleString()}</p>
             </div>
             <StopwatchRing value={cal} max={calGoal} label="Calories" size={110} />
           </div>
 
           {/* Macro rings */}
-          <div className="flex justify-around pt-3 border-t" style={{ borderColor: '#9BA3AC' }}>
+          <div className="flex justify-around pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
             <StopwatchRing value={log?.protein_g || 0} max={proteinGoal} label="Protein" size={80} />
             <StopwatchRing value={log?.carbs_g || 0} max={carbsGoal} label="Carbs" size={80} />
             <StopwatchRing value={log?.fats_g || 0} max={fatsGoal} label="Fats" size={80} />
@@ -185,38 +185,38 @@ export default function Track() {
         {/* Quick stats row */}
         <div className="grid grid-cols-3 gap-2.5">
           {/* Water */}
-          <div className="rounded border p-3" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+          <div className="rounded border p-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center gap-1 mb-2">
-              <Droplets size={12} style={{ color: '#5E646B' }} />
-              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>Water</span>
+              <Droplets size={12} style={{ color: 'var(--theme-ink-soft)' }} />
+              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Water</span>
             </div>
-            <p className="font-anton text-2xl" style={{ color: '#15151A' }}>{log?.water_oz || 0}</p>
-            <p className="font-elite text-[9px]" style={{ color: '#5A5D63' }}>oz / 128</p>
-            <div className="h-1 rounded-full my-2 overflow-hidden" style={{ background: '#9BA3AC44' }}>
+            <p className="font-anton text-2xl" style={{ color: 'var(--theme-ink)' }}>{log?.water_oz || 0}</p>
+            <p className="font-elite text-[9px]" style={{ color: 'var(--theme-ink-soft)' }}>oz / 128</p>
+            <div className="h-1 rounded-full my-2 overflow-hidden" style={{ background: 'var(--theme-border)' }}>
               <div className="h-full rounded-full" style={{ width: `${waterPct}%`, background: '#D7263D', transition: 'width 0.5s ease' }} />
             </div>
             <button onClick={() => updateLog({ water_oz: (log?.water_oz || 0) + 8 })}
-              className="w-full py-1 rounded font-elite text-[9px] uppercase tracking-wide" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#5A5D63' }}>
+              className="w-full py-1 rounded font-elite text-[9px] uppercase tracking-wide" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
               +8 oz
             </button>
           </div>
 
           {/* Sleep */}
-          <div className="rounded border p-3" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+          <div className="rounded border p-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center gap-1 mb-2">
-              <Moon size={12} style={{ color: '#5E646B' }} />
-              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>Sleep</span>
+              <Moon size={12} style={{ color: 'var(--theme-ink-soft)' }} />
+              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Sleep</span>
             </div>
-            <p className="font-anton text-2xl" style={{ color: '#15151A' }}>{log?.sleep_hours || "--"}</p>
-            <p className="font-elite text-[9px] mb-2" style={{ color: '#5A5D63' }}>hours</p>
+            <p className="font-anton text-2xl" style={{ color: 'var(--theme-ink)' }}>{log?.sleep_hours || "--"}</p>
+            <p className="font-elite text-[9px] mb-2" style={{ color: 'var(--theme-ink-soft)' }}>hours</p>
             <div className="flex gap-0.5">
               {["7", "8", "9"].map(h => (
                 <button key={h} onClick={() => updateLog({ sleep_hours: Number(h) })}
                   className="flex-1 rounded py-1 font-elite text-[9px]"
                   style={{
-                    background: log?.sleep_hours === Number(h) ? '#D7263D' : '#EDEEF0',
-                    color: log?.sleep_hours === Number(h) ? '#fff' : '#5A5D63',
-                    border: '1px solid #9BA3AC',
+                    background: log?.sleep_hours === Number(h) ? '#D7263D' : 'var(--theme-surface-alt)',
+                    color: log?.sleep_hours === Number(h) ? '#fff' : 'var(--theme-ink-soft)',
+                    border: '1px solid var(--theme-border)',
                   }}>
                   {h}h
                 </button>
@@ -225,19 +225,19 @@ export default function Track() {
           </div>
 
           {/* Workout */}
-          <div className="rounded border p-3" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+          <div className="rounded border p-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center gap-1 mb-2">
-              <CheckCircle size={12} style={{ color: log?.workout_complete ? '#D7263D' : '#5E646B' }} />
-              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>Workout</span>
+              <CheckCircle size={12} style={{ color: log?.workout_complete ? '#D7263D' : 'var(--theme-ink-soft)' }} />
+              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Workout</span>
             </div>
             <button onClick={() => updateLog({ workout_complete: !log?.workout_complete })} className="w-full text-left">
-              <p className="font-anton text-2xl mb-2" style={{ color: log?.workout_complete ? '#D7263D' : '#15151A' }}>
+              <p className="font-anton text-2xl mb-2" style={{ color: log?.workout_complete ? '#D7263D' : 'var(--theme-ink)' }}>
                 {log?.workout_complete ? "✓" : "–"}
               </p>
               <div className="w-full py-1 rounded font-elite text-[9px] uppercase text-center" style={{
-                background: log?.workout_complete ? '#D7263D' : '#EDEEF0',
-                color: log?.workout_complete ? '#fff' : '#5A5D63',
-                border: '1px solid #9BA3AC',
+                background: log?.workout_complete ? '#D7263D' : 'var(--theme-surface-alt)',
+                color: log?.workout_complete ? '#fff' : 'var(--theme-ink-soft)',
+                border: '1px solid var(--theme-border)',
               }}>
                 {log?.workout_complete ? "Done" : "Log It"}
               </div>
@@ -246,24 +246,24 @@ export default function Track() {
         </div>
 
         {/* Weight */}
-        <div className="rounded border p-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+        <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
           <div className="flex items-center gap-2 mb-3">
-            <Scale size={13} style={{ color: '#5E646B' }} />
-            <span className="font-elite text-xs uppercase tracking-widest" style={{ color: '#15151A' }}>Body Weight</span>
+            <Scale size={13} style={{ color: 'var(--theme-ink-soft)' }} />
+            <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>Body Weight</span>
             {athlete?.goal_weight_lbs && (
-              <span className="ml-auto font-elite text-[9px]" style={{ color: '#5A5D63' }}>Goal: {athlete.goal_weight_lbs} lbs</span>
+              <span className="ml-auto font-elite text-[9px]" style={{ color: 'var(--theme-ink-soft)' }}>Goal: {athlete.goal_weight_lbs} lbs</span>
             )}
           </div>
           <div className="flex items-center gap-3">
             <input
               type="number"
               className="flex-1 rounded px-4 py-2.5 font-elite text-base outline-none"
-              style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}
+              style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
               placeholder="0"
               value={log?.weight_lbs || ""}
               onChange={e => updateLog({ weight_lbs: Number(e.target.value) || null })}
             />
-            <span className="font-elite text-sm" style={{ color: '#5A5D63' }}>lbs</span>
+            <span className="font-elite text-sm" style={{ color: 'var(--theme-ink-soft)' }}>lbs</span>
           </div>
         </div>
 
@@ -272,13 +272,13 @@ export default function Track() {
         {/* Meals */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-anton text-xl uppercase" style={{ color: '#15151A' }}>Meals Logged</h2>
-            <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{meals.length} entries</span>
+            <h2 className="font-anton text-xl uppercase" style={{ color: 'var(--theme-ink)' }}>Meals Logged</h2>
+            <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{meals.length} entries</span>
           </div>
           {meals.length === 0 ? (
             <button onClick={() => setShowAddMeal(true)}
-              className="w-full border-2 border-dashed rounded py-10 text-center" style={{ borderColor: '#9BA3AC' }}>
-              <p className="font-work text-sm mb-2" style={{ color: '#5A5D63' }}>Nothing logged yet.</p>
+              className="w-full border-2 border-dashed rounded py-10 text-center" style={{ borderColor: 'var(--theme-border)' }}>
+              <p className="font-work text-sm mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Nothing logged yet.</p>
               <span className="btn-stamp" style={{ display: 'inline-flex' }}>Log First Meal</span>
             </button>
           ) : (

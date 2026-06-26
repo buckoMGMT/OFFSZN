@@ -171,16 +171,16 @@ export default function Rewards() {
   });
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: '#EDEEF0' }}>
+    <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: 'var(--theme-bg)' }}>
       <PlayDiagram size={150} />
-      <p className="font-elite text-xs mt-4" style={{ color: '#5A5D63' }}>Loading store…</p>
+      <p className="font-elite text-xs mt-4" style={{ color: 'var(--theme-ink-soft)' }}>Loading store…</p>
     </div>
   );
 
   return (
-    <div className="min-h-screen" style={{ background: '#EDEEF0', color: '#15151A' }}>
+    <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: '#EDEEF0', borderColor: '#9BA3AC' }}>
+      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
         <div className="flex items-center justify-between mb-1">
           <h1 className="font-anton text-3xl uppercase" style={{ color: '#15151A' }}>Locker Room</h1>
           <PageLabel number={5} />
@@ -199,7 +199,7 @@ export default function Rewards() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b" style={{ borderColor: '#9BA3AC' }}>
+        <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
           {[
             { id: "store", label: "Store" },
             { id: "referrals", label: "Recruit" },
@@ -233,9 +233,9 @@ export default function Rewards() {
                 <button key={f.id} onClick={() => setFilter(f.id)}
                   className="px-3 py-1 rounded font-elite text-[10px] uppercase tracking-widest"
                   style={{
-                    background: filter === f.id ? '#D7263D' : '#DCDEE1',
-                    color: filter === f.id ? '#fff' : '#5A5D63',
-                    border: '1px solid #9BA3AC',
+                    background: filter === f.id ? '#D7263D' : 'var(--theme-surface)',
+                        color: filter === f.id ? '#fff' : 'var(--theme-ink-soft)',
+                        border: '1px solid var(--theme-border)',
                   }}>
                   {f.label}
                 </button>
@@ -280,19 +280,19 @@ export default function Rewards() {
             ) : (
               <div className="space-y-3">
                 {redemptions.map(r => (
-                  <div key={r.id} className="rounded border p-4 flex items-center gap-3" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-                    <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC' }}>
+                  <div key={r.id} className="rounded border p-4 flex items-center gap-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+                    <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)' }}>
                       {r.reward_type === "merch" ? <Shirt size={16} style={{ color: '#D7263D' }} /> : <Gift size={16} style={{ color: '#D7263D' }} />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-work text-sm font-semibold truncate" style={{ color: '#15151A' }}>{r.reward_name}</p>
-                      <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{r.points_spent.toLocaleString()} pts spent</p>
+                      <p className="font-work text-sm font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>{r.reward_name}</p>
+                      <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{r.points_spent.toLocaleString()} pts spent</p>
                     </div>
                     <span className="font-elite text-[9px] uppercase px-2 py-0.5 rounded"
                       style={{
-                        background: r.status === "delivered" ? '#15151A' : '#EDEEF0',
-                        color: r.status === "delivered" ? '#fff' : '#D7263D',
-                        border: '1px solid #9BA3AC',
+                        background: r.status === "delivered" ? 'var(--theme-ink)' : 'var(--theme-surface-alt)',
+                        color: r.status === "delivered" ? 'var(--theme-bg)' : '#D7263D',
+                        border: '1px solid var(--theme-border)',
                       }}>
                       {r.status}
                     </span>
@@ -306,13 +306,13 @@ export default function Rewards() {
         {/* HOW TO EARN TAB */}
         {tab === "howto" && (
           <div className="space-y-4">
-            <div className="rounded border p-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <h2 className="font-anton text-xl uppercase mb-1" style={{ color: '#15151A' }}>The Point Economy</h2>
-              <p className="font-work text-xs mb-4" style={{ color: '#5A5D63' }}>Consistent daily effort adds up. A $5 gift card takes ~90 days of active use.</p>
+            <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+              <h2 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>The Point Economy</h2>
+              <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Consistent daily effort adds up. A $5 gift card takes ~90 days of active use.</p>
               <div className="space-y-3">
                 {DAILY_BREAKDOWN.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b" style={{ borderColor: '#9BA3AC44' }}>
-                    <p className="font-work text-xs flex-1" style={{ color: '#15151A' }}>{d.action}</p>
+                  <div key={i} className="flex items-center justify-between py-2 border-b" style={{ borderColor: 'var(--theme-border)' }}>
+                    <p className="font-work text-xs flex-1" style={{ color: 'var(--theme-ink)' }}>{d.action}</p>
                     <div className="flex items-center gap-1 ml-3">
                       <Zap size={10} style={{ color: '#D7263D' }} />
                       <span className="font-elite text-sm" style={{ color: '#D7263D' }}>+{d.pts}</span>
@@ -320,7 +320,7 @@ export default function Rewards() {
                   </div>
                 ))}
                 <div className="flex items-center justify-between pt-2">
-                  <p className="font-work text-xs font-semibold" style={{ color: '#15151A' }}>Daily Max (all 5 tasks)</p>
+                  <p className="font-work text-xs font-semibold" style={{ color: 'var(--theme-ink)' }}>Daily Max (all 5 tasks)</p>
                   <div className="flex items-center gap-1">
                     <Zap size={10} style={{ color: '#D7263D' }} />
                     <span className="font-elite text-sm font-bold" style={{ color: '#D7263D' }}>85</span>
@@ -329,21 +329,21 @@ export default function Rewards() {
               </div>
             </div>
 
-            <div className="rounded border p-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <h2 className="font-anton text-xl uppercase mb-3" style={{ color: '#15151A' }}>Challenge Tiers</h2>
+            <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+              <h2 className="font-anton text-xl uppercase mb-3" style={{ color: 'var(--theme-ink)' }}>Challenge Tiers</h2>
               {[
                 { tier: "Bronze", pts: "5", freq: "Daily", ex: "Complete any 1 daily task", color: '#9BA3AC' },
                 { tier: "Silver", pts: "15", freq: "Daily", ex: "Complete 3 of 5 daily tasks", color: '#5E646B' },
                 { tier: "Gold", pts: "50", freq: "Daily", ex: "Complete all 5 daily tasks", color: '#D7263D' },
               ].map(t => (
-                <div key={t.tier} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: '#9BA3AC44' }}>
+                <div key={t.tier} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: 'var(--theme-border)' }}>
                   <div className="w-14 h-6 rounded flex items-center justify-center flex-shrink-0 font-elite text-[9px] uppercase"
                     style={{ background: t.color, color: '#fff' }}>
                     {t.tier}
                   </div>
                   <div className="flex-1">
-                    <p className="font-work text-xs" style={{ color: '#15151A' }}>{t.ex}</p>
-                    <p className="font-elite text-[9px] uppercase tracking-widest mt-0.5" style={{ color: '#5A5D63' }}>{t.freq}</p>
+                    <p className="font-work text-xs" style={{ color: 'var(--theme-ink)' }}>{t.ex}</p>
+                    <p className="font-elite text-[9px] uppercase tracking-widest mt-0.5" style={{ color: 'var(--theme-ink-soft)' }}>{t.freq}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <Zap size={10} style={{ color: '#D7263D' }} />
@@ -353,15 +353,15 @@ export default function Rewards() {
               ))}
             </div>
 
-            <div className="rounded border p-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <h2 className="font-anton text-xl uppercase mb-2" style={{ color: '#15151A' }}>Referral Bonus</h2>
+            <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+              <h2 className="font-anton text-xl uppercase mb-2" style={{ color: 'var(--theme-ink)' }}>Referral Bonus</h2>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <p className="font-work text-xs" style={{ color: '#15151A' }}>Friend joins via your link</p>
+                  <p className="font-work text-xs" style={{ color: 'var(--theme-ink)' }}>Friend joins via your link</p>
                   <span className="font-elite text-sm" style={{ color: '#D7263D' }}>+500 pts</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="font-work text-xs" style={{ color: '#15151A' }}>Friend logs 3 workouts</p>
+                  <p className="font-work text-xs" style={{ color: 'var(--theme-ink)' }}>Friend logs 3 workouts</p>
                   <span className="font-elite text-sm" style={{ color: '#D7263D' }}>+1,500 pts</span>
                 </div>
               </div>

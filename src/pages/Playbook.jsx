@@ -97,19 +97,19 @@ export default function Playbook() {
     const isSaved = savedIds.includes(selected.id);
     const locked = selected.isPremium && !isPremium;
     return (
-      <div className="min-h-screen" style={{ background: '#EDEEF0', color: '#15151A' }}>
+      <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
         <div className="relative h-52 w-full overflow-hidden">
           <img src={selected.cover} alt={selected.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #EDEEF0 10%, transparent 80%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, var(--theme-bg) 10%, transparent 80%)' }} />
           <button onClick={() => setSelected(null)}
             className="absolute top-14 left-4 font-elite text-xs uppercase tracking-widest px-3 py-1.5 rounded"
-            style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}>
+            style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}>
             ← Back
           </button>
           {isPremium && (
             <button onClick={(e) => toggleSave(selected, e)}
               className="absolute top-14 right-4 p-2 rounded"
-              style={{ background: '#EDEEF0', border: '1px solid #9BA3AC' }}>
+              style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)' }}>
               {isSaved ? <BookmarkCheck size={16} style={{ color: '#D7263D' }} /> : <Bookmark size={16} style={{ color: '#5A5D63' }} />}
             </button>
           )}
@@ -117,7 +117,7 @@ export default function Playbook() {
 
         <div className="px-4 -mt-6 relative z-10 pb-8">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h1 className="font-anton text-2xl uppercase leading-tight" style={{ color: locked ? 'transparent' : '#15151A', position: 'relative' }}>
+            <h1 className="font-anton text-2xl uppercase leading-tight" style={{ color: locked ? 'transparent' : 'var(--theme-ink)', position: 'relative' }}>
               {locked ? (
                 <span className="relative">
                   {selected.title}
@@ -136,24 +136,24 @@ export default function Playbook() {
             {selected.positions && <span className="font-elite text-[10px] uppercase">{selected.positions}</span>}
           </div>
 
-          <div className="rounded border p-3 mb-3 flex items-start gap-2" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+          <div className="rounded border p-3 mb-3 flex items-start gap-2" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
             <Target size={13} style={{ color: '#D7263D', marginTop: 2, flexShrink: 0 }} />
             <div>
-              <p className="font-elite text-[9px] uppercase tracking-widest mb-0.5" style={{ color: '#5A5D63' }}>Aim</p>
-              <p className="font-work text-sm" style={{ color: '#15151A' }}>{selected.aim}</p>
+              <p className="font-elite text-[9px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--theme-ink-soft)' }}>Aim</p>
+              <p className="font-work text-sm" style={{ color: 'var(--theme-ink)' }}>{selected.aim}</p>
             </div>
           </div>
 
-          <div className="rounded border p-3 mb-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-            <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: '#5A5D63' }}>Targeted Areas</p>
+          <div className="rounded border p-3 mb-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+            <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Targeted Areas</p>
             <div className="flex flex-wrap gap-1.5">
               {selected.targeted_areas.map(area => (
-                <span key={area} className="px-2 py-1 rounded font-elite text-[10px] uppercase" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}>{area}</span>
+                <span key={area} className="px-2 py-1 rounded font-elite text-[10px] uppercase" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}>{area}</span>
               ))}
             </div>
           </div>
 
-          <p className="font-work text-sm mb-4 leading-relaxed" style={{ color: '#5A5D63' }}>{selected.description}</p>
+          <p className="font-work text-sm mb-4 leading-relaxed" style={{ color: 'var(--theme-ink-soft)' }}>{selected.description}</p>
 
           {selected.video_url && (
             <div className="mb-6 rounded overflow-hidden border" style={{ borderColor: '#9BA3AC' }}>
@@ -162,10 +162,10 @@ export default function Playbook() {
           )}
 
           {locked ? (
-            <div className="rounded border p-6 text-center" style={{ background: '#DCDEE1', borderColor: '#D7263D', borderWidth: 2 }}>
+            <div className="rounded border p-6 text-center" style={{ background: 'var(--theme-surface)', borderColor: '#D7263D', borderWidth: 2 }}>
               <Lock size={22} style={{ color: '#D7263D', margin: '0 auto 12px' }} />
-              <h3 className="font-anton text-xl uppercase mb-1" style={{ color: '#15151A' }}>Classified</h3>
-              <p className="font-work text-xs mb-4" style={{ color: '#5A5D63' }}>Premium clearance required to unlock this program.</p>
+              <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Classified</h3>
+              <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Premium clearance required to unlock this program.</p>
               <StampButton>Upgrade — $9.99/mo</StampButton>
             </div>
           ) : (
@@ -181,17 +181,17 @@ export default function Playbook() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#EDEEF0', color: '#15151A' }}>
+    <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: '#EDEEF0', borderColor: '#9BA3AC' }}>
+      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
         <div className="flex items-center justify-between mb-1">
-          <h1 className="font-anton text-3xl uppercase" style={{ color: '#15151A' }}>Playbook</h1>
+          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>Playbook</h1>
           <PageLabel number={3} />
         </div>
-        <p className="font-elite text-[9px] uppercase tracking-widest mb-3" style={{ color: '#5A5D63' }}>Training Programs — Select a Play</p>
+        <p className="font-elite text-[9px] uppercase tracking-widest mb-3" style={{ color: 'var(--theme-ink-soft)' }}>Training Programs — Select a Play</p>
 
         {/* Tab bar */}
-        <div className="flex border-b" style={{ borderColor: '#9BA3AC' }}>
+        <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
           {[
             { id: "programs", label: "Programs" },
             { id: "saved", label: `Saved${savedIds.length ? ` (${savedIds.length})` : ""}` },
@@ -214,9 +214,9 @@ export default function Playbook() {
               <button key={sport} onClick={() => setSportFilter(sport)}
                 className="flex-shrink-0 px-3 py-1 rounded font-elite text-[10px] uppercase tracking-widest transition-all"
                 style={{
-                  background: sportFilter === sport ? '#D7263D' : '#DCDEE1',
-                  color: sportFilter === sport ? '#fff' : '#5A5D63',
-                  border: '1px solid #9BA3AC',
+                  background: sportFilter === sport ? '#D7263D' : 'var(--theme-surface)',
+                  color: sportFilter === sport ? '#fff' : 'var(--theme-ink-soft)',
+                  border: '1px solid var(--theme-border)',
                 }}>
                 {sport}
               </button>
@@ -233,7 +233,7 @@ export default function Playbook() {
               const isSaved = savedIds.includes(program.id);
               return (
                 <div key={program.id} className="break-inside-avoid mb-3 cursor-pointer" onClick={() => setSelected(program)}>
-                  <div className="relative rounded overflow-hidden border" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+                <div className="relative rounded overflow-hidden border" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
                     <div className="relative">
                       <img src={program.cover} alt={program.title} className="w-full object-cover" style={{ height: program.id % 3 === 0 ? 170 : 130 }} />
                       <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(21,21,26,0.85) 0%, transparent 60%)' }} />
@@ -260,14 +260,14 @@ export default function Playbook() {
                       </div>
                     </div>
 
-                    <div className="p-2.5 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <XsOs size={22} />
+                    <div className="p-2.5 space-y-1.5" style={{ background: 'var(--theme-surface)' }}>
+                    <div className="flex items-center justify-between">
+                      <XsOs size={22} />
                         <span className="font-elite text-[9px]" style={{ color: '#D7263D', border: '1.5px solid #D7263D', padding: '1px 4px', borderRadius: 2, transform: 'rotate(-2deg)', display: 'inline-block' }}>
                           LVL {difficultyNum(program.difficulty)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1" style={{ color: '#5A5D63' }}>
+                      <div className="flex items-center gap-1" style={{ color: 'var(--theme-ink-soft)' }}>
                         <Clock size={9} />
                         <span className="font-elite text-[9px] uppercase">{program.duration}m</span>
                       </div>
@@ -288,10 +288,10 @@ export default function Playbook() {
         {tab === "saved" && (
           <div>
             {!isPremium ? (
-              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#D7263D', background: '#DCDEE1' }}>
+              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#D7263D', background: 'var(--theme-surface)' }}>
                 <Lock size={24} style={{ color: '#D7263D', margin: '0 auto 12px' }} />
-                <h3 className="font-anton text-xl uppercase mb-1" style={{ color: '#15151A' }}>Premium Feature</h3>
-                <p className="font-work text-xs mb-4" style={{ color: '#5A5D63' }}>Upgrade to save programs.</p>
+                <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Premium Feature</h3>
+                <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Upgrade to save programs.</p>
                 <StampButton>Upgrade — $9.99/mo</StampButton>
               </div>
             ) : savedPrograms.length === 0 ? (
@@ -302,13 +302,13 @@ export default function Playbook() {
             ) : (
               <div className="space-y-3">
                 {savedPrograms.map(program => (
-                  <div key={program.id} className="rounded border p-3 flex items-center gap-3 cursor-pointer" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }} onClick={() => setSelected(program)}>
-                    <img src={program.cover} alt="" className="w-12 h-12 rounded object-cover flex-shrink-0" style={{ border: '1px solid #9BA3AC' }} />
+                  <div key={program.id} className="rounded border p-3 flex items-center gap-3 cursor-pointer" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }} onClick={() => setSelected(program)}>
+                    <img src={program.cover} alt="" className="w-12 h-12 rounded object-cover flex-shrink-0" style={{ border: '1px solid var(--theme-border)' }} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-work text-sm font-semibold truncate" style={{ color: '#15151A' }}>{program.title}</p>
-                      <p className="font-elite text-[9px] uppercase tracking-widest mt-0.5" style={{ color: '#5A5D63' }}>{program.duration}m · LVL {difficultyNum(program.difficulty)}</p>
+                      <p className="font-work text-sm font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>{program.title}</p>
+                      <p className="font-elite text-[9px] uppercase tracking-widest mt-0.5" style={{ color: 'var(--theme-ink-soft)' }}>{program.duration}m · LVL {difficultyNum(program.difficulty)}</p>
                     </div>
-                    <span className="font-elite text-[9px]" style={{ color: '#9BA3AC' }}>→</span>
+                    <span className="font-elite text-[9px]" style={{ color: 'var(--theme-border)' }}>→</span>
                   </div>
                 ))}
               </div>
@@ -319,10 +319,10 @@ export default function Playbook() {
         {tab === "playlists" && (
           <div>
             {!isPremium ? (
-              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#D7263D', background: '#DCDEE1' }}>
+              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#D7263D', background: 'var(--theme-surface)' }}>
                 <Lock size={24} style={{ color: '#D7263D', margin: '0 auto 12px' }} />
-                <h3 className="font-anton text-xl uppercase mb-1" style={{ color: '#15151A' }}>Premium Feature</h3>
-                <p className="font-work text-xs mb-4" style={{ color: '#5A5D63' }}>Upgrade to create custom training playlists.</p>
+                <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Premium Feature</h3>
+                <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Upgrade to create custom training playlists.</p>
                 <StampButton>Upgrade — $9.99/mo</StampButton>
               </div>
             ) : (
@@ -340,11 +340,11 @@ export default function Playbook() {
                 ) : (
                   <div className="space-y-3">
                     {playlists.map(pl => (
-                      <div key={pl.id} className="rounded border p-4 flex items-center gap-3" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+                      <div key={pl.id} className="rounded border p-4 flex items-center gap-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
                         <XsOs size={32} />
                         <div className="flex-1 min-w-0">
-                          <p className="font-work font-semibold" style={{ color: '#15151A' }}>{pl.name}</p>
-                          <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{(pl.program_ids || []).length} programs</p>
+                          <p className="font-work font-semibold" style={{ color: 'var(--theme-ink)' }}>{pl.name}</p>
+                          <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{(pl.program_ids || []).length} programs</p>
                         </div>
                         <button onClick={() => base44.entities.Playlist.delete(pl.id).then(() => setPlaylists(p => p.filter(x => x.id !== pl.id)))}>
                           <X size={14} style={{ color: '#9BA3AC' }} />
@@ -363,29 +363,29 @@ export default function Playbook() {
       {showCreatePlaylist && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
           <div className="w-full max-w-lg rounded-t-2xl border-t border-l border-r p-6 animate-slide-up max-h-[85vh] overflow-y-auto"
-            style={{ background: '#EDEEF0', borderColor: '#9BA3AC' }}>
+            style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-anton text-xl uppercase" style={{ color: '#15151A' }}>New Playlist</h3>
-              <button onClick={() => setShowCreatePlaylist(false)} className="p-1.5 rounded" style={{ background: '#DCDEE1', border: '1px solid #9BA3AC' }}>
-                <X size={16} style={{ color: '#5A5D63' }} />
+              <h3 className="font-anton text-xl uppercase" style={{ color: 'var(--theme-ink)' }}>New Playlist</h3>
+              <button onClick={() => setShowCreatePlaylist(false)} className="p-1.5 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }}>
+                <X size={16} style={{ color: 'var(--theme-ink-soft)' }} />
               </button>
             </div>
             <input className="w-full rounded px-4 py-3 text-sm font-work outline-none mb-4"
-              style={{ background: '#DCDEE1', border: '1px solid #9BA3AC', color: '#15151A' }}
+              style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
               placeholder="Playlist name"
               value={playlistName} onChange={e => setPlaylistName(e.target.value)} />
-            <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: '#5A5D63' }}>Add Programs</p>
+            <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Add Programs</p>
             <div className="space-y-2 mb-5">
               {PROGRAMS.map(p => {
                 const included = playlistPrograms.includes(p.id);
                 return (
                   <button key={p.id} onClick={() => setPlaylistPrograms(prev => included ? prev.filter(id => id !== p.id) : [...prev, p.id])}
                     className="w-full flex items-center gap-3 p-2.5 rounded border text-left"
-                    style={{ border: included ? '2px solid #D7263D' : '1px solid #9BA3AC', background: included ? '#D7263D10' : '#DCDEE1' }}>
+                    style={{ border: included ? '2px solid #D7263D' : '1px solid var(--theme-border)', background: included ? '#D7263D10' : 'var(--theme-surface)' }}>
                     <img src={p.cover} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-work text-xs font-semibold truncate" style={{ color: '#15151A' }}>{p.title}</p>
-                      <p className="font-elite text-[9px] uppercase" style={{ color: '#5A5D63' }}>{p.duration}m</p>
+                      <p className="font-work text-xs font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>{p.title}</p>
+                      <p className="font-elite text-[9px] uppercase" style={{ color: 'var(--theme-ink-soft)' }}>{p.duration}m</p>
                     </div>
                     {included && <span style={{ color: '#D7263D', fontSize: 14 }}>✓</span>}
                   </button>
