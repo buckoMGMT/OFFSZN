@@ -393,6 +393,15 @@ export default function Profile() {
               </div>
             </div>
 
+            {/* Scripture */}
+            <div className="rounded border p-5 text-center" style={{ background: surface, borderColor: border }}>
+              <p className="font-elite text-xl mb-2" style={{ color: '#D7263D' }}>Proverbs 3:5-6</p>
+              <p className="font-work text-xs leading-relaxed" style={{ color: inkSoft, fontStyle: 'italic' }}>
+                "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."
+              </p>
+              <p className="font-elite text-[8px] uppercase tracking-widest mt-3" style={{ color: '#9BA3AC' }}>Coded with God</p>
+            </div>
+
             {/* Account */}
             <div className="rounded border overflow-hidden" style={{ background: surface, borderColor: border }}>
               <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: inkSoft }}>Account</p>
