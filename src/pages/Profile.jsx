@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Crown, Edit2, BookOpen } from "lucide-react";
+import { Trophy, Crown, Edit2, Sun, Moon, Bell, Lock, LogOut, ChevronRight, Zap } from "lucide-react";
 import BadgesSection from "@/components/profile/BadgesSection";
 import StrengthMaxes from "@/components/profile/StrengthMaxes";
 import HighlightReel from "@/components/profile/HighlightReel";
@@ -32,6 +32,15 @@ export default function Profile() {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState("stats");
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('pb_theme') === 'dark');
+  const [notifications, setNotifications] = useState(() => localStorage.getItem('pb_notifs') !== 'off');
+  const [units, setUnits] = useState(() => localStorage.getItem('pb_units') || 'imperial');
+  const [privacy, setPrivacy] = useState(() => localStorage.getItem('pb_privacy') || 'public');
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--bg-override', darkMode ? '#0D0D0F' : '#EDEEF0');
+    localStorage.setItem('pb_theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   useEffect(() => {
     base44.entities.Athlete.list("-created_date", 1).then(list => {
@@ -79,47 +88,54 @@ export default function Profile() {
 
   const isPremium = athlete.subscription_tier === "premium";
 
+  const bg = darkMode ? '#0D0D0F' : '#EDEEF0';
+  const surface = darkMode ? '#1B1B1D' : '#DCDEE1';
+  const headerBg = darkMode ? '#1B1B1D' : '#DCDEE1';
+  const ink = darkMode ? '#EDEEF0' : '#15151A';
+  const inkSoft = darkMode ? '#9BA3AC' : '#5A5D63';
+  const border = darkMode ? '#5E646B' : '#9BA3AC';
+
   return (
-    <div className="min-h-screen" style={{ background: '#EDEEF0', color: '#15151A' }}>
+    <div className="min-h-screen" style={{ background: bg, color: ink }}>
       {/* Player ID card header */}
-      <div className="px-4 pt-14 pb-5 border-b" style={{ borderColor: '#9BA3AC', background: '#DCDEE1' }}>
+      <div className="px-4 pt-14 pb-5 border-b" style={{ borderColor: border, background: headerBg }}>
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <div className="w-16 h-16 rounded border-2 flex items-center justify-center overflow-hidden flex-shrink-0" style={{ borderColor: '#9BA3AC', background: '#EDEEF0' }}>
+            <div className="w-16 h-16 rounded border-2 flex items-center justify-center overflow-hidden flex-shrink-0" style={{ borderColor: border, background: bg }}>
               {athlete.avatar_url
                 ? <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
                 : <span className="font-anton text-2xl" style={{ color: '#D7263D' }}>{(athlete.display_name || "A")[0].toUpperCase()}</span>
               }
             </div>
             <div>
-              <h1 className="font-anton text-xl uppercase leading-tight" style={{ color: '#15151A' }}>{athlete.display_name || "Athlete"}</h1>
-              <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>
+              <h1 className="font-anton text-xl uppercase leading-tight" style={{ color: ink }}>{athlete.display_name || "Athlete"}</h1>
+              <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: inkSoft }}>
                 {[athlete.sport, athlete.position, athlete.grade].filter(Boolean).join(" · ")}
               </p>
-              {athlete.school && <p className="font-work text-xs" style={{ color: '#5A5D63' }}>{athlete.school}</p>}
+              {athlete.school && <p className="font-work text-xs" style={{ color: inkSoft }}>{athlete.school}</p>}
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             <PageLabel number={5} />
             <button onClick={() => setEditing(!editing)} className="flex items-center gap-1 px-2.5 py-1.5 rounded font-elite text-[9px] uppercase tracking-widest"
-              style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#5A5D63' }}>
+              style={{ background: bg, border: `1px solid ${border}`, color: inkSoft }}>
               <Edit2 size={10} /> Edit
             </button>
           </div>
         </div>
 
         {/* Stats strip */}
-        <div className="flex items-center gap-4 mt-3 pt-3 border-t" style={{ borderColor: '#9BA3AC' }}>
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t" style={{ borderColor: border }}>
           <div className="flex items-center gap-1.5">
             <Trophy size={12} style={{ color: '#D7263D' }} />
-            <span className="font-elite text-sm" style={{ color: '#15151A' }}>{(athlete.total_points || 0).toLocaleString()}</span>
-            <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>pts</span>
+            <span className="font-elite text-sm" style={{ color: ink }}>{(athlete.total_points || 0).toLocaleString()}</span>
+            <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: inkSoft }}>pts</span>
           </div>
           {athlete.current_streak_days > 0 && (
             <div className="flex items-center gap-1.5">
               <span className="font-elite text-sm" style={{ color: '#D7263D' }}>{athlete.current_streak_days}</span>
-              <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>day streak</span>
+              <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: inkSoft }}>day streak</span>
             </div>
           )}
           {isPremium
@@ -130,18 +146,18 @@ export default function Profile() {
       </div>
 
       {/* Section tabs */}
-      <div className="flex border-b px-4" style={{ borderColor: '#9BA3AC', background: '#EDEEF0' }}>
+      <div className="flex border-b px-4" style={{ borderColor: border, background: bg }}>
         {[
           { id: "stats", label: "Stats" },
           { id: "badges", label: "Badges" },
           { id: "goals", label: "Goals" },
           { id: "coach", label: "Coach" },
-          { id: "about", label: "About" },
+          { id: "settings", label: "Settings" },
         ].map(s => (
           <button key={s.id} onClick={() => setActiveSection(s.id)}
             className="flex-1 py-3 font-elite text-[9px] uppercase tracking-widest"
             style={{
-              color: activeSection === s.id ? '#D7263D' : '#5A5D63',
+              color: activeSection === s.id ? '#D7263D' : inkSoft,
               borderBottom: activeSection === s.id ? '2px solid #D7263D' : '2px solid transparent',
             }}>
             {s.label}
@@ -152,8 +168,8 @@ export default function Profile() {
       <div className="px-4 pb-6">
         {/* Edit form */}
         {editing && (
-          <div className="rounded border p-4 my-4 space-y-3" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-            <p className="font-elite text-xs uppercase tracking-widest" style={{ color: '#5A5D63' }}>Edit Player Card</p>
+          <div className="rounded border p-4 my-4 space-y-3" style={{ background: surface, borderColor: border }}>
+            <p className="font-elite text-xs uppercase tracking-widest" style={{ color: inkSoft }}>Edit Player Card</p>
             {[
               { placeholder: "Display name", field: "display_name" },
               { placeholder: "Profile picture URL", field: "avatar_url" },
@@ -161,29 +177,29 @@ export default function Profile() {
               { placeholder: "Position", field: "position" },
             ].map(({ placeholder, field }) => (
               <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
-                style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}
+                style={{ background: bg, border: `1px solid ${border}`, color: ink }}
                 placeholder={placeholder}
                 value={form[field] || ""}
                 onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))} />
             ))}
             <div className="grid grid-cols-2 gap-3">
-              <select className="rounded px-4 py-3 text-sm font-work outline-none" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}
+              <select className="rounded px-4 py-3 text-sm font-work outline-none" style={{ background: bg, border: `1px solid ${border}`, color: ink }}
                 value={form.sport || ""} onChange={e => setForm(p => ({ ...p, sport: e.target.value }))}>
                 <option value="">Sport</option>
                 {SPORTS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
-              <select className="rounded px-4 py-3 text-sm font-work outline-none" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}
+              <select className="rounded px-4 py-3 text-sm font-work outline-none" style={{ background: bg, border: `1px solid ${border}`, color: ink }}
                 value={form.grade || ""} onChange={e => setForm(p => ({ ...p, grade: e.target.value }))}>
                 <option value="">Grade</option>
                 {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
             <textarea className="w-full rounded px-4 py-3 text-sm font-work outline-none resize-none h-16"
-              style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}
+              style={{ background: bg, border: `1px solid ${border}`, color: ink }}
               placeholder="Bio" value={form.bio || ""} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} />
             <div className="flex gap-2">
               <button onClick={() => setEditing(false)} className="flex-1 py-2.5 rounded font-elite text-xs uppercase"
-                style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#5A5D63' }}>Cancel</button>
+                style={{ background: bg, border: `1px solid ${border}`, color: inkSoft }}>Cancel</button>
               <StampButton onClick={save} disabled={saving} className="flex-1">
                 {saving ? "Saving…" : "Save"}
               </StampButton>
@@ -194,7 +210,6 @@ export default function Profile() {
         {activeSection === "stats" && (
           <div className="space-y-3 mt-3">
             <HighlightReel athlete={athlete} onUpdate={reload} />
-            {/* Stat-block grid — Special Elite numerals */}
             <div className="grid grid-cols-2 gap-2">
               {[
                 { label: "Day Streak", value: athlete.current_streak_days || 0 },
@@ -202,17 +217,17 @@ export default function Profile() {
                 { label: "Current lbs", value: athlete.weight_lbs || "--" },
                 { label: "Goal lbs", value: athlete.goal_weight_lbs || "--" },
               ].map(({ label, value, accent }) => (
-                <div key={label} className="rounded border p-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC', borderLeftWidth: accent ? 3 : 1, borderLeftColor: accent ? '#D7263D' : '#9BA3AC' }}>
-                  <p className="font-elite text-[8px] uppercase tracking-widest mb-1" style={{ color: '#5A5D63' }}>{label}</p>
-                  <p className="font-elite text-3xl leading-none" style={{ color: accent ? '#D7263D' : '#15151A' }}>{value}</p>
+                <div key={label} className="rounded border p-4" style={{ background: surface, borderColor: accent ? '#D7263D' : border, borderLeftWidth: accent ? 3 : 1 }}>
+                  <p className="font-elite text-[8px] uppercase tracking-widest mb-1" style={{ color: inkSoft }}>{label}</p>
+                  <p className="font-elite text-3xl leading-none" style={{ color: accent ? '#D7263D' : ink }}>{value}</p>
                 </div>
               ))}
             </div>
             <StrengthMaxes athlete={athlete} onUpdate={reload} />
             {athlete.bio && (
-              <div className="rounded border p-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-                <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: '#5A5D63' }}>Bio</p>
-                <p className="font-work text-sm leading-relaxed" style={{ color: '#15151A' }}>{athlete.bio}</p>
+              <div className="rounded border p-4" style={{ background: surface, borderColor: border }}>
+                <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: inkSoft }}>Bio</p>
+                <p className="font-work text-sm leading-relaxed" style={{ color: ink }}>{athlete.bio}</p>
               </div>
             )}
           </div>
@@ -222,8 +237,8 @@ export default function Profile() {
 
         {activeSection === "goals" && (
           <div className="space-y-3 mt-3">
-            <div className="rounded border p-4 space-y-3" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <p className="font-elite text-xs uppercase tracking-widest" style={{ color: '#5A5D63' }}>Macro Goals</p>
+            <div className="rounded border p-4 space-y-3" style={{ background: surface, borderColor: border }}>
+              <p className="font-elite text-xs uppercase tracking-widest" style={{ color: inkSoft }}>Macro Goals</p>
               {[
                 { label: "Daily Calories", field: "goal_calories", unit: "kcal" },
                 { label: "Protein", field: "goal_protein_g", unit: "g" },
@@ -231,32 +246,32 @@ export default function Profile() {
                 { label: "Fats", field: "goal_fats_g", unit: "g" },
               ].map(({ label, field, unit }) => (
                 <div key={field} className="flex items-center justify-between">
-                  <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{label}</span>
+                  <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: inkSoft }}>{label}</span>
                   <div className="flex items-center gap-2">
                     <input type="number"
                       className="w-24 rounded px-3 py-1.5 font-elite text-sm outline-none text-right"
-                      style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}
+                      style={{ background: bg, border: `1px solid ${border}`, color: ink }}
                       value={form[field] || ""}
                       onChange={e => setForm(p => ({ ...p, [field]: Number(e.target.value) }))}
                       onBlur={save} />
-                    <span className="font-elite text-xs" style={{ color: '#5A5D63' }}>{unit}</span>
+                    <span className="font-elite text-xs" style={{ color: inkSoft }}>{unit}</span>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="rounded border p-4 space-y-3" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <p className="font-elite text-xs uppercase tracking-widest" style={{ color: '#5A5D63' }}>Body Goals</p>
+            <div className="rounded border p-4 space-y-3" style={{ background: surface, borderColor: border }}>
+              <p className="font-elite text-xs uppercase tracking-widest" style={{ color: inkSoft }}>Body Goals</p>
               {[
                 { label: "Target Weight", field: "goal_weight_lbs", unit: "lbs" },
                 { label: "Weekly Budget", field: "weekly_budget_usd", unit: "$" },
               ].map(({ label, field, unit }) => (
                 <div key={field} className="flex items-center justify-between">
-                  <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{label}</span>
+                  <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: inkSoft }}>{label}</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-elite text-xs" style={{ color: '#5A5D63' }}>{unit}</span>
+                    <span className="font-elite text-xs" style={{ color: inkSoft }}>{unit}</span>
                     <input type="number"
                       className="w-24 rounded px-3 py-1.5 font-elite text-sm outline-none text-right"
-                      style={{ background: '#EDEEF0', border: '1px solid #9BA3AC', color: '#15151A' }}
+                      style={{ background: bg, border: `1px solid ${border}`, color: ink }}
                       value={form[field] || ""}
                       onChange={e => setForm(p => ({ ...p, [field]: Number(e.target.value) }))}
                       onBlur={save} />
@@ -269,58 +284,128 @@ export default function Profile() {
 
         {activeSection === "coach" && <div className="mt-3"><CoachTier athlete={athlete} onUpdate={reload} /></div>}
 
-        {activeSection === "about" && (
+        {activeSection === "settings" && (
           <div className="space-y-4 mt-3">
-            {/* About card */}
-            <div className="rounded border p-5" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <BookOpen size={20} style={{ color: '#D7263D', marginBottom: 12 }} />
-              <h3 className="font-anton text-xl uppercase mb-3" style={{ color: '#15151A' }}>About The Playbook</h3>
-              <p className="font-work text-xs leading-relaxed mb-3" style={{ color: '#5A5D63' }}>
-                Growing up, I was super athletic — but limited by poor ankles, bad sleep, and foods that weren't fueling a future athlete. The most limiting thing was the lack of knowledge.
-              </p>
-              <p className="font-work text-xs leading-relaxed mb-3" style={{ color: '#5A5D63' }}>
-                That led me to college, where I got my minor in Kinesiology and researched everything about how to optimize the body for maximum potential. My numbers in strength, speed, and agility were off the chart.
-              </p>
-              <p className="font-work text-xs leading-relaxed mb-4" style={{ color: '#5A5D63' }}>
-                But I didn't reach my athletic potential until after high school — where I became a D1 athlete in a matter of months after following this system.
-              </p>
-              {/* Coach's note in Permanent Marker */}
-              <div className="sticky-note inline-block">
+
+            {/* Appearance */}
+            <div className="rounded border overflow-hidden" style={{ background: surface, borderColor: border }}>
+              <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: inkSoft }}>Appearance</p>
+              <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: border }}>
+                <div className="flex items-center gap-3">
+                  {darkMode ? <Moon size={15} style={{ color: '#D7263D' }} /> : <Sun size={15} style={{ color: '#D7263D' }} />}
+                  <span className="font-elite text-xs uppercase tracking-widest" style={{ color: ink }}>
+                    {darkMode ? "Dark Mode" : "Light Mode"}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setDarkMode(d => !d)}
+                  className="w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0"
+                  style={{ background: darkMode ? '#D7263D' : '#9BA3AC' }}>
+                  <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all duration-300"
+                    style={{ left: darkMode ? '26px' : '2px' }} />
+                </button>
+              </div>
+            </div>
+
+            {/* Notifications */}
+            <div className="rounded border overflow-hidden" style={{ background: surface, borderColor: border }}>
+              <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: inkSoft }}>Notifications</p>
+              {[
+                { label: "Daily Streak Reminders", key: "streak" },
+                { label: "Challenge Updates", key: "challenges" },
+                { label: "Clan Activity", key: "clan" },
+              ].map(({ label, key }) => (
+                <div key={key} className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: border }}>
+                  <div className="flex items-center gap-3">
+                    <Bell size={15} style={{ color: '#D7263D' }} />
+                    <span className="font-elite text-xs uppercase tracking-widest" style={{ color: ink }}>{label}</span>
+                  </div>
+                  <button
+                    onClick={() => { setNotifications(n => !n); localStorage.setItem('pb_notifs', notifications ? 'off' : 'on'); }}
+                    className="w-12 h-6 rounded-full relative transition-all duration-300"
+                    style={{ background: notifications ? '#D7263D' : '#9BA3AC' }}>
+                    <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all duration-300"
+                      style={{ left: notifications ? '26px' : '2px' }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Preferences */}
+            <div className="rounded border overflow-hidden" style={{ background: surface, borderColor: border }}>
+              <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: inkSoft }}>Preferences</p>
+              <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: border }}>
+                <span className="font-elite text-xs uppercase tracking-widest" style={{ color: ink }}>Units</span>
+                <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${border}` }}>
+                  {["imperial", "metric"].map(u => (
+                    <button key={u} onClick={() => { setUnits(u); localStorage.setItem('pb_units', u); }}
+                      className="px-3 py-1 font-elite text-[9px] uppercase tracking-widest transition-all"
+                      style={{ background: units === u ? '#D7263D' : 'transparent', color: units === u ? '#fff' : inkSoft }}>
+                      {u}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: border }}>
+                <span className="font-elite text-xs uppercase tracking-widest" style={{ color: ink }}>Profile Privacy</span>
+                <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${border}` }}>
+                  {["public", "private"].map(p => (
+                    <button key={p} onClick={() => { setPrivacy(p); localStorage.setItem('pb_privacy', p); }}
+                      className="px-3 py-1 font-elite text-[9px] uppercase tracking-widest transition-all"
+                      style={{ background: privacy === p ? '#D7263D' : 'transparent', color: privacy === p ? '#fff' : inkSoft }}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Subscription */}
+            {!isPremium && (
+              <div className="rounded border-2 p-5 flex items-center justify-between" style={{ borderColor: '#D7263D', background: surface }}>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Crown size={14} style={{ color: '#D7263D' }} />
+                    <span className="font-anton text-base uppercase" style={{ color: ink }}>Go Premium</span>
+                  </div>
+                  <p className="font-work text-xs" style={{ color: inkSoft }}>Elite programs · Advanced analytics</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-elite text-xl" style={{ color: '#D7263D' }}>$9.99<span style={{ fontSize: 11 }}>/mo</span></p>
+                  <StampButton className="text-[10px] px-3 py-1 mt-1">Upgrade</StampButton>
+                </div>
+              </div>
+            )}
+
+            {/* Points balance */}
+            <div className="rounded border p-4 flex items-center justify-between" style={{ background: surface, borderColor: border }}>
+              <div className="flex items-center gap-2">
+                <Zap size={14} style={{ color: '#D7263D' }} />
+                <span className="font-elite text-xs uppercase tracking-widest" style={{ color: ink }}>Your Points</span>
+              </div>
+              <span className="font-elite text-xl" style={{ color: '#D7263D' }}>{(athlete.total_points || 0).toLocaleString()}</span>
+            </div>
+
+            {/* Coach's sticky note */}
+            <div className="flex justify-center">
+              <div className="sticky-note">
                 "Every athlete can make plays — but what is an athlete without a playbook?"
               </div>
             </div>
 
-            {/* Endorsement */}
-            <div className="rounded border p-5 flex items-center gap-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <div className="w-14 h-14 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#EDEEF0', border: '2px solid #9BA3AC' }}>
-                <Trophy size={22} style={{ color: '#D7263D' }} />
-              </div>
-              <div>
-                <p className="font-elite text-[8px] uppercase tracking-widest mb-0.5" style={{ color: '#5A5D63' }}>Backed By</p>
-                <p className="font-anton text-lg uppercase" style={{ color: '#15151A' }}>Jamal Adams</p>
-                <p className="font-work text-xs" style={{ color: '#5A5D63' }}>NFL Safety · D1 Athlete</p>
-              </div>
+            {/* Account */}
+            <div className="rounded border overflow-hidden" style={{ background: surface, borderColor: border }}>
+              <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: inkSoft }}>Account</p>
+              <button className="w-full flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: border }}
+                onClick={() => base44.auth.logout('/')}>
+                <div className="flex items-center gap-3">
+                  <LogOut size={15} style={{ color: '#D7263D' }} />
+                  <span className="font-elite text-xs uppercase tracking-widest" style={{ color: '#D7263D' }}>Sign Out</span>
+                </div>
+                <ChevronRight size={14} style={{ color: inkSoft }} />
+              </button>
             </div>
 
-            {/* Scripture */}
-            <div className="rounded border p-5 text-center" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
-              <p className="font-elite text-xl mb-2" style={{ color: '#D7263D' }}>Proverbs 3:5-6</p>
-              <p className="font-work text-xs leading-relaxed" style={{ color: '#5A5D63', fontStyle: 'italic' }}>
-                "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."
-              </p>
-              <p className="font-elite text-[8px] uppercase tracking-widest mt-3" style={{ color: '#9BA3AC' }}>Coded with God</p>
-            </div>
-
-            {/* Premium CTA */}
-            {!isPremium && (
-              <div className="rounded border-2 p-6 text-center" style={{ borderColor: '#D7263D', background: '#DCDEE1' }}>
-                <Crown size={26} style={{ color: '#D7263D', margin: '0 auto 12px' }} />
-                <h3 className="font-anton text-2xl uppercase mb-1" style={{ color: '#15151A' }}>Go Premium</h3>
-                <p className="font-work text-xs mb-2" style={{ color: '#5A5D63' }}>Elite D1 programs. Advanced analytics. No limits.</p>
-                <p className="font-elite text-3xl mb-4" style={{ color: '#D7263D' }}>$9.99<span style={{ fontSize: 14 }}>/mo</span></p>
-                <StampButton className="text-base px-8 py-3">Upgrade Now</StampButton>
-              </div>
-            )}
           </div>
         )}
       </div>
