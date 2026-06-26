@@ -9,6 +9,7 @@ import AppleHealthBanner from "@/components/tracking/AppleHealthBanner";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
+import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 
 // Stopwatch-face macro ring — steel bezel, red fill arc, Special Elite numerals
 function StopwatchRing({ value, max, label, size = 110 }) {
@@ -65,6 +66,7 @@ function StopwatchRing({ value, max, label, size = 110 }) {
 }
 
 export default function Track() {
+  const { checkMilestones } = useMilestoneNotifier();
   const [athlete, setAthlete] = useState(null);
   const [log, setLog] = useState(null);
   const [meals, setMeals] = useState([]);
@@ -76,6 +78,7 @@ export default function Track() {
     const athletes = await base44.entities.Athlete.list("-created_date", 1);
     const a = athletes[0] || null;
     setAthlete(a);
+    if (a) checkMilestones(a);
     if (a) {
       const logs = await base44.entities.DailyLog.filter({ athlete_id: a.id, date: today });
       let todayLog = logs[0];

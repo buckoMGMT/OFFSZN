@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Crown, Edit2, Sun, Moon, Bell, Lock, LogOut, ChevronRight, Zap } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
+import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 import BadgesSection from "@/components/profile/BadgesSection";
 import StrengthMaxes from "@/components/profile/StrengthMaxes";
 import HighlightReel from "@/components/profile/HighlightReel";
@@ -34,6 +35,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState("stats");
   const { darkMode, setDarkMode } = useTheme();
+  const { checkMilestones } = useMilestoneNotifier();
   const [notifications, setNotifications] = useState(() => localStorage.getItem('pb_notifs') !== 'off');
   const [units, setUnits] = useState(() => localStorage.getItem('pb_units') || 'imperial');
   const [privacy, setPrivacy] = useState(() => localStorage.getItem('pb_privacy') || 'public');
@@ -44,7 +46,7 @@ export default function Profile() {
     base44.entities.Athlete.list("-created_date", 1).then(list => {
       const a = list[0] || null;
       setAthlete(a);
-      if (a) setForm(a);
+      if (a) { setForm(a); checkMilestones(a); }
       setLoading(false);
     });
   }, []);

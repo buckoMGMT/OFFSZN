@@ -15,6 +15,7 @@ import Profile from '@/pages/Profile';
 import Rewards from '@/pages/Rewards';
 import PlaybookSplash from '@/components/PlaybookSplash';
 import { ThemeProvider } from '@/lib/ThemeContext';
+import { MilestoneNotifierProvider } from '@/lib/MilestoneNotifier';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <ThemeProvider>
+      <MilestoneNotifierProvider>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
@@ -78,6 +80,7 @@ function App() {
           <Toaster />
         </QueryClientProvider>
       </AuthProvider>
+      </MilestoneNotifierProvider>
     </ThemeProvider>
   )
 }
