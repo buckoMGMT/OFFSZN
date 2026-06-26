@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Trophy, Crown, Edit2, Sun, Moon, Bell, Lock, LogOut, ChevronRight, Zap } from "lucide-react";
+import { useTheme } from "@/lib/ThemeContext";
 import BadgesSection from "@/components/profile/BadgesSection";
 import StrengthMaxes from "@/components/profile/StrengthMaxes";
 import HighlightReel from "@/components/profile/HighlightReel";
@@ -32,15 +33,12 @@ export default function Profile() {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState("stats");
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('pb_theme') === 'dark');
+  const { darkMode, setDarkMode } = useTheme();
   const [notifications, setNotifications] = useState(() => localStorage.getItem('pb_notifs') !== 'off');
   const [units, setUnits] = useState(() => localStorage.getItem('pb_units') || 'imperial');
   const [privacy, setPrivacy] = useState(() => localStorage.getItem('pb_privacy') || 'public');
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--bg-override', darkMode ? '#0D0D0F' : '#EDEEF0');
-    localStorage.setItem('pb_theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
+
 
   useEffect(() => {
     base44.entities.Athlete.list("-created_date", 1).then(list => {

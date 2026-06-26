@@ -4,7 +4,8 @@ import { Users, Copy, Check, Zap, Trophy, UserPlus } from "lucide-react";
 import StampButton from "@/components/ui/StampButton";
 
 const STARTER_POINTS = 500;
-const RECRUITER_BONUS = 1500;
+const RECRUITER_BONUS_FIRST = 1500;
+const RECRUITER_BONUS_SUBSEQUENT = 100;
 
 function statusColor(s) {
   if (s === "bonus_earned") return '#D7263D';
@@ -25,10 +26,12 @@ export default function ReferralPanel({ athlete, referrals, onReferred }) {
   const [sent, setSent] = useState(false);
 
   const referralCode = athlete ? `PBP-${athlete.id.slice(-6).toUpperCase()}` : "";
-  const referralLink = `https://playbookpro.app/register?ref=${referralCode}`;
+  const referralLink = `https://theplaybook.app/register?ref=${referralCode}`;
 
   const bonusEarned = referrals.filter(r => r.status === "bonus_earned").length;
-  const totalEarned = bonusEarned * RECRUITER_BONUS + referrals.filter(r => r.starter_pack_awarded).length * STARTER_POINTS;
+  const totalEarned = bonusEarned > 0
+    ? RECRUITER_BONUS_FIRST + (bonusEarned - 1) * RECRUITER_BONUS_SUBSEQUENT + referrals.filter(r => r.starter_pack_awarded).length * STARTER_POINTS
+    : referrals.filter(r => r.starter_pack_awarded).length * STARTER_POINTS;
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -53,8 +56,8 @@ export default function ReferralPanel({ athlete, referrals, onReferred }) {
     });
     await base44.integrations.Core.SendEmail({
       to: email.trim(),
-      subject: `${athlete.display_name} wants you to join Playbook Pro 🏆`,
-      body: `Your training partner ${athlete.display_name} has invited you to join Playbook Pro — the ultimate performance hub for athletes.\n\nUse their link to sign up and you'll both get 500 bonus points toward free merch and gift cards:\n\n${referralLink}\n\nSee you on the field.`,
+      subject: `${athlete.display_name} wants you to join The Playbook 🏆`,
+      body: `Your training partner ${athlete.display_name} has invited you to join The Playbook — the ultimate performance hub for athletes.\n\nUse their link to sign up and you'll both get 500 bonus points toward free merch and gift cards:\n\n${referralLink}\n\nSee you on the field.`,
     });
     setSent(true);
     setEmail("");
@@ -86,7 +89,7 @@ export default function ReferralPanel({ athlete, referrals, onReferred }) {
           {[
             { step: "01", label: "Send your link", detail: "Share it via the email invite or copy the link.", pts: null },
             { step: "02", label: "Friend joins", detail: "They sign up using your referral link.", pts: `Both get +${STARTER_POINTS} pts` },
-            { step: "03", label: "They log 3 workouts", detail: "Once they complete 3 workouts, you unlock the big bonus.", pts: `You get +${RECRUITER_BONUS.toLocaleString()} pts` },
+            { step: "03", label: "They log 3 workouts", detail: "First recruit earns you +1,500 pts. Every recruit after that earns +100 pts.", pts: `You get +${RECRUITER_BONUS_FIRST.toLocaleString()} pts (1st)` },
           ].map(s => (
             <div key={s.step} className="flex items-start gap-3 py-2 border-b" style={{ borderColor: '#9BA3AC44' }}>
               <span className="font-elite text-base" style={{ color: '#D7263D', minWidth: 24 }}>{s.step}</span>
