@@ -8,10 +8,11 @@ import RedeemModal from "@/components/rewards/RedeemModal";
 import ReferralPanel from "@/components/rewards/ReferralPanel";
 
 const DAILY_BREAKDOWN = [
-  { action: "Full daily log (macros + water + sleep)", pts: 50 },
-  { action: "Workout logged", pts: 100 },
-  { action: "Daily streak bonus", pts: 30 },
-  { action: "Challenge completion (avg/day)", pts: 100 },
+  { action: "Hit your water goal (80oz)", pts: 10 },
+  { action: "Hit your calorie goal", pts: 20 },
+  { action: "Hit your protein target", pts: 15 },
+  { action: "Complete your workout", pts: 25 },
+  { action: "Log 8 hours of sleep", pts: 15 },
 ];
 
 function PointsBar({ current, target, label }) {
@@ -183,7 +184,7 @@ export default function Rewards() {
 
         {/* Progress to next gift card */}
         <div className="mb-3">
-          <PointsBar current={points} target={10000} label="Progress to $10 Gift Card" />
+          <PointsBar current={points} target={10000} label="Progress to $5 Gift Card" />
         </div>
 
         {/* Tabs */}
@@ -296,7 +297,7 @@ export default function Rewards() {
           <div className="space-y-4">
             <div className="rounded border p-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
               <h2 className="font-anton text-xl uppercase mb-1" style={{ color: '#15151A' }}>The Point Economy</h2>
-              <p className="font-work text-xs mb-4" style={{ color: '#5A5D63' }}>Consistent daily effort adds up. A $10 gift card takes ~90 days of active use.</p>
+              <p className="font-work text-xs mb-4" style={{ color: '#5A5D63' }}>Consistent daily effort adds up. A $5 gift card takes ~90 days of active use.</p>
               <div className="space-y-3">
                 {DAILY_BREAKDOWN.map((d, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b" style={{ borderColor: '#9BA3AC44' }}>
@@ -308,10 +309,10 @@ export default function Rewards() {
                   </div>
                 ))}
                 <div className="flex items-center justify-between pt-2">
-                  <p className="font-work text-xs font-semibold" style={{ color: '#15151A' }}>Daily Max (approx)</p>
+                  <p className="font-work text-xs font-semibold" style={{ color: '#15151A' }}>Daily Max (all 5 tasks)</p>
                   <div className="flex items-center gap-1">
                     <Zap size={10} style={{ color: '#D7263D' }} />
-                    <span className="font-elite text-sm font-bold" style={{ color: '#D7263D' }}>~280</span>
+                    <span className="font-elite text-sm font-bold" style={{ color: '#D7263D' }}>85</span>
                   </div>
                 </div>
               </div>
@@ -320,9 +321,9 @@ export default function Rewards() {
             <div className="rounded border p-4" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
               <h2 className="font-anton text-xl uppercase mb-3" style={{ color: '#15151A' }}>Challenge Tiers</h2>
               {[
-                { tier: "Bronze", pts: "500", freq: "Weekly", ex: "Log water intake 3 days in a row", color: '#9BA3AC' },
-                { tier: "Silver", pts: "1,500", freq: "Weekly", ex: "Complete 4 workouts this week", color: '#5E646B' },
-                { tier: "Gold", pts: "4,000", freq: "Bi-weekly", ex: "Hit 90%+ macro adherence + 5 workouts for 7 days", color: '#D7263D' },
+                { tier: "Bronze", pts: "5", freq: "Daily", ex: "Complete any 1 daily task", color: '#9BA3AC' },
+                { tier: "Silver", pts: "15", freq: "Daily", ex: "Complete 3 of 5 daily tasks", color: '#5E646B' },
+                { tier: "Gold", pts: "50", freq: "Daily", ex: "Complete all 5 daily tasks", color: '#D7263D' },
               ].map(t => (
                 <div key={t.tier} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: '#9BA3AC44' }}>
                   <div className="w-14 h-6 rounded flex items-center justify-center flex-shrink-0 font-elite text-[9px] uppercase"

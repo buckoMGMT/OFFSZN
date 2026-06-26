@@ -12,6 +12,7 @@ function getChallenge(log, athlete) {
       desc: `${log?.water_oz || 0}/80 oz`,
       done: (log?.water_oz || 0) >= waterGoal,
       points: 10,
+      tier: "Bronze",
     },
     {
       id: "calories",
@@ -19,6 +20,7 @@ function getChallenge(log, athlete) {
       desc: `${Math.round(log?.calories_consumed || 0)}/${calGoal} kcal`,
       done: (log?.calories_consumed || 0) >= calGoal * 0.9,
       points: 20,
+      tier: "Silver",
     },
     {
       id: "protein",
@@ -26,6 +28,7 @@ function getChallenge(log, athlete) {
       desc: `${Math.round(log?.protein_g || 0)}/${proteinGoal}g protein`,
       done: (log?.protein_g || 0) >= proteinGoal * 0.9,
       points: 15,
+      tier: "Silver",
     },
     {
       id: "workout",
@@ -33,6 +36,7 @@ function getChallenge(log, athlete) {
       desc: log?.workout_complete ? "Done!" : "Not yet",
       done: !!log?.workout_complete,
       points: 25,
+      tier: "Gold",
     },
     {
       id: "sleep",
@@ -40,6 +44,7 @@ function getChallenge(log, athlete) {
       desc: log?.sleep_hours ? `${log.sleep_hours} hrs logged` : "Not logged",
       done: (log?.sleep_hours || 0) >= 8,
       points: 15,
+      tier: "Silver",
     },
   ];
 }
