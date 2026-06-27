@@ -52,6 +52,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [usResident, setUsResident] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
@@ -61,6 +62,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
     if (password !== confirmPassword) { setError("Passwords do not match"); return; }
+    if (!usResident) { setError("You must confirm you are a US resident to continue"); return; }
     if (!agreed) { setError("You must agree to the Terms of Service to continue"); return; }
     setLoading(true);
     try {
@@ -181,6 +183,20 @@ export default function Register() {
             value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={inputStyle} required />
         </div>
 
+        {/* US Residency */}
+        <label className="flex items-start gap-3 cursor-pointer">
+          <div
+            onClick={() => setUsResident(u => !u)}
+            className="mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center border"
+            style={{ background: usResident ? '#D7263D' : 'transparent', borderColor: usResident ? '#D7263D' : '#5E646B' }}
+          >
+            {usResident && <span style={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>✓</span>}
+          </div>
+          <span className="font-work text-xs leading-snug" style={{ color: '#5A5D63' }}>
+            I confirm I am a <span style={{ color: '#9BA3AC' }}>resident of the United States</span>. This service is not available outside the US.
+          </span>
+        </label>
+
         {/* Age + Terms agreement */}
         <label className="flex items-start gap-3 cursor-pointer">
           <div
@@ -191,7 +207,7 @@ export default function Register() {
             {agreed && <span style={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>✓</span>}
           </div>
           <span className="font-work text-xs leading-snug" style={{ color: '#5A5D63' }}>
-            I am at least 16 years old and agree to the{" "}
+            I am at least <span style={{ color: '#9BA3AC' }}>18 years old</span> and agree to the{" "}
             <span style={{ color: '#9BA3AC' }}>Terms of Service</span> and{" "}
             <span style={{ color: '#9BA3AC' }}>Privacy Policy</span>.
             This app is for athletic performance tracking only — not medical advice.

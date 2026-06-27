@@ -15,6 +15,7 @@ import Profile from '@/pages/Profile';
 import Rewards from '@/pages/Rewards';
 import PlaybookSplash from '@/components/PlaybookSplash';
 import { ThemeProvider } from '@/lib/ThemeContext';
+import GeoBlocker from '@/components/GeoBlocker';
 import { MilestoneNotifierProvider } from '@/lib/MilestoneNotifier';
 
 const AuthenticatedApp = () => {
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
 
 function App() {
   return (
+    <GeoBlocker>
     <ThemeProvider>
       <MilestoneNotifierProvider>
       <AuthProvider>
@@ -82,6 +84,7 @@ function App() {
       </AuthProvider>
       </MilestoneNotifierProvider>
     </ThemeProvider>
+    </GeoBlocker>
   )
 }
 
