@@ -1,56 +1,75 @@
 import { Link, useLocation } from "react-router-dom";
 import { Rss, BarChart2, BookOpen, Shield, User, Gift } from "lucide-react";
 
+/* Icon size 24px, stroke 1.75 per spec §8 */
 const tabs = [
-  { icon: Rss,      label: "Field",    path: "/",        color: "#00C85322", textColor: "#fff" },
-  { icon: BarChart2,label: "Stats",    path: "/track",   color: "#5E646B",  textColor: "#fff" },
-  { icon: BookOpen, label: "Drills",   path: "/playbook",color: "#272729",  textColor: "#9BA3AC" },
-  { icon: Shield,   label: "Teams",    path: "/clans",   color: "#1B1B1D",  textColor: "#9BA3AC" },
-  { icon: Gift,     label: "Locker",   path: "/rewards", color: "#272729",  textColor: "#9BA3AC" },
-  { icon: User,     label: "Player",   path: "/profile", color: "#0D0D0F",  textColor: "#9BA3AC" },
+  { icon: Rss,       label: "Field",   path: "/" },
+  { icon: BarChart2, label: "Stats",   path: "/track" },
+  { icon: BookOpen,  label: "Drills",  path: "/playbook" },
+  { icon: Shield,    label: "Teams",   path: "/clans" },
+  { icon: Gift,      label: "Locker",  path: "/rewards" },
+  { icon: User,      label: "Player",  path: "/profile" },
 ];
 
 export default function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ background: '#0D0D0F', borderTop: '1px solid #5E646B' }}>
-      <div className="flex items-end justify-around max-w-lg mx-auto px-1 pt-0 pb-0">
-        {tabs.map(({ icon: Icon, label, path, color, textColor }) => {
+    /* Surface-2 nav, hairline top border, no heavy shadow — elevation from ladder.
+       Backdrop blur where supported for depth without opaque occlusion.
+       Psychology: Fitts's law — primary actions in thumb zone. */
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50"
+      style={{
+        background: 'var(--surface-2)',
+        borderTop: '1px solid var(--border-subtle)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+      }}
+    >
+      <div className="flex items-stretch justify-around max-w-lg mx-auto" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {tabs.map(({ icon: Icon, label, path }) => {
           const active = location.pathname === path;
           return (
             <Link
               key={path}
               to={path}
-              className="flex flex-col items-center justify-end relative"
-              style={{ flex: 1 }}
+              className="flex flex-col items-center justify-center gap-1 flex-1 py-3 relative"
+              style={{
+                minHeight: 56,
+                color: active ? 'var(--accent)' : 'var(--text-tertiary)',
+                transition: 'color var(--dur-fast) var(--ease-out)',
+              }}
             >
-              {/* Binder tab shape */}
-              <div
-                className="binder-tab w-full flex flex-col items-center justify-center gap-1 py-2.5 transition-all duration-200"
+              {/* Von Restorff: active tab is the only orange element in the nav */}
+              {active && (
+                <span
+                  className="absolute top-0 left-1/2 -translate-x-1/2 rounded-b-full"
+                  style={{
+                    width: 32,
+                    height: 3,
+                    background: 'var(--accent)',
+                    borderRadius: '0 0 var(--r-sm) var(--r-sm)',
+                  }}
+                />
+              )}
+              <Icon
+                size={22}
+                strokeWidth={active ? 2 : 1.75}
+                color="currentColor"
+              />
+              <span
                 style={{
-                  background: active ? '#EDEEF0' : color,
-                  minHeight: active ? 60 : 54,
-                  borderLeft: '1px solid #5E646B44',
-                  borderRight: '1px solid #5E646B44',
-                  borderTop: '1px solid #5E646B',
+                  fontSize: 'var(--text-xs)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: active ? 600 : 400,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  lineHeight: 1,
                 }}
               >
-                <Icon
-                  size={18}
-                  strokeWidth={active ? 2 : 1.5}
-                  color={active ? '#00C853' : textColor}
-                />
-                <span
-                  className="font-elite text-[9px] uppercase tracking-widest leading-none"
-                  style={{ color: active ? '#00C853' : textColor }}
-                >
-                  {label}
-                </span>
-                {active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full" style={{ background: '#00C853' }} />
-                )}
-              </div>
+                {label}
+              </span>
             </Link>
           );
         })}

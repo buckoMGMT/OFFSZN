@@ -11,56 +11,76 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 
-// Stopwatch-face macro ring — steel bezel, red fill arc, Special Elite numerals
+/* §5 Progress rings: 8px stroke, round caps, surface-3 track, accent fill.
+   Ring completion ≥100% swaps fill to --positive (the color-shift IS the reward).
+   Psychology: Goal gradient — near-complete rings accelerate motivation.
+   Numbers in Archivo Black tabular so they never jitter. */
 function StopwatchRing({ value, max, label, size = 110 }) {
   const pct = Math.min(1, (value || 0) / (max || 1));
-  const r = (size - 14) / 2;
+  const strokeWidth = size < 100 ? 6 : 8;
+  const r = (size - strokeWidth * 2 - 4) / 2;
   const circumference = 2 * Math.PI * r;
   const offset = circumference * (1 - pct);
   const center = size / 2;
+  // Color-shift moment: completion ≥100% → semantic green (the reward)
+  const arcColor = pct >= 1 ? 'var(--positive)' : 'var(--accent)';
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex flex-col items-center" style={{ gap: 8 }}>
       <div style={{ position: 'relative', width: size, height: size }}>
-        {/* Steel bezel */}
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ position: 'absolute', top: 0, left: 0 }}>
-          <circle cx={center} cy={center} r={center - 2} fill="none" stroke="#9BA3AC" strokeWidth="3" />
-          <circle cx={center} cy={center} r={center - 6} fill="#EDEEF0" />
-          {/* Tick marks */}
-          {Array.from({ length: 12 }).map((_, i) => {
-            const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
-            const x1 = center + (center - 9) * Math.cos(angle);
-            const y1 = center + (center - 9) * Math.sin(angle);
-            const x2 = center + (center - 14) * Math.cos(angle);
-            const y2 = center + (center - 14) * Math.sin(angle);
-            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#9BA3AC" strokeWidth="1.5" />;
-          })}
-          {/* Track */}
-          <circle cx={center} cy={center} r={r} fill="none" stroke="#DCDEE1" strokeWidth="7" />
-          {/* Fill arc — red */}
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}>
+          {/* Track — surface-3 */}
           <circle
             cx={center} cy={center} r={r}
             fill="none"
-            stroke="#00C853"
-            strokeWidth="7"
-            strokeLinecap="butt"
+            stroke="var(--surface-3)"
+            strokeWidth={strokeWidth}
+          />
+          {/* Fill arc — accent, animated sweep */}
+          <circle
+            cx={center} cy={center} r={r}
+            fill="none"
+            stroke={arcColor}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            transform={`rotate(-90 ${center} ${center})`}
-            style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+            style={{ transition: `stroke-dashoffset 0.6s var(--ease-out), stroke 0.3s ease` }}
           />
         </svg>
-        {/* Center numerals */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-          <span className="font-elite" style={{ fontSize: size < 100 ? 15 : 19, color: '#15151A', lineHeight: 1 }}>
+        {/* Center — Archivo Black tabular numerals */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+          <span
+            style={{
+              fontFamily: "'Archivo Black', sans-serif",
+              fontVariantNumeric: 'tabular-nums',
+              fontSize: size < 100 ? 'var(--text-base)' : 'var(--text-xl)',
+              color: 'var(--text-primary)',
+              lineHeight: 1,
+            }}
+          >
             {value >= 1000 ? `${(value/1000).toFixed(1)}k` : Math.round(value)}
           </span>
-          <span className="font-elite" style={{ fontSize: 8, color: '#9BA3AC', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '0.625rem',
+              color: pct >= 1 ? 'var(--positive)' : 'var(--text-tertiary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 600,
+            }}
+          >
             {Math.round(pct * 100)}%
           </span>
         </div>
       </div>
-      <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{label}</span>
+      <span
+        className="eyebrow"
+        style={{ fontSize: '0.625rem', letterSpacing: '0.1em' }}
+      >
+        {label}
+      </span>
     </div>
   );
 }
@@ -130,12 +150,34 @@ export default function Track() {
     load();
   };
 
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: 'var(--theme-bg)' }}>
-      <PlayDiagram size={150} />
-      <p className="font-elite text-xs mt-4" style={{ color: 'var(--theme-ink-soft)' }}>Loading stats…</p>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="min-h-screen" style={{ background: 'var(--surface-0)' }}>
+        <div className="px-5 pt-16 pb-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+          <div className="skeleton" style={{ width: 80, height: 36, borderRadius: 'var(--r-sm)' }} />
+        </div>
+        <div className="px-5 pt-5 space-y-4">
+          <div className="card-base p-5 flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="skeleton" style={{ width: 80, height: 11 }} />
+              <div className="skeleton" style={{ width: 120, height: 44 }} />
+              <div className="skeleton" style={{ width: 100, height: 11 }} />
+            </div>
+            <div className="skeleton" style={{ width: 110, height: 110, borderRadius: '50%' }} />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[1,2,3].map(i => (
+              <div key={i} className="card-base p-3 space-y-2">
+                <div className="skeleton" style={{ width: '60%', height: 10 }} />
+                <div className="skeleton" style={{ width: '80%', height: 28 }} />
+                <div className="skeleton" style={{ width: '100%', height: 6, borderRadius: 'var(--r-full)' }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const calGoal = athlete?.goal_calories || 2500;
   const proteinGoal = athlete?.goal_protein_g || 150;
@@ -148,11 +190,11 @@ export default function Track() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-4 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
+      <div className="sticky top-0 z-40 px-5 pt-12 pb-4 border-b" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>Stats</h1>
-            <p className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{format(new Date(), "EEE, MMM d")}</p>
+            <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Stats</h1>
+            <p className="eyebrow" style={{ marginTop: 2 }}>{format(new Date(), "EEE, MMM d")}</p>
           </div>
           <div className="flex items-center gap-3">
             <PageLabel number={2} />
@@ -163,32 +205,45 @@ export default function Track() {
         </div>
       </div>
 
-      <div className="px-4 py-4 space-y-4">
+      <div className="px-5 py-4 space-y-4">
         <AppleHealthBanner log={log} onSync={(data) => updateLog(data)} />
 
-        {/* Main Calorie Dashboard — stopwatch rings */}
-        <div className="rounded border p-5" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)', boxShadow: '1px 2px 6px rgba(0,0,0,0.08)' }}>
+        {/* Main Calorie Dashboard — progress rings */}
+        <div className="card-base p-5">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Calories Today</p>
-              <p className="font-anton text-4xl" style={{ color: 'var(--theme-ink)' }}>{Math.round(cal).toLocaleString()}</p>
-              <p className="font-elite text-[10px]" style={{ color: 'var(--theme-ink-soft)' }}>{remaining.toLocaleString()} remaining of {calGoal.toLocaleString()}</p>
+            <div style={{ maxWidth: '55%' }}>
+              {/* §3: eyebrow → hero number → context. Number IS the emotional payload. */}
+              <p className="eyebrow mb-1">Calories Today</p>
+              <p
+                style={{
+                  fontFamily: "'Archivo Black', sans-serif",
+                  fontVariantNumeric: 'tabular-nums',
+                  fontSize: 'var(--text-4xl)',
+                  color: 'var(--text-primary)',
+                  lineHeight: 1,
+                }}
+              >
+                {Math.round(cal).toLocaleString()}
+              </p>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: 4 }}>
+                {remaining.toLocaleString()} left of {calGoal.toLocaleString()}
+              </p>
             </div>
             <StopwatchRing value={cal} max={calGoal} label="Calories" size={110} />
           </div>
 
           {/* Macro rings */}
-          <div className="flex justify-around pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="flex justify-around pt-4 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
             <StopwatchRing value={log?.protein_g || 0} max={proteinGoal} label="Protein" size={80} />
             <StopwatchRing value={log?.carbs_g || 0} max={carbsGoal} label="Carbs" size={80} />
             <StopwatchRing value={log?.fats_g || 0} max={fatsGoal} label="Fats" size={80} />
           </div>
         </div>
 
-        {/* Quick stats row */}
-        <div className="grid grid-cols-3 gap-2.5">
+        {/* Quick stats row — surface-1 cards, no shadows */}
+        <div className="grid grid-cols-3 gap-3">
           {/* Water */}
-          <div className="rounded border p-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+          <div className="card-base p-3">
             <div className="flex items-center gap-1 mb-2">
               <Droplets size={12} style={{ color: 'var(--theme-ink-soft)' }} />
               <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Water</span>
@@ -249,24 +304,26 @@ export default function Track() {
         </div>
 
         {/* Weight */}
-        <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+        <div className="card-base p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Scale size={13} style={{ color: 'var(--theme-ink-soft)' }} />
-            <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>Body Weight</span>
+            <Scale size={16} strokeWidth={1.75} style={{ color: 'var(--text-tertiary)' }} />
+            <span className="eyebrow">Body Weight</span>
             {athlete?.goal_weight_lbs && (
-              <span className="ml-auto font-elite text-[9px]" style={{ color: 'var(--theme-ink-soft)' }}>Goal: {athlete.goal_weight_lbs} lbs</span>
+              <span className="ml-auto" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)' }}>
+                Goal: {athlete.goal_weight_lbs} lbs
+              </span>
             )}
           </div>
           <div className="flex items-center gap-3">
             <input
               type="number"
-              className="flex-1 rounded px-4 py-2.5 font-elite text-base outline-none"
-              style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
+              className="input-base flex-1"
+              style={{ minHeight: 44 }}
               placeholder="0"
               value={log?.weight_lbs || ""}
               onChange={e => updateLog({ weight_lbs: Number(e.target.value) || null })}
             />
-            <span className="font-elite text-sm" style={{ color: 'var(--theme-ink-soft)' }}>lbs</span>
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)', fontFamily: 'Inter, sans-serif' }}>lbs</span>
           </div>
         </div>
 
@@ -275,14 +332,22 @@ export default function Track() {
         {/* Meals */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-anton text-xl uppercase" style={{ color: 'var(--theme-ink)' }}>Meals Logged</h2>
-            <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{meals.length} entries</span>
+            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-xl)', color: 'var(--text-primary)', textTransform: 'uppercase' }}>
+              Meals Logged
+            </h2>
+            <span className="eyebrow">{meals.length} entries</span>
           </div>
           {meals.length === 0 ? (
-            <button onClick={() => setShowAddMeal(true)}
-              className="w-full border-2 border-dashed rounded py-10 text-center" style={{ borderColor: 'var(--theme-border)' }}>
-              <p className="font-work text-sm mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Nothing logged yet.</p>
-              <span className="btn-stamp" style={{ display: 'inline-flex' }}>Log First Meal</span>
+            /* §5 EmptyState: athlete-voice copy + action */
+            <button
+              onClick={() => setShowAddMeal(true)}
+              className="w-full text-center py-10"
+              style={{ border: '1px dashed var(--border-strong)', borderRadius: 'var(--r-lg)' }}
+            >
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 12 }}>
+                Nothing logged. Fix that.
+              </p>
+              <span className="btn-stamp">Log First Meal</span>
             </button>
           ) : (
             <div className="space-y-2.5">

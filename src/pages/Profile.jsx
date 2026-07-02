@@ -98,7 +98,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Player ID card header */}
-      <div className="px-4 pt-14 pb-5 border-b" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-surface)' }}>
+      <div className="px-5 pt-14 pb-5 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-1)' }}>
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-3">
             {/* Avatar */}
@@ -146,7 +146,7 @@ export default function Profile() {
       </div>
 
       {/* Section tabs */}
-      <div className="flex border-b px-4" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg)' }}>
+      <div className="flex border-b px-5" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-0)' }}>
         {[
           { id: "stats", label: "Stats" },
           { id: "badges", label: "Badges" },
@@ -157,15 +157,15 @@ export default function Profile() {
           <button key={s.id} onClick={() => setActiveSection(s.id)}
             className="flex-1 py-3 font-elite text-[9px] uppercase tracking-widest"
             style={{
-              color: activeSection === s.id ? '#00C853' : 'var(--theme-ink-soft)',
-              borderBottom: activeSection === s.id ? '2px solid #00C853' : '2px solid transparent',
+              color: activeSection === s.id ? 'var(--accent)' : 'var(--text-tertiary)',
+              borderBottom: activeSection === s.id ? '2px solid var(--accent)' : '2px solid transparent',
             }}>
             {s.label}
           </button>
         ))}
       </div>
 
-      <div className="px-4 pb-6">
+      <div className="px-5 pb-6">
         {/* Edit form */}
         {editing && (
           <div className="rounded border p-4 my-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>

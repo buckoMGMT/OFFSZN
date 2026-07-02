@@ -147,7 +147,8 @@ function PlaybookCover({ onDone }) {
         {/* Tap to open */}
         <motion.button
           onClick={onDone}
-          className="mt-2 px-8 py-3 border border-primary/60 rounded-xl font-barlow font-bold uppercase tracking-widest text-primary text-sm"
+          className="btn-primary mt-2"
+          style={{ borderRadius: 'var(--r-xl)', fontSize: 'var(--text-sm)', paddingLeft: '2rem', paddingRight: '2rem' }}
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >

@@ -1,15 +1,26 @@
-// Single swappable wordmark — swap the final logo here when ready.
-// Usage: <BrandMark size="lg" /> or <BrandMark size="sm" />
+/* Single swappable wordmark — swap the final logo here when the asset is ready.
+   Renders in Archivo Black (display face) with Cone Orange accent on the "SZN".
+   Psychology: the wordmark IS identity — treat it with the same restraint as the
+   primary button. Never color both halves the same; the contrast is the brand. */
 export default function BrandMark({ size = "md", className = "" }) {
   const sizes = {
-    sm: "text-xl tracking-widest",
-    md: "text-3xl tracking-widest",
-    lg: "text-5xl tracking-widest",
+    sm: { fontSize: '1.25rem',  letterSpacing: '0.04em' },
+    md: { fontSize: '1.75rem',  letterSpacing: '0.04em' },
+    lg: { fontSize: '2.75rem',  letterSpacing: '0.04em' },
   };
+  const style = sizes[size] || sizes.md;
+
   return (
-    <span className={`font-anton uppercase leading-none ${sizes[size] || sizes.md} ${className}`}>
-      <span style={{ color: '#F5F5F0' }}>OFF</span>
-      <span style={{ color: '#00C853' }}>SZN</span>
+    <span
+      className={`leading-none select-none ${className}`}
+      style={{
+        fontFamily: "'Archivo Black', 'Anton', sans-serif",
+        fontWeight: 900,
+        ...style,
+      }}
+    >
+      <span style={{ color: 'var(--text-primary)' }}>OFF</span>
+      <span style={{ color: 'var(--accent)' }}>SZN</span>
     </span>
   );
 }

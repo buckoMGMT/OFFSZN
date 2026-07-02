@@ -97,9 +97,9 @@ export default function Clans() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
+      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
         <div className="flex items-center justify-between mb-1">
-          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>Teams</h1>
+          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase' }}>Teams</h1>
           <div className="flex items-center gap-3">
             <PageLabel number={4} />
             {!myClan && (

@@ -60,12 +60,12 @@ export default function Feed() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
+      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
         <div className="flex items-center justify-between mb-1">
-          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>The Field</h1>
+          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>The Field</h1>
           <PageLabel number={1} />
         </div>
-        <p className="font-elite text-xs mb-3" style={{ color: 'var(--theme-ink-soft)' }}>GAME FEED — LIVE REPORTS</p>
+        <p className="eyebrow mb-3">Game Feed — Live Reports</p>
 
         {/* Filter tabs */}
         <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
@@ -79,8 +79,8 @@ export default function Feed() {
               onClick={() => setFeedFilter(tab.id)}
               className="flex-1 py-2 font-elite text-xs uppercase tracking-widest transition-all"
               style={{
-                color: feedFilter === tab.id ? '#00C853' : '#5A5D63',
-                borderBottom: feedFilter === tab.id ? '2px solid #00C853' : '2px solid transparent',
+                color: feedFilter === tab.id ? 'var(--accent)' : 'var(--text-tertiary)',
+                borderBottom: feedFilter === tab.id ? '2px solid var(--accent)' : '2px solid transparent',
               }}
             >
               {tab.label}
@@ -89,18 +89,18 @@ export default function Feed() {
         </div>
       </div>
 
-      <div className="px-4 py-4">
+      <div className="px-5 py-4">
         {/* Clan feed */}
         {feedFilter === "clan" && <ClanFeed athlete={athlete} />}
 
         {/* Compose */}
         {feedFilter !== "clan" && athlete && (
-          <div className="mb-4 border rounded p-3" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-surface)' }}>
+          <div className="mb-4 card-base p-3">
             {showCompose ? (
               <div className="space-y-3">
                 <textarea
-                  className="w-full rounded px-3 py-2.5 text-sm outline-none resize-none h-20 font-work"
-                  style={{ background: 'var(--theme-surface-alt)', color: 'var(--theme-ink)', border: '1px solid var(--theme-border)' }}
+                  className="input-base resize-none"
+                  style={{ height: 80, padding: '12px 16px', minHeight: 'auto', fontSize: 'var(--text-sm)' }}
                   placeholder="What's your win today?"
                   value={newPost}
                   onChange={e => setNewPost(e.target.value)}
@@ -133,7 +133,7 @@ export default function Feed() {
                   }
                 </div>
                 <span className="text-sm font-work flex-1" style={{ color: 'var(--theme-ink-soft)' }}>Log a win…</span>
-                <Plus size={15} style={{ color: '#00C853' }} />
+                <Plus size={15} style={{ color: 'var(--accent)' }} />
               </button>
             )}
           </div>
@@ -141,18 +141,35 @@ export default function Feed() {
 
         {/* Loading state — play diagram instead of spinner */}
         {feedFilter !== "clan" && loading && (
-          <div className="flex flex-col items-center justify-center py-16">
-            <PlayDiagram size={160} />
-            <p className="font-elite text-xs mt-4" style={{ color: 'var(--theme-ink-soft)' }}>Loading the field…</p>
+          /* §5: Skeleton loaders replace spinners — content streams in */
+          <div className="space-y-4 pt-2">
+            {[1,2,3].map(i => (
+              <div key={i} className="card-base p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="skeleton" style={{ width: 36, height: 36, borderRadius: 'var(--r-full)', flexShrink: 0 }} />
+                  <div className="flex-1 space-y-2">
+                    <div className="skeleton" style={{ width: '55%', height: 13 }} />
+                    <div className="skeleton" style={{ width: '35%', height: 10 }} />
+                  </div>
+                </div>
+                <div className="skeleton" style={{ width: '100%', height: 12 }} />
+                <div className="skeleton" style={{ width: '75%', height: 12 }} />
+              </div>
+            ))}
           </div>
         )}
 
         {/* Empty */}
         {feedFilter !== "clan" && !loading && posts.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <PlayDiagram size={160} />
-            <h3 className="font-anton text-xl uppercase mt-4 mb-1" style={{ color: 'var(--theme-ink)' }}>The Feed Awaits</h3>
-            <p className="text-sm font-work max-w-xs" style={{ color: 'var(--theme-ink-soft)' }}>Join a team. Log your first win. Show up on the board.</p>
+          /* §5 EmptyState + §7 Hick's: one clear action */
+          <div className="flex flex-col items-center justify-center py-16 text-center px-5">
+            <PlayDiagram size={130} />
+            <p style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-xl)', color: 'var(--text-primary)', textTransform: 'uppercase', marginTop: 16, marginBottom: 8 }}>
+              The Field's Empty.
+            </p>
+            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', maxWidth: '32ch' }}>
+              Log your first win. The board doesn't fill itself.
+            </p>
           </div>
         )}
 
