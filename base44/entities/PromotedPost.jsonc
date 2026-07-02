@@ -1,0 +1,18 @@
+// base44/entities/PromotedPost.jsonc
+{
+  "name": "PromotedPost",
+  "type": "object",
+  "title": "Promoted Post",
+  "description": "Paid placement of coach content into the free-tier feed. Must be moderation-approved before status can be 'active'.",
+  "properties": {
+    "coach_id": { "type": "string" },
+    "target_content_id": { "type": "string" },
+    "target_content_type": { "type": "string", "enum": ["stretch_program", "video_submission"] },
+    "budget_cents": { "type": "integer", "minimum": 0 },
+    "spent_cents": { "type": "integer", "default": 0 },
+    "status": { "type": "string", "enum": ["active", "paused", "exhausted", "rejected"], "default": "paused" },
+    "moderation_status": { "type": "string", "enum": ["pending", "approved", "rejected"], "default": "pending" },
+    "impressions": { "type": "integer", "default": 0 }
+  },
+  "required": ["coach_id", "target_content_id", "target_content_type", "budget_cents"]
+}

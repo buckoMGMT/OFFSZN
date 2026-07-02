@@ -1,0 +1,19 @@
+// base44/entities/FraudEvent.jsonc
+{
+  "name": "FraudEvent",
+  "type": "object",
+  "title": "Fraud Event",
+  "description": "Audit log written by the Fraud & Security Guard agent. Read by the human trust-and-safety review queue.",
+  "properties": {
+    "athlete_id": { "type": "string" },
+    "event_type": {
+      "type": "string",
+      "enum": ["velocity_anomaly", "impossible_geo", "duplicate_device", "scrape_pattern", "point_exploit"]
+    },
+    "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "evidence": { "type": "object" },
+    "action_taken": { "type": "string", "enum": ["logged", "flagged", "throttled", "suspended"] },
+    "reviewed_by_human": { "type": "boolean", "default": false }
+  },
+  "required": ["athlete_id", "event_type", "severity"]
+}
