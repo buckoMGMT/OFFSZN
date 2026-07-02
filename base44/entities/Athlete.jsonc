@@ -71,6 +71,15 @@
       ],
       "default": "free"
     },
+    "role": {
+      "type": "string",
+      "enum": [
+        "athlete",
+        "coach",
+        "school_admin"
+      ],
+      "default": "athlete"
+    },
     "clan_id": {
       "type": "string"
     },
@@ -125,6 +134,21 @@
     "is_coach_verified": {
       "type": "boolean",
       "default": false
+    },
+    "is_flagged": {
+      "type": "boolean",
+      "default": false
+    },
+    "flagged_reason": {
+      "type": "string"
+    },
+    "flagged_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "throttle_until": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
