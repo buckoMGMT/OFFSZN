@@ -63,6 +63,19 @@
     },
     "metric_value": {
       "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "pending_human_review"
+      ],
+      "default": "approved"
+    },
+    "moderation_notes": {
+      "type": "string"
     }
   },
   "required": [
