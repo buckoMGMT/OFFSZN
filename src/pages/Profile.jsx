@@ -78,8 +78,8 @@ export default function Profile() {
   if (!athlete) return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ background: '#EDEEF0' }}>
       <PlayDiagram size={160} />
-      <h1 className="font-anton text-3xl uppercase mt-6 mb-2" style={{ color: '#15151A' }}>Welcome to The Playbook</h1>
-      <p className="font-work text-sm mb-8 max-w-xs" style={{ color: '#5A5D63' }}>Every champion needs a playbook. Build your player card.</p>
+      <h1 className="font-anton text-3xl uppercase mt-6 mb-2" style={{ color: '#15151A' }}>Welcome to OFFSZN</h1>
+      <p className="font-work text-sm mb-8 max-w-xs" style={{ color: '#5A5D63' }}>Every champion needs a system. Build your player card.</p>
       <StampButton onClick={createProfile} disabled={saving} className="text-base px-8 py-3">
         {saving ? "Creating..." : "Build My Card"}
       </StampButton>
@@ -389,7 +389,7 @@ export default function Profile() {
             {/* Coach's sticky note */}
             <div className="flex justify-center">
               <div className="sticky-note">
-                "Every athlete can make plays — but what is an athlete without a playbook?"
+                "It's not the off-season. It's OFFSZN."
               </div>
             </div>
 

@@ -122,7 +122,7 @@ function PlaybookCover({ onDone }) {
           className="absolute text-white/20 font-barlow font-black tracking-widest text-xs whitespace-nowrap"
           style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}
         >
-          THE PLAYBOOK
+          OFFSZN
         </span>
       </div>
 
@@ -139,8 +139,8 @@ function PlaybookCover({ onDone }) {
         {/* Title */}
         <div className="text-center">
           <p className="text-white/40 font-barlow text-xs uppercase tracking-[0.3em] mb-1">High Performance System</p>
-          <h1 className="font-display text-white text-5xl tracking-widest leading-none">THE</h1>
-          <h1 className="font-display text-primary text-5xl tracking-widest leading-none">PLAYBOOK</h1>
+          <h1 className="font-display text-white text-5xl tracking-widest leading-none">OFF</h1>
+          <h1 className="font-display text-primary text-5xl tracking-widest leading-none">SZN</h1>
         </div>
 
         {/* Tap to open */}
@@ -150,7 +150,7 @@ function PlaybookCover({ onDone }) {
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          Open Playbook
+          Enter OFFSZN
         </motion.button>
       </div>
 
@@ -204,7 +204,7 @@ export default function PlaybookSplash({ onDone }) {
         >
           <PlaybookBackground />
           <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="font-display text-4xl text-white/20 tracking-widest">THE PLAYBOOK</h1>
+            <h1 className="font-display text-4xl text-white/20 tracking-widest">OFFSZN</h1>
           </div>
           {/* Page curl shadow */}
           <div
