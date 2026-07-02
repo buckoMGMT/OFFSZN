@@ -60,7 +60,9 @@ export default function Feed() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
+      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b field-lines" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
+        {/* Accent top stripe */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--accent)', opacity: 0.9 }} />
         <div className="flex items-center justify-between mb-1">
           <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>The Field</h1>
           <PageLabel number={1} />
