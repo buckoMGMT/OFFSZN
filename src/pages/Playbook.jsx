@@ -185,10 +185,10 @@ export default function Playbook() {
       {/* Header */}
       <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
         <div className="flex items-center justify-between mb-1">
-          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>Playbook</h1>
+          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>Drills</h1>
           <PageLabel number={3} />
         </div>
-        <p className="font-elite text-[9px] uppercase tracking-widest mb-3" style={{ color: 'var(--theme-ink-soft)' }}>Training Programs — Select a Play</p>
+        <p className="font-elite text-[9px] uppercase tracking-widest mb-3" style={{ color: 'var(--theme-ink-soft)' }}>Training Programs — Select a Drill</p>
 
         {/* Tab bar */}
         <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
