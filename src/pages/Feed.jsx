@@ -79,8 +79,8 @@ export default function Feed() {
               onClick={() => setFeedFilter(tab.id)}
               className="flex-1 py-2 font-elite text-xs uppercase tracking-widest transition-all"
               style={{
-                color: feedFilter === tab.id ? '#D7263D' : '#5A5D63',
-                borderBottom: feedFilter === tab.id ? '2px solid #D7263D' : '2px solid transparent',
+                color: feedFilter === tab.id ? '#00C853' : '#5A5D63',
+                borderBottom: feedFilter === tab.id ? '2px solid #00C853' : '2px solid transparent',
               }}
             >
               {tab.label}
@@ -133,7 +133,7 @@ export default function Feed() {
                   }
                 </div>
                 <span className="text-sm font-work flex-1" style={{ color: 'var(--theme-ink-soft)' }}>Log a win…</span>
-                <Plus size={15} style={{ color: '#D7263D' }} />
+                <Plus size={15} style={{ color: '#00C853' }} />
               </button>
             )}
           </div>

@@ -41,7 +41,7 @@ function StopwatchRing({ value, max, label, size = 110 }) {
           <circle
             cx={center} cy={center} r={r}
             fill="none"
-            stroke="#D7263D"
+            stroke="#00C853"
             strokeWidth="7"
             strokeLinecap="butt"
             strokeDasharray={circumference}
@@ -196,7 +196,7 @@ export default function Track() {
             <p className="font-anton text-2xl" style={{ color: 'var(--theme-ink)' }}>{log?.water_oz || 0}</p>
             <p className="font-elite text-[9px]" style={{ color: 'var(--theme-ink-soft)' }}>oz / 128</p>
             <div className="h-1 rounded-full my-2 overflow-hidden" style={{ background: 'var(--theme-border)' }}>
-              <div className="h-full rounded-full" style={{ width: `${waterPct}%`, background: '#D7263D', transition: 'width 0.5s ease' }} />
+              <div className="h-full rounded-full" style={{ width: `${waterPct}%`,               background: '#00C853', transition: 'width 0.5s ease' }} />
             </div>
             <button onClick={() => updateLog({ water_oz: (log?.water_oz || 0) + 8 })}
               className="w-full py-1 rounded font-elite text-[9px] uppercase tracking-wide" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
@@ -217,8 +217,8 @@ export default function Track() {
                 <button key={h} onClick={() => updateLog({ sleep_hours: Number(h) })}
                   className="flex-1 rounded py-1 font-elite text-[9px]"
                   style={{
-                    background: log?.sleep_hours === Number(h) ? '#D7263D' : 'var(--theme-surface-alt)',
-                    color: log?.sleep_hours === Number(h) ? '#fff' : 'var(--theme-ink-soft)',
+                    background: log?.sleep_hours === Number(h) ? '#00C853' : 'var(--theme-surface-alt)',
+                    color: log?.sleep_hours === Number(h) ? '#0A0B0D' : 'var(--theme-ink-soft)',
                     border: '1px solid var(--theme-border)',
                   }}>
                   {h}h
@@ -230,16 +230,16 @@ export default function Track() {
           {/* Workout */}
           <div className="rounded border p-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center gap-1 mb-2">
-              <CheckCircle size={12} style={{ color: log?.workout_complete ? '#D7263D' : 'var(--theme-ink-soft)' }} />
+              <CheckCircle size={12} style={{ color: log?.workout_complete ? '#00C853' : 'var(--theme-ink-soft)' }} />
               <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Workout</span>
             </div>
             <button onClick={() => updateLog({ workout_complete: !log?.workout_complete })} className="w-full text-left">
-              <p className="font-anton text-2xl mb-2" style={{ color: log?.workout_complete ? '#D7263D' : 'var(--theme-ink)' }}>
+              <p className="font-anton text-2xl mb-2" style={{ color: log?.workout_complete ? '#00C853' : 'var(--theme-ink)' }}>
                 {log?.workout_complete ? "✓" : "–"}
               </p>
               <div className="w-full py-1 rounded font-elite text-[9px] uppercase text-center" style={{
-                background: log?.workout_complete ? '#D7263D' : 'var(--theme-surface-alt)',
-                color: log?.workout_complete ? '#fff' : 'var(--theme-ink-soft)',
+                background: log?.workout_complete ? '#00C853' : 'var(--theme-surface-alt)',
+                color: log?.workout_complete ? '#0A0B0D' : 'var(--theme-ink-soft)',
                 border: '1px solid var(--theme-border)',
               }}>
                 {log?.workout_complete ? "Done" : "Log It"}

@@ -120,8 +120,8 @@ export default function Clans() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex-1 py-2 font-elite text-xs uppercase tracking-widest"
               style={{
-                color: tab === t.id ? '#D7263D' : '#5A5D63',
-                borderBottom: tab === t.id ? '2px solid #D7263D' : '2px solid transparent',
+                color: tab === t.id ? '#00C853' : '#5A5D63',
+                borderBottom: tab === t.id ? '2px solid #00C853' : '2px solid transparent',
               }}>
               {t.label}
             </button>
@@ -135,14 +135,14 @@ export default function Clans() {
           <div className="rounded border p-4 mb-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)' }}>
-                <Shield size={18} style={{ color: '#D7263D' }} />
+                <Shield size={18} style={{ color: '#00C853' }} />
               </div>
               <div className="flex-1">
                 <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>My Team</p>
                 <h3 className="font-anton text-lg uppercase" style={{ color: 'var(--theme-ink)' }}>{myClan.name}</h3>
                 <div className="flex items-center gap-3 mt-0.5">
                   <span className="font-elite text-[9px]" style={{ color: '#5A5D63' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length} members</span>
-                  <span className="font-elite text-[9px]" style={{ color: '#D7263D' }}><Trophy size={9} className="inline mr-0.5" />{myClan.total_points} pts</span>
+                  <span className="font-elite text-[9px]" style={{ color: '#00C853' }}><Trophy size={9} className="inline mr-0.5" />{myClan.total_points} pts</span>
                 </div>
               </div>
               <button onClick={leaveClan} className="p-1.5 rounded" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)' }}>
@@ -206,15 +206,15 @@ export default function Clans() {
                 return (
                   <div key={clan.id} className="relative rounded border p-4 flex items-center gap-4"
                     style={{
-                      background: isMe ? '#D7263D10' : 'var(--theme-surface)',
-                      borderColor: isMe ? '#D7263D' : 'var(--theme-border)',
+                      background: isMe ? '#00C85310' : 'var(--theme-surface)',
+                      borderColor: isMe ? '#00C853' : 'var(--theme-border)',
                     }}>
                     {isCircled && <CoachCircle />}
 
                     {/* Rank */}
                     <div className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0 font-elite text-base"
                       style={{
-                        background: i === 0 ? '#D7263D' : 'var(--theme-surface-alt)',
+                        background: i === 0 ? '#00C853' : 'var(--theme-surface-alt)',
                         color: i === 0 ? '#fff' : 'var(--theme-ink)',
                         border: '1px solid var(--theme-border)',
                       }}>
@@ -228,7 +228,7 @@ export default function Clans() {
                       <p className="font-elite text-[9px] uppercase tracking-wide" style={{ color: 'var(--theme-ink-soft)' }}>{(clan.member_ids || []).length} members</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-elite text-lg" style={{ color: i === 0 ? '#D7263D' : 'var(--theme-ink)' }}>{(clan.total_points || 0).toLocaleString()}</p>
+                      <p className="font-elite text-lg" style={{ color: i === 0 ? '#00C853' : 'var(--theme-ink)' }}>{(clan.total_points || 0).toLocaleString()}</p>
                       <p className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>pts</p>
                     </div>
                   </div>

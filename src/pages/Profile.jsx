@@ -20,7 +20,7 @@ function ChromeSeal() {
     <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
       <circle cx="26" cy="26" r="24" stroke="#9BA3AC" strokeWidth="2.5" fill="#DCDEE1" />
       <circle cx="26" cy="26" r="19" stroke="#5E646B" strokeWidth="1" fill="none" strokeDasharray="3 2" />
-      <text x="26" y="22" textAnchor="middle" fontFamily="Anton" fontSize="7" fill="#00C853" letterSpacing="1">ALL-SZN</text>
+      <text x="26" y="22" textAnchor="middle" fontFamily="Anton" fontSize="7" fill="#00C853" letterSpacing="1">ALL‑SZN</text>
       <text x="26" y="31" textAnchor="middle" fontFamily="Special Elite" fontSize="5" fill="#5E646B" letterSpacing="1">PASS</text>
       <text x="26" y="37" textAnchor="middle" fontFamily="Special Elite" fontSize="4" fill="#9BA3AC" letterSpacing="0.5">VERIFIED</text>
     </svg>
@@ -80,7 +80,7 @@ export default function Profile() {
       <PlayDiagram size={160} />
       <h1 className="font-anton text-3xl uppercase mt-6 mb-2" style={{ color: '#15151A' }}>Welcome to OFFSZN</h1>
       <p className="font-work text-sm mb-8 max-w-xs" style={{ color: '#5A5D63' }}>Every champion needs a system. Build your player card.</p>
-      <StampButton onClick={createProfile} disabled={saving} className="text-base px-8 py-3">
+      <StampButton onClick={createProfile} disabled={saving} className="text-base px-8 py-3 mt-2">
         {saving ? "Creating..." : "Build My Card"}
       </StampButton>
     </div>
@@ -105,7 +105,7 @@ export default function Profile() {
             <div className="w-16 h-16 rounded border-2 flex items-center justify-center overflow-hidden flex-shrink-0" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg)' }}>
               {athlete.avatar_url
                 ? <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
-                : <span className="font-anton text-2xl" style={{ color: '#D7263D' }}>{(athlete.display_name || "A")[0].toUpperCase()}</span>
+                :             <span className="font-anton text-2xl" style={{ color: '#00C853' }}>{(athlete.display_name || "A")[0].toUpperCase()}</span>
               }
             </div>
             <div>
@@ -128,19 +128,19 @@ export default function Profile() {
         {/* Stats strip */}
         <div className="flex items-center gap-4 mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
           <div className="flex items-center gap-1.5">
-            <Trophy size={12} style={{ color: '#D7263D' }} />
+            <Trophy size={12} style={{ color: '#00C853' }} />
             <span className="font-elite text-sm" style={{ color: 'var(--theme-ink)' }}>{(athlete.total_points || 0).toLocaleString()}</span>
             <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>pts</span>
           </div>
           {athlete.current_streak_days > 0 && (
             <div className="flex items-center gap-1.5">
-              <span className="font-elite text-sm" style={{ color: '#D7263D' }}>{athlete.current_streak_days}</span>
-                <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>SZN streak</span>
+              <span className="font-elite text-sm" style={{ color: '#00C853' }}>{athlete.current_streak_days}</span>
+                <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>SZN Streak</span>
             </div>
           )}
           {isPremium
             ? <div className="ml-auto"><ChromeSeal /></div>
-            : <button className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: '#D7263D' }}>Upgrade →</button>
+            : <button className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: '#00C853' }}>Get ALL-SZN Pass →</button>
           }
         </div>
       </div>
@@ -157,8 +157,8 @@ export default function Profile() {
           <button key={s.id} onClick={() => setActiveSection(s.id)}
             className="flex-1 py-3 font-elite text-[9px] uppercase tracking-widest"
             style={{
-              color: activeSection === s.id ? '#D7263D' : 'var(--theme-ink-soft)',
-              borderBottom: activeSection === s.id ? '2px solid #D7263D' : '2px solid transparent',
+              color: activeSection === s.id ? '#00C853' : 'var(--theme-ink-soft)',
+              borderBottom: activeSection === s.id ? '2px solid #00C853' : '2px solid transparent',
             }}>
             {s.label}
           </button>
@@ -213,13 +213,13 @@ export default function Profile() {
             <div className="grid grid-cols-2 gap-2">
               {[
                 { label: "Day Streak", value: athlete.current_streak_days || 0 },
-                { label: "Total Points", value: (athlete.total_points || 0).toLocaleString(), accent: true },
+                { label: "OFFSZN Points", value: (athlete.total_points || 0).toLocaleString(), accent: true },
                 { label: "Current lbs", value: athlete.weight_lbs || "--" },
                 { label: "Goal lbs", value: athlete.goal_weight_lbs || "--" },
               ].map(({ label, value, accent }) => (
-                <div key={label} className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: accent ? '#D7263D' : 'var(--theme-border)', borderLeftWidth: accent ? 3 : 1 }}>
+                <div key={label} className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: accent ? '#00C853' : 'var(--theme-border)', borderLeftWidth: accent ? 3 : 1 }}>
                   <p className="font-elite text-[8px] uppercase tracking-widest mb-1" style={{ color: 'var(--theme-ink-soft)' }}>{label}</p>
-                  <p className="font-elite text-3xl leading-none" style={{ color: accent ? '#D7263D' : 'var(--theme-ink)' }}>{value}</p>
+                  <p className="font-elite text-3xl leading-none" style={{ color: accent ? '#00C853' : 'var(--theme-ink)' }}>{value}</p>
                 </div>
               ))}
             </div>
@@ -292,7 +292,7 @@ export default function Profile() {
               <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: 'var(--theme-ink-soft)' }}>Appearance</p>
               <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                 <div className="flex items-center gap-3">
-                  {darkMode ? <Moon size={15} style={{ color: '#D7263D' }} /> : <Sun size={15} style={{ color: '#D7263D' }} />}
+                  {darkMode ? <Moon size={15} style={{ color: '#00C853' }} /> : <Sun size={15} style={{ color: '#00C853' }} />}
                   <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>
                     {darkMode ? "Dark Mode" : "Light Mode"}
                   </span>
@@ -300,7 +300,7 @@ export default function Profile() {
                 <button
                   onClick={() => setDarkMode(d => !d)}
                   className="w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0"
-                  style={{ background: darkMode ? '#D7263D' : '#9BA3AC' }}>
+                  style={{ background: darkMode ? '#00C853' : '#9BA3AC' }}>
                   <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all duration-300"
                     style={{ left: darkMode ? '26px' : '2px' }} />
                 </button>
@@ -317,13 +317,13 @@ export default function Profile() {
               ].map(({ label, key }) => (
                 <div key={key} className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                     <div className="flex items-center gap-3">
-                      <Bell size={15} style={{ color: '#D7263D' }} />
+                      <Bell size={15} style={{ color: '#00C853' }} />
                       <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>{label}</span>
                   </div>
                   <button
                     onClick={() => { setNotifications(n => !n); localStorage.setItem('pb_notifs', notifications ? 'off' : 'on'); }}
                     className="w-12 h-6 rounded-full relative transition-all duration-300"
-                    style={{ background: notifications ? '#D7263D' : '#9BA3AC' }}>
+                    style={{ background: notifications ? '#00C853' : '#9BA3AC' }}>
                     <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all duration-300"
                       style={{ left: notifications ? '26px' : '2px' }} />
                   </button>
@@ -340,7 +340,7 @@ export default function Profile() {
                   {["imperial", "metric"].map(u => (
                     <button key={u} onClick={() => { setUnits(u); localStorage.setItem('pb_units', u); }}
                       className="px-3 py-1 font-elite text-[9px] uppercase tracking-widest transition-all"
-                      style={{ background: units === u ? '#D7263D' : 'transparent', color: units === u ? '#fff' : 'var(--theme-ink-soft)' }}>
+                      style={{                       background: units === u ? '#00C853' : 'transparent', color: units === u ? '#0A0B0D' : 'var(--theme-ink-soft)' }}>
                       {u}
                     </button>
                   ))}
@@ -352,7 +352,7 @@ export default function Profile() {
                   {["public", "private"].map(p => (
                     <button key={p} onClick={() => { setPrivacy(p); localStorage.setItem('pb_privacy', p); }}
                       className="px-3 py-1 font-elite text-[9px] uppercase tracking-widest transition-all"
-                      style={{ background: privacy === p ? '#D7263D' : 'transparent', color: privacy === p ? '#fff' : 'var(--theme-ink-soft)' }}>
+                      style={{                       background: privacy === p ? '#00C853' : 'transparent', color: privacy === p ? '#0A0B0D' : 'var(--theme-ink-soft)' }}>
                       {p}
                     </button>
                   ))}
@@ -362,16 +362,16 @@ export default function Profile() {
 
             {/* Subscription */}
             {!isPremium && (
-              <div className="rounded border-2 p-5 flex items-center justify-between" style={{ borderColor: '#D7263D', background: 'var(--theme-surface)' }}>
+              <div className="rounded border-2 p-5 flex items-center justify-between" style={{ borderColor: '#00C853', background: 'var(--theme-surface)' }}>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <Crown size={14} style={{ color: '#D7263D' }} />
+                    <Crown size={14} style={{ color: '#00C853' }} />
                     <span className="font-anton text-base uppercase" style={{ color: 'var(--theme-ink)' }}>ALL-SZN Pass</span>
                   </div>
                   <p className="font-work text-xs" style={{ color: 'var(--theme-ink-soft)' }}>Elite programs · Advanced analytics</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-elite text-xl" style={{ color: '#D7263D' }}>$9.99<span style={{ fontSize: 11 }}>/mo</span></p>
+                  <p className="font-elite text-xl" style={{ color: '#00C853' }}>$9.99<span style={{ fontSize: 11 }}>/mo</span></p>
                   <StampButton className="text-[10px] px-3 py-1 mt-1">Upgrade</StampButton>
                 </div>
               </div>
@@ -380,10 +380,10 @@ export default function Profile() {
             {/* Points balance */}
             <div className="rounded border p-4 flex items-center justify-between" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <div className="flex items-center gap-2">
-                <Zap size={14} style={{ color: '#D7263D' }} />
+                <Zap size={14} style={{ color: '#00C853' }} />
                 <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>Your Points</span>
               </div>
-              <span className="font-elite text-xl" style={{ color: '#D7263D' }}>{(athlete.total_points || 0).toLocaleString()}</span>
+              <span className="font-elite text-xl" style={{ color: '#00C853' }}>{(athlete.total_points || 0).toLocaleString()}</span>
             </div>
 
             {/* Coach's sticky note */}
@@ -395,7 +395,7 @@ export default function Profile() {
 
             {/* Scripture */}
             <div className="rounded border p-5 text-center" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
-              <p className="font-elite text-xl mb-2" style={{ color: '#D7263D' }}>Proverbs 3:5-6</p>
+              <p className="font-elite text-xl mb-2" style={{ color: '#00C853' }}>Proverbs 3:5-6</p>
               <p className="font-work text-xs leading-relaxed" style={{ color: 'var(--theme-ink-soft)', fontStyle: 'italic' }}>
                 "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."
               </p>
@@ -408,8 +408,8 @@ export default function Profile() {
               <button className="w-full flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}
                 onClick={() => base44.auth.logout('/')}>
                 <div className="flex items-center gap-3">
-                  <LogOut size={15} style={{ color: '#D7263D' }} />
-                  <span className="font-elite text-xs uppercase tracking-widest" style={{ color: '#D7263D' }}>Sign Out</span>
+                  <LogOut size={15} style={{ color: '#00C853' }} />
+                  <span className="font-elite text-xs uppercase tracking-widest" style={{ color: '#00C853' }}>Sign Out</span>
                 </div>
                 <ChevronRight size={14} style={{ color: 'var(--theme-ink-soft)' }} />
               </button>

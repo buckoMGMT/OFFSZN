@@ -33,10 +33,10 @@ function XsOs({ size = 28 }) {
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
       <circle cx="8" cy="8" r="4" stroke="#9BA3AC" strokeWidth="1.5" fill="none" />
       <circle cx="20" cy="8" r="4" stroke="#9BA3AC" strokeWidth="1.5" fill="none" />
-      <line x1="5" y1="19" x2="11" y2="25" stroke="#D7263D" strokeWidth="1.5" />
-      <line x1="11" y1="19" x2="5" y2="25" stroke="#D7263D" strokeWidth="1.5" />
-      <line x1="17" y1="19" x2="23" y2="25" stroke="#D7263D" strokeWidth="1.5" />
-      <line x1="23" y1="19" x2="17" y2="25" stroke="#D7263D" strokeWidth="1.5" />
+      <line x1="5" y1="19" x2="11" y2="25" stroke="#00C853" strokeWidth="1.5" />
+      <line x1="11" y1="19" x2="5" y2="25" stroke="#00C853" strokeWidth="1.5" />
+      <line x1="17" y1="19" x2="23" y2="25" stroke="#00C853" strokeWidth="1.5" />
+      <line x1="23" y1="19" x2="17" y2="25" stroke="#00C853" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -110,7 +110,7 @@ export default function Playbook() {
             <button onClick={(e) => toggleSave(selected, e)}
               className="absolute top-14 right-4 p-2 rounded"
               style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)' }}>
-              {isSaved ? <BookmarkCheck size={16} style={{ color: '#D7263D' }} /> : <Bookmark size={16} style={{ color: '#5A5D63' }} />}
+              {isSaved ?               <BookmarkCheck size={16} style={{ color: '#00C853' }} /> : <Bookmark size={16} style={{ color: '#5A5D63' }} />}
             </button>
           )}
         </div>
@@ -125,7 +125,7 @@ export default function Playbook() {
                 </span>
               ) : selected.title}
             </h1>
-            <span className="font-elite text-[9px] uppercase tracking-widest mt-1.5 flex-shrink-0" style={{ color: '#D7263D', border: '2px solid #D7263D', padding: '2px 6px', borderRadius: 2 }}>
+            <span className="font-elite text-[9px] uppercase tracking-widest mt-1.5 flex-shrink-0" style={{ color: '#00C853', border: '2px solid #00C853', padding: '2px 6px', borderRadius: 2 }}>
               LVL {difficultyNum(selected.difficulty)}
             </span>
           </div>
@@ -137,7 +137,7 @@ export default function Playbook() {
           </div>
 
           <div className="rounded border p-3 mb-3 flex items-start gap-2" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
-            <Target size={13} style={{ color: '#D7263D', marginTop: 2, flexShrink: 0 }} />
+            <Target size={13} style={{ color: '#00C853', marginTop: 2, flexShrink: 0 }} />
             <div>
               <p className="font-elite text-[9px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--theme-ink-soft)' }}>Aim</p>
               <p className="font-work text-sm" style={{ color: 'var(--theme-ink)' }}>{selected.aim}</p>
@@ -162,8 +162,8 @@ export default function Playbook() {
           )}
 
           {locked ? (
-            <div className="rounded border p-6 text-center" style={{ background: 'var(--theme-surface)', borderColor: '#D7263D', borderWidth: 2 }}>
-              <Lock size={22} style={{ color: '#D7263D', margin: '0 auto 12px' }} />
+            <div className="rounded border p-6 text-center" style={{ background: 'var(--theme-surface)', borderColor: '#00C853', borderWidth: 2 }}>
+              <Lock size={22} style={{ color: '#00C853', margin: '0 auto 12px' }} />
               <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Classified</h3>
               <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Premium clearance required to unlock this program.</p>
               <StampButton>Upgrade — $9.99/mo</StampButton>
@@ -200,8 +200,8 @@ export default function Playbook() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex-1 py-2 font-elite text-xs uppercase tracking-widest"
               style={{
-                color: tab === t.id ? '#D7263D' : '#5A5D63',
-                borderBottom: tab === t.id ? '2px solid #D7263D' : '2px solid transparent',
+                color: tab === t.id ? '#00C853' : '#5A5D63',
+                borderBottom: tab === t.id ? '2px solid #00C853' : '2px solid transparent',
               }}>
               {t.label}
             </button>
@@ -214,8 +214,8 @@ export default function Playbook() {
               <button key={sport} onClick={() => setSportFilter(sport)}
                 className="flex-shrink-0 px-3 py-1 rounded font-elite text-[10px] uppercase tracking-widest transition-all"
                 style={{
-                  background: sportFilter === sport ? '#D7263D' : 'var(--theme-surface)',
-                  color: sportFilter === sport ? '#fff' : 'var(--theme-ink-soft)',
+                  background: sportFilter === sport ? '#00C853' : 'var(--theme-surface)',
+                  color: sportFilter === sport ? '#0A0B0D' : 'var(--theme-ink-soft)',
                   border: '1px solid var(--theme-border)',
                 }}>
                 {sport}
@@ -245,7 +245,7 @@ export default function Playbook() {
 
                       {isPremium && (
                         <button onClick={(e) => toggleSave(program, e)} className="absolute top-2 right-2 p-1 rounded" style={{ background: 'rgba(237,238,240,0.85)' }}>
-                          {isSaved ? <BookmarkCheck size={11} style={{ color: '#D7263D' }} /> : <Bookmark size={11} style={{ color: '#5A5D63' }} />}
+                          {isSaved ? <BookmarkCheck size={11} style={{ color: '#00C853' }} /> : <Bookmark size={11} style={{ color: '#5A5D63' }} />}
                         </button>
                       )}
 
@@ -263,7 +263,7 @@ export default function Playbook() {
                     <div className="p-2.5 space-y-1.5" style={{ background: 'var(--theme-surface)' }}>
                     <div className="flex items-center justify-between">
                       <XsOs size={22} />
-                        <span className="font-elite text-[9px]" style={{ color: '#D7263D', border: '1.5px solid #D7263D', padding: '1px 4px', borderRadius: 2, transform: 'rotate(-2deg)', display: 'inline-block' }}>
+                        <span className="font-elite text-[9px]" style={{ color: '#00C853', border: '1.5px solid #00C853', padding: '1px 4px', borderRadius: 2, transform: 'rotate(-2deg)', display: 'inline-block' }}>
                           LVL {difficultyNum(program.difficulty)}
                         </span>
                       </div>
@@ -288,8 +288,8 @@ export default function Playbook() {
         {tab === "saved" && (
           <div>
             {!isPremium ? (
-              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#D7263D', background: 'var(--theme-surface)' }}>
-                <Lock size={24} style={{ color: '#D7263D', margin: '0 auto 12px' }} />
+              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#00C853', background: 'var(--theme-surface)' }}>
+                <Lock size={24} style={{ color: '#00C853', margin: '0 auto 12px' }} />
                 <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Premium Feature</h3>
                 <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Upgrade to save programs.</p>
                 <StampButton>Upgrade — $9.99/mo</StampButton>
@@ -319,8 +319,8 @@ export default function Playbook() {
         {tab === "playlists" && (
           <div>
             {!isPremium ? (
-              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#D7263D', background: 'var(--theme-surface)' }}>
-                <Lock size={24} style={{ color: '#D7263D', margin: '0 auto 12px' }} />
+              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#00C853', background: 'var(--theme-surface)' }}>
+                <Lock size={24} style={{ color: '#00C853', margin: '0 auto 12px' }} />
                 <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Premium Feature</h3>
                 <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Upgrade to create custom training playlists.</p>
                 <StampButton>Upgrade — $9.99/mo</StampButton>
@@ -381,13 +381,13 @@ export default function Playbook() {
                 return (
                   <button key={p.id} onClick={() => setPlaylistPrograms(prev => included ? prev.filter(id => id !== p.id) : [...prev, p.id])}
                     className="w-full flex items-center gap-3 p-2.5 rounded border text-left"
-                    style={{ border: included ? '2px solid #D7263D' : '1px solid var(--theme-border)', background: included ? '#D7263D10' : 'var(--theme-surface)' }}>
+                    style={{ border: included ? '2px solid #00C853' : '1px solid var(--theme-border)', background: included ? '#00C85310' : 'var(--theme-surface)' }}>
                     <img src={p.cover} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-work text-xs font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>{p.title}</p>
                       <p className="font-elite text-[9px] uppercase" style={{ color: 'var(--theme-ink-soft)' }}>{p.duration}m</p>
                     </div>
-                    {included && <span style={{ color: '#D7263D', fontSize: 14 }}>✓</span>}
+                    {included && <span style={{ color: '#00C853', fontSize: 14 }}>✓</span>}
                   </button>
                 );
               })}

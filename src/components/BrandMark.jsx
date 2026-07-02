@@ -8,8 +8,8 @@ export default function BrandMark({ size = "md", className = "" }) {
   };
   return (
     <span className={`font-anton uppercase leading-none ${sizes[size] || sizes.md} ${className}`}>
-      <span style={{ color: '#EDEEF0' }}>OFF</span>
-      <span style={{ color: '#D7263D' }}>SZN</span>
+      <span style={{ color: '#F5F5F0' }}>OFF</span>
+      <span style={{ color: '#00C853' }}>SZN</span>
     </span>
   );
 }

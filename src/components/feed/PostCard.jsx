@@ -5,12 +5,12 @@ import { formatDistanceToNow } from "date-fns";
 import VideoPlayer from "@/components/feed/VideoPlayer";
 
 const typeConfig = {
-  achievement:     { icon: Trophy,   label: "PR",       stampColor: "#D7263D" },
+  achievement:     { icon: Trophy,   label: "PR",       stampColor: "#00C853" },
   macro_log:       { icon: Flame,    label: "Nutrition", stampColor: "#5E646B" },
   workout_complete:{ icon: Dumbbell, label: "Workout",  stampColor: "#5E646B" },
-  streak:          { icon: Zap,      label: "Streak",   stampColor: "#D7263D" },
-  clan_challenge:  { icon: Trophy,   label: "Challenge",stampColor: "#D7263D" },
-  weight_milestone:{ icon: Trophy,   label: "Milestone",stampColor: "#D7263D" },
+  streak:          { icon: Zap,      label: "SZN Streak", stampColor: "#00C853" },
+  clan_challenge:  { icon: Trophy,   label: "Challenge",stampColor: "#00C853" },
+  weight_milestone:{ icon: Trophy,   label: "Milestone",stampColor: "#00C853" },
 };
 
 // Slight random rotation for "clipped-in" feel — stable per post id
@@ -68,7 +68,7 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
           <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0" style={{ background: '#DCDEE1', border: '1px solid #9BA3AC' }}>
             {post.athlete_avatar
               ? <img src={post.athlete_avatar} alt="" className="w-full h-full object-cover" />
-              : <span className="font-elite text-xs" style={{ color: '#D7263D' }}>{(post.athlete_name || "A")[0].toUpperCase()}</span>
+              : <span className="font-elite text-xs" style={{ color: '#00C853' }}>{(post.athlete_name || "A")[0].toUpperCase()}</span>
             }
           </div>
           <div className="flex-1 min-w-0">
@@ -93,7 +93,7 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
         <div className="px-4 py-3">
           <p className="text-sm font-work leading-relaxed" style={{ color: '#15151A' }}>{post.content}</p>
           {post.metric_value && !post.metric_value.includes("http") && (
-            <p className="font-elite text-base mt-1" style={{ color: '#D7263D' }}>{post.metric_value}</p>
+            <p className="font-elite text-base mt-1" style={{ color: '#00C853' }}>{post.metric_value}</p>
           )}
         </div>
 
@@ -101,7 +101,7 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
         <div className="flex items-center gap-5 px-4 pb-3 pt-2 border-t" style={{ borderColor: '#DCDEE1' }}>
           <button onClick={handleLike}
             className={`flex items-center gap-1.5 transition-all duration-150 ${liked ? "scale-110" : ""}`}
-            style={{ color: liked ? '#D7263D' : '#9BA3AC' }}>
+            style={{ color: liked ? '#00C853' : '#9BA3AC' }}>
             <Heart size={15} fill={liked ? "currentColor" : "none"} />
             <span className="font-elite text-xs">{post.likes || 0}</span>
           </button>

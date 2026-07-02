@@ -21,10 +21,10 @@ function PointsBar({ current, target, label }) {
     <div>
       <div className="flex justify-between mb-1">
         <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{label}</span>
-        <span className="font-elite text-[9px]" style={{ color: '#D7263D' }}>{current.toLocaleString()} / {target.toLocaleString()}</span>
-      </div>
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: '#9BA3AC44' }}>
-        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: '#D7263D' }} />
+        <span className="font-elite text-[9px]" style={{ color: '#00C853' }}>{current.toLocaleString()} / {target.toLocaleString()}</span>
+        </div>
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: '#9BA3AC44' }}>
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: '#00C853' }} />
       </div>
     </div>
   );
@@ -43,7 +43,7 @@ function RewardCard({ item, athletePoints, onRedeem }) {
       className="rounded border overflow-hidden relative"
       style={{
         background: '#DCDEE1',
-        borderColor: item.is_featured ? '#D7263D' : '#9BA3AC',
+        borderColor: item.is_featured ? '#00C853' : '#9BA3AC',
         borderWidth: item.is_featured ? 2 : 1,
         opacity: isUnavailable ? 0.6 : (canAfford ? 1 : 0.75),
       }}
@@ -91,8 +91,8 @@ function RewardCard({ item, athletePoints, onRedeem }) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <Zap size={10} style={{ color: '#D7263D' }} />
-            <span className="font-elite text-sm" style={{ color: '#D7263D' }}>{item.points_required.toLocaleString()}</span>
+            <Zap size={10} style={{ color: '#00C853' }} />
+            <span className="font-elite text-sm" style={{ color: '#00C853' }}>{item.points_required.toLocaleString()}</span>
             <span className="font-elite text-[9px]" style={{ color: '#9BA3AC' }}>pts</span>
           </div>
           {isUnavailable
@@ -188,8 +188,8 @@ export default function Rewards() {
 
         {/* Points balance */}
         <div className="flex items-center gap-2 mb-3">
-          <Zap size={13} style={{ color: '#D7263D' }} />
-          <span className="font-elite text-base" style={{ color: '#D7263D' }}>{points.toLocaleString()}</span>
+          <Zap size={13} style={{ color: '#00C853' }} />
+          <span className="font-elite text-base" style={{ color: '#00C853' }}>{points.toLocaleString()}</span>
           <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: '#9BA3AC' }}>pts available</span>
         </div>
 
@@ -209,8 +209,8 @@ export default function Rewards() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex-1 py-2 font-elite text-[10px] uppercase tracking-widest"
               style={{
-                color: tab === t.id ? '#D7263D' : '#5A5D63',
-                borderBottom: tab === t.id ? '2px solid #D7263D' : '2px solid transparent',
+                color: tab === t.id ? '#00C853' : '#5A5D63',
+                borderBottom: tab === t.id ? '2px solid #00C853' : '2px solid transparent',
               }}>
               {t.label}
             </button>
@@ -233,7 +233,7 @@ export default function Rewards() {
                 <button key={f.id} onClick={() => setFilter(f.id)}
                   className="px-3 py-1 rounded font-elite text-[10px] uppercase tracking-widest"
                   style={{
-                    background: filter === f.id ? '#D7263D' : 'var(--theme-surface)',
+                    background: filter === f.id ? '#00C853' : 'var(--theme-surface)',
                         color: filter === f.id ? '#fff' : 'var(--theme-ink-soft)',
                         border: '1px solid var(--theme-border)',
                   }}>
@@ -244,12 +244,12 @@ export default function Rewards() {
 
             {/* Merch nudge banner */}
             {filter !== "gift_card" && (
-              <div className="rounded border-2 p-3 mb-4 flex items-start gap-3" style={{ borderColor: '#D7263D', background: '#D7263D12' }}>
-                <Shirt size={18} style={{ color: '#D7263D', flexShrink: 0, marginTop: 2 }} />
+              <div className="rounded border-2 p-3 mb-4 flex items-start gap-3" style={{ borderColor: '#00C853', background: '#00C85312' }}>
+                <Shirt size={18} style={{ color: '#00C853', flexShrink: 0, marginTop: 2 }} />
                 <div>
-                  <p className="font-elite text-[10px] uppercase tracking-widest mb-0.5" style={{ color: '#D7263D' }}>Rep the Brand → Earn Faster</p>
+                  <p className="font-elite text-[10px] uppercase tracking-widest mb-0.5" style={{ color: '#00C853' }}>Rep the Brand → Earn Faster</p>
                   <p className="font-work text-xs" style={{ color: '#5A5D63' }}>
-                    Merch items cost <strong>40% fewer points</strong> than gift cards — and you become a walking billboard for The Playbook.
+                    Merch items cost <strong>40% fewer points</strong> than gift cards — and you become a walking billboard for OFFSZN.
                   </p>
                 </div>
               </div>
@@ -282,7 +282,7 @@ export default function Rewards() {
                 {redemptions.map(r => (
                   <div key={r.id} className="rounded border p-4 flex items-center gap-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
                     <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)' }}>
-                      {r.reward_type === "merch" ? <Shirt size={16} style={{ color: '#D7263D' }} /> : <Gift size={16} style={{ color: '#D7263D' }} />}
+                      {r.reward_type === "merch" ? <Shirt size={16} style={{ color: '#00C853' }} /> : <Gift size={16} style={{ color: '#00C853' }} />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-work text-sm font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>{r.reward_name}</p>
@@ -291,7 +291,7 @@ export default function Rewards() {
                     <span className="font-elite text-[9px] uppercase px-2 py-0.5 rounded"
                       style={{
                         background: r.status === "delivered" ? 'var(--theme-ink)' : 'var(--theme-surface-alt)',
-                        color: r.status === "delivered" ? 'var(--theme-bg)' : '#D7263D',
+                        color: r.status === "delivered" ? 'var(--theme-bg)' : '#00C853',
                         border: '1px solid var(--theme-border)',
                       }}>
                       {r.status}
@@ -314,16 +314,16 @@ export default function Rewards() {
                   <div key={i} className="flex items-center justify-between py-2 border-b" style={{ borderColor: 'var(--theme-border)' }}>
                     <p className="font-work text-xs flex-1" style={{ color: 'var(--theme-ink)' }}>{d.action}</p>
                     <div className="flex items-center gap-1 ml-3">
-                      <Zap size={10} style={{ color: '#D7263D' }} />
-                      <span className="font-elite text-sm" style={{ color: '#D7263D' }}>+{d.pts}</span>
+                      <Zap size={10} style={{ color: '#00C853' }} />
+                      <span className="font-elite text-sm" style={{ color: '#00C853' }}>+{d.pts}</span>
                     </div>
                   </div>
                 ))}
                 <div className="flex items-center justify-between pt-2">
                   <p className="font-work text-xs font-semibold" style={{ color: 'var(--theme-ink)' }}>Daily Max (all 5 tasks)</p>
                   <div className="flex items-center gap-1">
-                    <Zap size={10} style={{ color: '#D7263D' }} />
-                    <span className="font-elite text-sm font-bold" style={{ color: '#D7263D' }}>85</span>
+                    <Zap size={10} style={{ color: '#00C853' }} />
+                    <span className="font-elite text-sm font-bold" style={{ color: '#00C853' }}>85</span>
                   </div>
                 </div>
               </div>
@@ -334,7 +334,7 @@ export default function Rewards() {
               {[
                 { tier: "Bronze", pts: "5", freq: "Daily", ex: "Complete any 1 daily task", color: '#9BA3AC' },
                 { tier: "Silver", pts: "15", freq: "Daily", ex: "Complete 3 of 5 daily tasks", color: '#5E646B' },
-                { tier: "Gold", pts: "50", freq: "Daily", ex: "Complete all 5 daily tasks", color: '#D7263D' },
+                { tier: "Gold", pts: "50", freq: "Daily", ex: "Complete all 5 daily tasks", color: '#00C853' },
               ].map(t => (
                 <div key={t.tier} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: 'var(--theme-border)' }}>
                   <div className="w-14 h-6 rounded flex items-center justify-center flex-shrink-0 font-elite text-[9px] uppercase"
@@ -346,8 +346,8 @@ export default function Rewards() {
                     <p className="font-elite text-[9px] uppercase tracking-widest mt-0.5" style={{ color: 'var(--theme-ink-soft)' }}>{t.freq}</p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Zap size={10} style={{ color: '#D7263D' }} />
-                    <span className="font-elite text-sm" style={{ color: '#D7263D' }}>{t.pts}</span>
+                    <Zap size={10} style={{ color: '#00C853' }} />
+                    <span className="font-elite text-sm" style={{ color: '#00C853' }}>{t.pts}</span>
                   </div>
                 </div>
               ))}
@@ -358,11 +358,11 @@ export default function Rewards() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <p className="font-work text-xs" style={{ color: 'var(--theme-ink)' }}>Friend joins via your link</p>
-                  <span className="font-elite text-sm" style={{ color: '#D7263D' }}>+500 pts</span>
+                  <span className="font-elite text-sm" style={{ color: '#00C853' }}>+500 pts</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <p className="font-work text-xs" style={{ color: 'var(--theme-ink)' }}>Friend logs 3 workouts</p>
-                  <span className="font-elite text-sm" style={{ color: '#D7263D' }}>+1,500 pts</span>
+                  <span className="font-elite text-sm" style={{ color: '#00C853' }}>+1,500 pts</span>
                 </div>
               </div>
             </div>

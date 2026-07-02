@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Rss, BarChart2, BookOpen, Shield, User, Gift } from "lucide-react";
 
 const tabs = [
-  { icon: Rss,      label: "Field",    path: "/",        color: "#D7263D",  textColor: "#fff" },
+  { icon: Rss,      label: "Field",    path: "/",        color: "#00C85322", textColor: "#fff" },
   { icon: BarChart2,label: "Stats",    path: "/track",   color: "#5E646B",  textColor: "#fff" },
   { icon: BookOpen, label: "Drills",   path: "/playbook",color: "#272729",  textColor: "#9BA3AC" },
   { icon: Shield,   label: "Teams",    path: "/clans",   color: "#1B1B1D",  textColor: "#9BA3AC" },
@@ -39,16 +39,16 @@ export default function BottomNav() {
                 <Icon
                   size={18}
                   strokeWidth={active ? 2 : 1.5}
-                  color={active ? '#D7263D' : textColor}
+                  color={active ? '#00C853' : textColor}
                 />
                 <span
                   className="font-elite text-[9px] uppercase tracking-widest leading-none"
-                  style={{ color: active ? '#D7263D' : textColor }}
+                  style={{ color: active ? '#00C853' : textColor }}
                 >
                   {label}
                 </span>
                 {active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full" style={{ background: '#D7263D' }} />
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full" style={{ background: '#00C853' }} />
                 )}
               </div>
             </Link>
