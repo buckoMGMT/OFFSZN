@@ -20,8 +20,8 @@ function ChromeSeal() {
     <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
       <circle cx="26" cy="26" r="24" stroke="#9BA3AC" strokeWidth="2.5" fill="#DCDEE1" />
       <circle cx="26" cy="26" r="19" stroke="#5E646B" strokeWidth="1" fill="none" strokeDasharray="3 2" />
-      <text x="26" y="22" textAnchor="middle" fontFamily="Anton" fontSize="10" fill="#D7263D" letterSpacing="1">TP</text>
-      <text x="26" y="31" textAnchor="middle" fontFamily="Special Elite" fontSize="5" fill="#5E646B" letterSpacing="1">PREMIUM</text>
+      <text x="26" y="22" textAnchor="middle" fontFamily="Anton" fontSize="7" fill="#D7263D" letterSpacing="1">ALL-SZN</text>
+      <text x="26" y="31" textAnchor="middle" fontFamily="Special Elite" fontSize="5" fill="#5E646B" letterSpacing="1">PASS</text>
       <text x="26" y="37" textAnchor="middle" fontFamily="Special Elite" fontSize="4" fill="#9BA3AC" letterSpacing="0.5">VERIFIED</text>
     </svg>
   );

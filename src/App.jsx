@@ -16,6 +16,7 @@ import Rewards from '@/pages/Rewards';
 import PlaybookSplash from '@/components/PlaybookSplash';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import GeoBlocker from '@/components/GeoBlocker';
+import BrandMark from '@/components/BrandMark';
 import { MilestoneNotifierProvider } from '@/lib/MilestoneNotifier';
 
 const AuthenticatedApp = () => {
@@ -34,7 +35,7 @@ const AuthenticatedApp = () => {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="text-4xl font-display text-primary tracking-widest">OFFSZN</div>
+          <BrandMark size="lg" />
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </div>

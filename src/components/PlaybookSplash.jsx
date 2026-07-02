@@ -50,6 +50,8 @@ function PlayDiagram() {
 }
 
 // Scattered X's and O's background
+import BrandMark from "@/components/BrandMark";
+
 function PlaybookBackground() {
   const items = [
     { type: "O", x: 8, y: 12, size: 28, rot: -12, op: 0.07 },
@@ -138,9 +140,8 @@ function PlaybookCover({ onDone }) {
 
         {/* Title */}
         <div className="text-center">
-          <p className="text-white/40 font-barlow text-xs uppercase tracking-[0.3em] mb-1">High Performance System</p>
-          <h1 className="font-display text-white text-5xl tracking-widest leading-none">OFF</h1>
-          <h1 className="font-display text-primary text-5xl tracking-widest leading-none">SZN</h1>
+          <p className="text-white/40 font-barlow text-xs uppercase tracking-[0.3em] mb-1">Made in the OFFSZN.</p>
+          <BrandMark size="lg" />
         </div>
 
         {/* Tap to open */}
