@@ -6,50 +6,74 @@
 
 @layer base {
   :root {
-    /* Floor / shell */
-    --background:       215 8% 6%;      /* #0D0D0F near-black */
-    --foreground:       220 5% 10%;     /* #15151A ink on page surfaces */
+    /* ── OFFSZN Field — Dark (default / pre-dawn workout energy) ── */
 
-    /* Cover surfaces — nav, headers, footers */
-    --cover:            220 5% 11%;     /* #1B1B1D */
-    --cover-lift:       220 4% 15%;     /* #272729 */
+    /* Shell */
+    --background:       220 8% 4%;       /* #0A0B0D near-black */
+    --foreground:       60 5% 96%;       /* #F5F5F0 chalk white */
 
-    /* Page surfaces — main content area */
-    --page:             216 6% 93%;     /* #EDEEF0 chalk white */
-    --page-alt:         216 6% 87%;     /* #DCDEE1 card within page */
+    /* Steel-gray card surfaces */
+    --cover:            220 6% 10%;      /* #181A1C */
+    --cover-lift:       220 5% 14%;      /* #212326 */
 
-    /* Primary accent: Athletic Red */
-    --primary:          351 71% 51%;    /* #D7263D */
-    --primary-foreground: 0 0% 100%;
+    /* Page / content area (dark default) */
+    --page:             220 6% 10%;      /* #181A1C */
+    --page-alt:         220 5% 14%;      /* #212326 */
+
+    /* Single accent — Turf Green */
+    --primary:          145 100% 39%;    /* #00C853 */
+    --primary-foreground: 220 8% 4%;
 
     /* Chrome / steel */
-    --chrome-light:     210 7% 65%;     /* #9BA3AC */
-    --chrome-dark:      210 6% 39%;     /* #5E646B */
+    --chrome-light:     210 7% 55%;      /* #838B94 */
+    --chrome-dark:      210 6% 32%;      /* #4C5258 */
 
     /* Ink */
-    --ink:              240 5% 10%;     /* #15151A */
-    --ink-soft:         218 4% 37%;     /* #5A5D63 */
+    --ink:              60 5% 96%;       /* #F5F5F0 chalk white */
+    --ink-soft:         210 5% 55%;      /* #848A8F */
 
-    /* Yellow — sticky note ONLY */
-    --sticky:           45 100% 62%;    /* #FFD93D */
+    /* Field line white */
+    --field-line:       60 5% 96%;       /* #F5F5F0 */
 
     /* shadcn token aliases */
-    --card:             216 6% 93%;
-    --card-foreground:  240 5% 10%;
-    --popover:          216 6% 93%;
-    --popover-foreground: 240 5% 10%;
-    --secondary:        216 6% 87%;
-    --secondary-foreground: 240 5% 10%;
-    --muted:            216 6% 87%;
-    --muted-foreground: 218 4% 37%;
-    --accent:           351 71% 51%;
-    --accent-foreground: 0 0% 100%;
-    --destructive:      351 71% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border:           210 6% 39%;
-    --input:            216 6% 87%;
-    --ring:             351 71% 51%;
-    --radius:           0.5rem;
+    --card:             220 6% 10%;
+    --card-foreground:  60 5% 96%;
+    --popover:          220 6% 10%;
+    --popover-foreground: 60 5% 96%;
+    --secondary:        220 5% 14%;
+    --secondary-foreground: 60 5% 96%;
+    --muted:            220 5% 14%;
+    --muted-foreground: 210 5% 55%;
+    --accent:           145 100% 39%;
+    --accent-foreground: 220 8% 4%;
+    --destructive:      0 72% 51%;
+    --destructive-foreground: 60 5% 96%;
+    --border:           220 5% 20%;
+    --input:            220 5% 14%;
+    --ring:             145 100% 39%;
+    --radius:           0.375rem;
+  }
+
+  /* ── Light mode override ── */
+  .light {
+    --background:       60 5% 96%;       /* #F5F5F0 chalk */
+    --foreground:       220 8% 8%;       /* #111316 */
+    --cover:            210 8% 90%;      /* #E3E5E8 */
+    --cover-lift:       210 7% 84%;      /* #D4D7DB */
+    --page:             60 5% 96%;
+    --page-alt:         210 8% 90%;
+    --ink:              220 8% 8%;
+    --ink-soft:         210 6% 40%;
+    --card:             60 5% 96%;
+    --card-foreground:  220 8% 8%;
+    --popover:          60 5% 96%;
+    --popover-foreground: 220 8% 8%;
+    --secondary:        210 8% 90%;
+    --secondary-foreground: 220 8% 8%;
+    --muted:            210 8% 90%;
+    --muted-foreground: 210 6% 40%;
+    --border:           210 6% 72%;
+    --input:            210 8% 90%;
   }
 }
 
@@ -57,8 +81,8 @@
   * { @apply border-border outline-ring/50; }
 
   body {
-    background: #0D0D0F;
-    color: #15151A;
+    background: #0A0B0D;
+    color: #F5F5F0;
     font-family: 'Work Sans', sans-serif;
   }
 
@@ -74,91 +98,126 @@
 @layer utilities {
   /* ── Page surface ── */
   .page-surface {
-    background: #EDEEF0;
-    color: #15151A;
+    background: #181A1C;
+    color: #F5F5F0;
   }
   .page-alt {
-    background: #DCDEE1;
+    background: #212326;
   }
 
-  /* ── Cover surface ── */
+  /* ── Cover / shell surface — stadium light gradient ── */
   .cover-surface {
-    background: linear-gradient(180deg, #1B1B1D 0%, #272729 100%);
+    background: linear-gradient(180deg, #0A0B0D 0%, #181A1C 100%);
   }
 
-  /* ── Stamp button — core signature interaction ── */
+  /* ── Turf grain texture (subtle repeating diagonal lines) ── */
+  .turf-texture {
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 3px,
+      rgba(0,200,83,0.03) 3px,
+      rgba(0,200,83,0.03) 6px
+    );
+  }
+
+  /* ── Chalk field lines (replaces binder rings) ── */
+  .field-lines {
+    position: relative;
+  }
+  .field-lines::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 38px,
+      rgba(245,245,240,0.06) 38px,
+      rgba(245,245,240,0.06) 40px
+    );
+    pointer-events: none;
+  }
+
+  /* ── Stadium light gradient header ── */
+  .stadium-header {
+    background: linear-gradient(
+      180deg,
+      rgba(0,200,83,0.08) 0%,
+      rgba(10,11,13,0) 100%
+    );
+  }
+
+  /* ── Field button — replaces btn-stamp ── */
   .btn-stamp {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    font-family: 'Special Elite', cursive;
+    font-family: 'Anton', sans-serif;
     font-size: 0.8rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #D7263D;
-    border: 3px solid #D7263D;
+    letter-spacing: 0.1em;
+    color: #00C853;
+    border: 2px solid #00C853;
     background: transparent;
-    border-radius: 4px;
+    border-radius: 3px;
     padding: 0.5rem 1.25rem;
-    transform: rotate(-2deg);
-    transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease;
+    transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
   }
-  .btn-stamp:active, .btn-stamp.stamped {
-    transform: rotate(0deg);
-    background: #D7263D;
-    color: #fff;
+  .btn-stamp:hover, .btn-stamp:active, .btn-stamp.stamped {
+    background: #00C853;
+    color: #0A0B0D;
+    box-shadow: 0 0 12px rgba(0,200,83,0.35);
   }
 
-  /* ── Binder ring holes ── */
+  /* ── Binder rings → field yard-line markers (kept as class for compat) ── */
   .binder-rings::before {
     content: '';
     position: absolute;
-    left: 10px;
+    left: 0;
+    right: 0;
     top: 0;
     bottom: 0;
-    width: 1px;
     background: repeating-linear-gradient(
       to bottom,
       transparent 0px,
-      transparent 22px,
-      #9BA3AC 22px,
-      #9BA3AC 23px,
-      transparent 23px,
-      transparent 28px
+      transparent 38px,
+      rgba(245,245,240,0.05) 38px,
+      rgba(245,245,240,0.05) 40px
     );
+    pointer-events: none;
   }
 
-  /* Small punched circles running down left margin */
   .ring-holes {
     position: relative;
   }
   .ring-holes::before {
     content: '';
     position: absolute;
-    left: 6px;
-    top: 24px;
-    bottom: 24px;
-    width: 12px;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
     background: repeating-linear-gradient(
       to bottom,
       transparent 0px,
-      transparent 26px,
-      #9BA3AC44 26px,
-      #9BA3AC44 38px,
-      transparent 38px,
-      transparent 64px
+      transparent 60px,
+      rgba(0,200,83,0.06) 60px,
+      rgba(0,200,83,0.06) 62px
     );
-    background-size: 12px 64px;
-    border-radius: 6px;
+    pointer-events: none;
   }
 
-  /* ── Graph paper background for charts ── */
+  /* ── Graph paper → turf grid for charts ── */
   .graph-paper {
-    background-color: #EDEEF0;
+    background-color: #181A1C;
     background-image:
-      linear-gradient(rgba(91,100,107,0.15) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(91,100,107,0.15) 1px, transparent 1px);
+      linear-gradient(rgba(245,245,240,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,245,240,0.05) 1px, transparent 1px);
     background-size: 20px 20px;
   }
 
@@ -172,25 +231,25 @@
     content: '';
     position: absolute;
     inset: 0 -2px;
-    background: #15151A;
+    background: #00C853;
     border-radius: 2px;
+    opacity: 0.25;
   }
 
-  /* ── Ink stamp badge ── */
+  /* ── Ink stamp badge → field tag ── */
   .ink-stamp {
-    font-family: 'Special Elite', cursive;
+    font-family: 'Anton', sans-serif;
     font-size: 0.6rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #D7263D;
-    border: 2px solid #D7263D;
+    letter-spacing: 0.12em;
+    color: #00C853;
+    border: 1.5px solid #00C853;
     padding: 1px 5px;
-    border-radius: 3px;
-    transform: rotate(-4deg);
+    border-radius: 2px;
     display: inline-block;
   }
 
-  /* ── Red coach oval annotation ── */
+  /* ── Coach oval annotation (green) ── */
   @keyframes coachCircle {
     0%   { stroke-dashoffset: 300; opacity: 0; }
     40%  { opacity: 1; }
@@ -213,14 +272,14 @@
 
   /* ── Page-number label ── */
   .page-number {
-    font-family: 'Special Elite', cursive;
-    font-size: 0.6rem;
-    color: #5A5D63;
-    letter-spacing: 0.12em;
+    font-family: 'Anton', sans-serif;
+    font-size: 0.55rem;
+    color: #848A8F;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
-  /* ── Binder tab shapes ── */
+  /* ── Binder tab → field position tab ── */
   .binder-tab {
     clip-path: polygon(0% 30%, 8% 0%, 92% 0%, 100% 30%, 100% 100%, 0% 100%);
     transition: all 0.15s ease;
@@ -230,14 +289,20 @@
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Sticky note yellow — use sparingly */
+  /* Chalk note — replaces sticky note */
   .sticky-note {
-    background: #FFD93D;
+    background: rgba(245,245,240,0.06);
     font-family: 'Permanent Marker', cursive;
-    color: #15151A;
+    color: #F5F5F0;
     padding: 0.5rem 0.75rem;
     transform: rotate(1.5deg);
     border-radius: 2px;
-    box-shadow: 2px 3px 6px rgba(0,0,0,0.25);
+    border: 1px solid rgba(245,245,240,0.12);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  /* ── Accent glow for key stats / active elements ── */
+  .accent-glow {
+    box-shadow: 0 0 16px rgba(0,200,83,0.25);
   }
 }

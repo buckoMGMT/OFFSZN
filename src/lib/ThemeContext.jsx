@@ -9,23 +9,25 @@ export function ThemeProvider({ children }) {
     localStorage.setItem('pb_theme', darkMode ? 'dark' : 'light');
     const root = document.documentElement;
     if (darkMode) {
-      root.classList.add('dark');
-      document.body.style.background = '#0D0D0F';
-      root.style.setProperty('--theme-bg', '#0D0D0F');
-      root.style.setProperty('--theme-surface', '#1B1B1D');
-      root.style.setProperty('--theme-surface-alt', '#272729');
-      root.style.setProperty('--theme-ink', '#EDEEF0');
-      root.style.setProperty('--theme-ink-soft', '#9BA3AC');
-      root.style.setProperty('--theme-border', '#5E646B');
+      root.classList.remove('light');
+      document.body.style.background = '#0A0B0D';
+      root.style.setProperty('--theme-bg', '#0A0B0D');
+      root.style.setProperty('--theme-surface', '#181A1C');
+      root.style.setProperty('--theme-surface-alt', '#212326');
+      root.style.setProperty('--theme-ink', '#F5F5F0');
+      root.style.setProperty('--theme-ink-soft', '#848A8F');
+      root.style.setProperty('--theme-border', '#2C2F33');
+      root.style.setProperty('--theme-accent', '#00C853');
     } else {
-      root.classList.remove('dark');
-      document.body.style.background = '#EDEEF0';
-      root.style.setProperty('--theme-bg', '#EDEEF0');
-      root.style.setProperty('--theme-surface', '#DCDEE1');
-      root.style.setProperty('--theme-surface-alt', '#EDEEF0');
-      root.style.setProperty('--theme-ink', '#15151A');
-      root.style.setProperty('--theme-ink-soft', '#5A5D63');
-      root.style.setProperty('--theme-border', '#9BA3AC');
+      root.classList.add('light');
+      document.body.style.background = '#F5F5F0';
+      root.style.setProperty('--theme-bg', '#F5F5F0');
+      root.style.setProperty('--theme-surface', '#E3E5E8');
+      root.style.setProperty('--theme-surface-alt', '#F5F5F0');
+      root.style.setProperty('--theme-ink', '#111316');
+      root.style.setProperty('--theme-ink-soft', '#5A6068');
+      root.style.setProperty('--theme-border', '#C8CBD0');
+      root.style.setProperty('--theme-accent', '#00C853');
     }
   }, [darkMode]);
 

@@ -10,68 +10,76 @@ module.exports = {
         sm: 'calc(var(--radius) - 4px)'
       },
       colors: {
-        background: '#0D0D0F',
-        foreground: '#15151A',
-        page: '#EDEEF0',
-        'page-alt': '#DCDEE1',
-        cover: '#1B1B1D',
-        'cover-lift': '#272729',
-        ink: '#15151A',
-        'ink-soft': '#5A5D63',
+        // ── OFFSZN Field palette ──
+        background: '#0A0B0D',       // pre-dawn near-black
+        foreground: '#F5F5F0',       // chalk white
+        page: '#181A1C',             // steel-gray card
+        'page-alt': '#212326',       // lifted steel
+        cover: '#181A1C',
+        'cover-lift': '#212326',
+        ink: '#F5F5F0',              // chalk white on dark
+        'ink-soft': '#848A8F',       // muted steel
+
+        // Single accent — Turf Green
         primary: {
-          DEFAULT: '#D7263D',
-          foreground: '#FFFFFF',
+          DEFAULT: '#00C853',
+          foreground: '#0A0B0D',
         },
         chrome: {
-          light: '#9BA3AC',
-          dark: '#5E646B',
+          light: '#838B94',
+          dark: '#4C5258',
         },
-        sticky: '#FFD93D',
+        // Field line white for decorative elements
+        'field-line': '#F5F5F0',
+
+        // shadcn aliases
         card: {
-          DEFAULT: '#EDEEF0',
-          foreground: '#15151A',
+          DEFAULT: '#181A1C',
+          foreground: '#F5F5F0',
         },
         popover: {
-          DEFAULT: '#EDEEF0',
-          foreground: '#15151A',
+          DEFAULT: '#181A1C',
+          foreground: '#F5F5F0',
         },
         secondary: {
-          DEFAULT: '#DCDEE1',
-          foreground: '#15151A',
+          DEFAULT: '#212326',
+          foreground: '#F5F5F0',
         },
         muted: {
-          DEFAULT: '#DCDEE1',
-          foreground: '#5A5D63',
+          DEFAULT: '#212326',
+          foreground: '#848A8F',
         },
         accent: {
-          DEFAULT: '#D7263D',
-          foreground: '#FFFFFF',
+          DEFAULT: '#00C853',
+          foreground: '#0A0B0D',
         },
         destructive: {
-          DEFAULT: '#D7263D',
-          foreground: '#FFFFFF',
+          DEFAULT: '#E53935',
+          foreground: '#F5F5F0',
         },
-        border: '#5E646B',
-        input: '#DCDEE1',
-        ring: '#D7263D',
+        border: '#2C2F33',
+        input: '#212326',
+        ring: '#00C853',
+        sticky: '#F5F5F0',
       },
       fontFamily: {
-        anton:  ['Anton', 'sans-serif'],
-        elite:  ['Special Elite', 'cursive'],
-        marker: ['Permanent Marker', 'cursive'],
-        work:   ['Work Sans', 'sans-serif'],
-        // Keep legacy names that existing code might reference
-        barlow: ['Special Elite', 'cursive'],
-        mono:   ['Special Elite', 'cursive'],
-        display:['Anton', 'sans-serif'],
+        anton:   ['Anton', 'sans-serif'],
+        elite:   ['Special Elite', 'cursive'],
+        marker:  ['Permanent Marker', 'cursive'],
+        work:    ['Work Sans', 'sans-serif'],
+        // Legacy aliases
+        barlow:  ['Anton', 'sans-serif'],
+        mono:    ['Special Elite', 'cursive'],
+        display: ['Anton', 'sans-serif'],
       },
       keyframes: {
         'accordion-down': { from: { height: '0' }, to: { height: 'var(--radix-accordion-content-height)' } },
         'accordion-up':   { from: { height: 'var(--radix-accordion-content-height)' }, to: { height: '0' } },
         'slide-up':       { from: { transform: 'translateY(20px)', opacity: '0' }, to: { transform: 'translateY(0)', opacity: '1' } },
         'count-up':       { from: { opacity: '0', transform: 'translateY(6px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
-        'stamp-in':       { '0%': { transform: 'rotate(-4deg) scale(1.4)', opacity: '0' }, '60%': { transform: 'rotate(-2deg) scale(0.96)' }, '100%': { transform: 'rotate(-2deg) scale(1)', opacity: '1' } },
+        'stamp-in':       { '0%': { transform: 'scale(1.3)', opacity: '0' }, '60%': { transform: 'scale(0.97)' }, '100%': { transform: 'scale(1)', opacity: '1' } },
         'page-flip':      { '0%': { transform: 'rotateY(-8deg)', opacity: '0.6' }, '100%': { transform: 'rotateY(0deg)', opacity: '1' } },
+        'field-pulse':    { '0%, 100%': { boxShadow: '0 0 8px rgba(0,200,83,0.2)' }, '50%': { boxShadow: '0 0 20px rgba(0,200,83,0.45)' } },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -80,6 +88,7 @@ module.exports = {
         'count-up':       'count-up 0.4s ease-out',
         'stamp-in':       'stamp-in 0.3s cubic-bezier(0.16,1,0.3,1)',
         'page-flip':      'page-flip 0.25s ease-out',
+        'field-pulse':    'field-pulse 2s ease-in-out infinite',
       },
     }
   },
@@ -87,5 +96,6 @@ module.exports = {
   safelist: [
     'rotate-1', '-rotate-1', 'rotate-2', '-rotate-2', '-rotate-3',
     'text-primary', 'bg-primary', 'border-primary',
+    'accent-glow', 'turf-texture', 'field-lines', 'stadium-header',
   ],
 }
