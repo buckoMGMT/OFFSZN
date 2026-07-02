@@ -4,7 +4,7 @@ import { Rss, BarChart2, BookOpen, Shield, User, Gift } from "lucide-react";
 const tabs = [
   { icon: Rss,      label: "Field",    path: "/",        color: "#D7263D",  textColor: "#fff" },
   { icon: BarChart2,label: "Stats",    path: "/track",   color: "#5E646B",  textColor: "#fff" },
-  { icon: BookOpen, label: "Playbook", path: "/playbook",color: "#272729",  textColor: "#9BA3AC" },
+  { icon: BookOpen, label: "Drills",   path: "/playbook",color: "#272729",  textColor: "#9BA3AC" },
   { icon: Shield,   label: "Teams",    path: "/clans",   color: "#1B1B1D",  textColor: "#9BA3AC" },
   { icon: Gift,     label: "Locker",   path: "/rewards", color: "#272729",  textColor: "#9BA3AC" },
   { icon: User,     label: "Player",   path: "/profile", color: "#0D0D0F",  textColor: "#9BA3AC" },

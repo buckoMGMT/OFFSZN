@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('pb_theme') === 'dark');
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('pb_theme') !== 'light');
 
   useEffect(() => {
     localStorage.setItem('pb_theme', darkMode ? 'dark' : 'light');

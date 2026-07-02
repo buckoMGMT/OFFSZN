@@ -135,7 +135,7 @@ export default function Profile() {
           {athlete.current_streak_days > 0 && (
             <div className="flex items-center gap-1.5">
               <span className="font-elite text-sm" style={{ color: '#D7263D' }}>{athlete.current_streak_days}</span>
-                <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>day streak</span>
+                <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>SZN streak</span>
             </div>
           )}
           {isPremium
@@ -366,7 +366,7 @@ export default function Profile() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Crown size={14} style={{ color: '#D7263D' }} />
-                    <span className="font-anton text-base uppercase" style={{ color: 'var(--theme-ink)' }}>Go Premium</span>
+                    <span className="font-anton text-base uppercase" style={{ color: 'var(--theme-ink)' }}>ALL-SZN Pass</span>
                   </div>
                   <p className="font-work text-xs" style={{ color: 'var(--theme-ink-soft)' }}>Elite programs · Advanced analytics</p>
                 </div>
