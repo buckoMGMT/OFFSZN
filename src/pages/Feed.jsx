@@ -61,7 +61,7 @@ export default function Feed() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b field-lines" style={{ background: 'rgba(10,11,13,0.72)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
+      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b field-lines" style={{ background: 'color-mix(in srgb, var(--surface-0) 82%, transparent)', borderColor: 'var(--border-strong)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
         {/* Accent top stripe */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--accent)', opacity: 0.9 }} />
         <div className="flex items-center justify-between mb-1">

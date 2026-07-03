@@ -18,8 +18,8 @@ export default function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: 'rgba(18, 20, 23, 0.72)',
-        borderTop: '0.5px solid var(--border-strong)',
+        background: 'color-mix(in srgb, var(--surface-1) 78%, transparent)',
+        borderTop: '1px solid var(--border-strong)',
         backdropFilter: 'blur(24px) saturate(180%)',
         WebkitBackdropFilter: 'blur(24px) saturate(180%)',
       }}
