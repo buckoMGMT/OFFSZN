@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Trophy, Flame, Dumbbell, Zap } from "lucide-react
 import { base44 } from "@/api/base44Client";
 import { formatDistanceToNow } from "date-fns";
 import VideoPlayer from "@/components/feed/VideoPlayer";
+import { motion } from "framer-motion";
 
 const typeConfig = {
   achievement:      { icon: Trophy,   label: "PR",        stampColor: "var(--positive)" },
@@ -48,7 +49,10 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
   };
 
   return (
-    <div className="mb-4 card-base overflow-hidden animate-slide-up">
+    <motion.div
+      variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.2, 0, 0, 1] } } }}
+      className="mb-4 card-base overflow-hidden relative"
+    >
       {/* Accent left edge — "draft card" feel */}
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: 'var(--accent)', opacity: 0.85 }} />
 
@@ -128,6 +132,6 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

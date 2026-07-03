@@ -6,6 +6,7 @@ import PremiumGate from "@/components/ui/PremiumGate";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
+import { StaggerList, motion } from "@/lib/motion.jsx";
 
 const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming", "Lacrosse"];
 
@@ -219,53 +220,55 @@ export default function Playbook() {
 
       <div className="px-4 py-4">
         {tab === "programs" && (
-          <div className="columns-2 gap-3">
+          <StaggerList className="columns-2 gap-3">
             {filtered.map(program => {
               const locked = program.isPremium && !isPremium;
               const isSaved = savedIds.includes(program.id);
               return (
-                <div key={program.id} className="break-inside-avoid mb-3 cursor-pointer" onClick={() => setSelected(program)}>
-                <div className="relative rounded overflow-hidden border" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+                <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.2, 0, 0, 1] } } }} key={program.id} className="break-inside-avoid mb-3 cursor-pointer" onClick={() => setSelected(program)}>
+                <div className="relative rounded-lg overflow-hidden border" style={{ background: 'var(--surface-1)', borderColor: locked ? 'var(--accent)' : 'var(--border-subtle)', borderWidth: locked ? 1.5 : 1 }}>
                     <div className="relative">
-                      <img src={program.cover} alt={program.title} className="w-full object-cover" style={{ height: program.id % 3 === 0 ? 170 : 130 }} />
-                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(21,21,26,0.85) 0%, transparent 60%)' }} />
+                      <img src={program.cover} alt={program.title} className="w-full object-cover" style={{ height: program.id % 3 === 0 ? 170 : 130, filter: locked ? 'blur(7px) brightness(0.5)' : 'none' }} />
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,11,13,0.85) 0%, transparent 60%)' }} />
 
-                      {/* Redacted bar for locked premium */}
+                      {/* Glassmorphic lock overlay on premium — teases the blurred content */}
                       {locked && (
-                        <div className="absolute inset-x-2 bottom-10 h-4 rounded" style={{ background: '#15151A' }} />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'rgba(10,11,13,0.35)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)' }}>
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center mb-1" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                            <Lock size={16} style={{ color: 'var(--accent)' }} />
+                          </div>
+                          <span className="eyebrow" style={{ color: 'var(--accent)', fontSize: '8px' }}>All-SZN Pass</span>
+                        </div>
                       )}
 
-                      {isPremium && (
-                        <button onClick={(e) => toggleSave(program, e)} className="absolute top-2 right-2 p-1 rounded" style={{ background: 'rgba(237,238,240,0.85)' }}>
-                          {isSaved ? <BookmarkCheck size={11} style={{ color: '#00C853' }} /> : <Bookmark size={11} style={{ color: '#5A5D63' }} />}
+                      {isPremium && !locked && (
+                        <button onClick={(e) => toggleSave(program, e)} className="absolute top-2 right-2 p-1 rounded" style={{ background: 'rgba(10,11,13,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                          {isSaved ? <BookmarkCheck size={11} style={{ color: 'var(--accent)' }} /> : <Bookmark size={11} style={{ color: 'var(--text-secondary)' }} />}
                         </button>
                       )}
 
                       <div className="absolute bottom-2 left-2 right-2">
-                        <p className="font-elite text-[9px] uppercase tracking-widest mb-0.5" style={{ color: locked ? 'transparent' : '#fff', position: 'relative' }}>
-                          {locked ? (
-                            <span style={{ background: '#15151A', position: 'absolute', inset: 0, borderRadius: 2 }} />
-                          ) : null}
+                        <p className="font-elite text-[9px] uppercase tracking-widest mb-0.5" style={{ color: '#fff' }}>
                           {program.category}
                         </p>
-                        <p className="font-work text-xs font-semibold" style={{ color: '#fff' }}>{locked ? "████████" : program.title}</p>
+                        <p className="font-work text-xs font-semibold" style={{ color: '#fff' }}>{locked ? "Premium Program" : program.title}</p>
                       </div>
                     </div>
 
-                    <div className="p-2.5 space-y-1.5" style={{ background: 'var(--theme-surface)' }}>
+                    <div className="p-2.5 space-y-1.5" style={{ background: 'var(--surface-1)' }}>
                     <div className="flex items-center justify-between">
                       <XsOs size={22} />
-                        <span className="font-elite text-[9px]" style={{ color: '#00C853', border: '1.5px solid #00C853', padding: '1px 4px', borderRadius: 2, transform: 'rotate(-2deg)', display: 'inline-block' }}>
+                        <span className="ink-stamp" style={{ fontSize: '8px', padding: '1px 5px', transform: 'rotate(-2deg)', display: 'inline-block' }}>
                           LVL {difficultyNum(program.difficulty)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1" style={{ color: 'var(--theme-ink-soft)' }}>
+                      <div className="flex items-center gap-1" style={{ color: 'var(--text-tertiary)' }}>
                         <Clock size={9} />
                         <span className="font-elite text-[9px] uppercase">{program.duration}m</span>
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
             {filtered.length === 0 && (
@@ -274,7 +277,7 @@ export default function Playbook() {
                 <p className="font-work text-sm mt-4" style={{ color: '#5A5D63' }}>No programs match that sport.</p>
               </div>
             )}
-          </div>
+          </StaggerList>
         )}
 
         {tab === "saved" && (

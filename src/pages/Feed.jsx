@@ -6,6 +6,7 @@ import ClanFeed from "@/components/feed/ClanFeed";
 import PageLabel from "@/components/ui/PageLabel";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import StampButton from "@/components/ui/StampButton";
+import { StaggerList } from "@/lib/motion.jsx";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
@@ -60,7 +61,7 @@ export default function Feed() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b field-lines" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
+      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b field-lines" style={{ background: 'rgba(10,11,13,0.72)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
         {/* Accent top stripe */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--accent)', opacity: 0.9 }} />
         <div className="flex items-center justify-between mb-1">
@@ -177,7 +178,7 @@ export default function Feed() {
 
         {/* Posts */}
         {feedFilter !== "clan" && !loading && posts.length > 0 && (
-          <div>
+          <StaggerList>
             {posts
               .filter(post => {
                 if (feedFilter === "friends") {
@@ -189,7 +190,7 @@ export default function Feed() {
                 <PostCard key={post.id} post={post} currentAthleteId={athlete?.id} onUpdate={load} />
               ))
             }
-          </div>
+          </StaggerList>
         )}
       </div>
     </div>
