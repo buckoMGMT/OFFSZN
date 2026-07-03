@@ -350,9 +350,9 @@ export default function Playbook() {
 
       {/* Create Playlist Modal */}
       {showCreatePlaylist && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
+        <div className="fixed inset-0 z-[100] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
           <div className="w-full max-w-lg rounded-t-2xl border-t border-l border-r p-6 animate-slide-up max-h-[85vh] overflow-y-auto"
-            style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
+            style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-anton text-xl uppercase" style={{ color: 'var(--theme-ink)' }}>New Playlist</h3>
               <button onClick={() => setShowCreatePlaylist(false)} className="p-1.5 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }}>
