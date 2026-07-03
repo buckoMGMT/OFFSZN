@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Lock, Play, Clock, Target, Bookmark, BookmarkCheck, Plus, X, ListVideo } from "lucide-react";
 import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
+import PremiumGate from "@/components/ui/PremiumGate";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
@@ -117,62 +118,53 @@ export default function Playbook() {
 
         <div className="px-4 -mt-6 relative z-10 pb-8">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h1 className="font-anton text-2xl uppercase leading-tight" style={{ color: locked ? 'transparent' : 'var(--theme-ink)', position: 'relative' }}>
-              {locked ? (
-                <span className="relative">
-                  {selected.title}
-                  <span className="absolute inset-0 rounded" style={{ background: '#15151A' }} />
-                </span>
-              ) : selected.title}
+            <h1 className="font-anton text-2xl uppercase leading-tight" style={{ color: locked ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>
+              {locked ? "🔒 Classified Program" : selected.title}
             </h1>
-            <span className="font-elite text-[9px] uppercase tracking-widest mt-1.5 flex-shrink-0" style={{ color: '#00C853', border: '2px solid #00C853', padding: '2px 6px', borderRadius: 2 }}>
-              LVL {difficultyNum(selected.difficulty)}
-            </span>
+            <span className="ink-stamp mt-1.5 flex-shrink-0">LVL {difficultyNum(selected.difficulty)}</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 mb-4" style={{ color: '#5A5D63' }}>
+          <div className="flex flex-wrap items-center gap-3 mb-4" style={{ color: 'var(--text-tertiary)' }}>
             <span className="font-elite text-[10px] uppercase flex items-center gap-1"><Clock size={10} /> {selected.duration} min</span>
             <span className="font-elite text-[10px] uppercase">{selected.timing}</span>
             {selected.positions && <span className="font-elite text-[10px] uppercase">{selected.positions}</span>}
           </div>
 
-          <div className="rounded border p-3 mb-3 flex items-start gap-2" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
-            <Target size={13} style={{ color: '#00C853', marginTop: 2, flexShrink: 0 }} />
+          <div className="card-base p-3 mb-3 flex items-start gap-2">
+            <Target size={13} style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }} />
             <div>
-              <p className="font-elite text-[9px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--theme-ink-soft)' }}>Aim</p>
-              <p className="font-work text-sm" style={{ color: 'var(--theme-ink)' }}>{selected.aim}</p>
+              <p className="eyebrow mb-0.5">Aim</p>
+              <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{locked ? "Premium access required" : selected.aim}</p>
             </div>
           </div>
 
-          <div className="rounded border p-3 mb-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
-            <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Targeted Areas</p>
+          <div className="card-base p-3 mb-4">
+            <p className="eyebrow mb-2">Targeted Areas</p>
             <div className="flex flex-wrap gap-1.5">
               {selected.targeted_areas.map(area => (
-                <span key={area} className="px-2 py-1 rounded font-elite text-[10px] uppercase" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}>{area}</span>
+                <span key={area} className="px-2 py-1 rounded font-elite text-[10px] uppercase" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>{area}</span>
               ))}
             </div>
           </div>
 
-          <p className="font-work text-sm mb-4 leading-relaxed" style={{ color: 'var(--theme-ink-soft)' }}>{selected.description}</p>
+          <p className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{selected.description}</p>
 
-          {selected.video_url && (
+          {selected.video_url && !locked && (
             <div className="mb-6">
               <ProtectedVideoPlayer url={selected.video_url} />
             </div>
           )}
 
           {locked ? (
-            <div className="rounded border p-6 text-center" style={{ background: 'var(--theme-surface)', borderColor: '#00C853', borderWidth: 2 }}>
-              <Lock size={22} style={{ color: '#00C853', margin: '0 auto 12px' }} />
-              <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Classified</h3>
-              <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Premium clearance required to unlock this program.</p>
-              <StampButton>Upgrade — $9.99/mo</StampButton>
-            </div>
+            <PremiumGate
+              title="All-SZN Pass Required"
+              subtitle="This is private coach content. Unlock full access to every program, drill, and protected video."
+            />
           ) : (
             <div className="flex justify-center">
-              <StampButton className="text-base px-10 py-3">
+              <button className="btn-primary" style={{ fontSize: 'var(--text-base)', padding: '12px 40px' }}>
                 <Play size={14} fill="currentColor" /> Start Program
-              </StampButton>
+              </button>
             </div>
           )}
         </div>
@@ -183,15 +175,15 @@ export default function Playbook() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
+      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'rgba(10,11,13,0.72)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
         <div className="flex items-center justify-between mb-1">
-          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>Drills</h1>
+          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--text-primary)' }}>Drills</h1>
           <PageLabel number={3} />
         </div>
-        <p className="font-elite text-[9px] uppercase tracking-widest mb-3" style={{ color: 'var(--theme-ink-soft)' }}>Training Programs — Select a Drill</p>
+        <p className="eyebrow mb-3">Training Programs — Select a Drill</p>
 
         {/* Tab bar */}
-        <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
+        <div className="flex border-b" style={{ borderColor: 'var(--border-subtle)' }}>
           {[
             { id: "programs", label: "Programs" },
             { id: "saved", label: `Saved${savedIds.length ? ` (${savedIds.length})` : ""}` },
@@ -200,8 +192,8 @@ export default function Playbook() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex-1 py-2 font-elite text-xs uppercase tracking-widest"
               style={{
-                color: tab === t.id ? '#00C853' : '#5A5D63',
-                borderBottom: tab === t.id ? '2px solid #00C853' : '2px solid transparent',
+                color: tab === t.id ? 'var(--accent)' : 'var(--text-tertiary)',
+                borderBottom: tab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
               }}>
               {t.label}
             </button>
@@ -214,9 +206,9 @@ export default function Playbook() {
               <button key={sport} onClick={() => setSportFilter(sport)}
                 className="flex-shrink-0 px-3 py-1 rounded font-elite text-[10px] uppercase tracking-widest transition-all"
                 style={{
-                  background: sportFilter === sport ? '#00C853' : 'var(--theme-surface)',
-                  color: sportFilter === sport ? '#0A0B0D' : 'var(--theme-ink-soft)',
-                  border: '1px solid var(--theme-border)',
+                  background: sportFilter === sport ? 'var(--accent)' : 'var(--surface-1)',
+                  color: sportFilter === sport ? 'var(--on-accent)' : 'var(--text-secondary)',
+                  border: '1px solid var(--border-subtle)',
                 }}>
                 {sport}
               </button>
@@ -288,11 +280,8 @@ export default function Playbook() {
         {tab === "saved" && (
           <div>
             {!isPremium ? (
-              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#00C853', background: 'var(--theme-surface)' }}>
-                <Lock size={24} style={{ color: '#00C853', margin: '0 auto 12px' }} />
-                <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Premium Feature</h3>
-                <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Upgrade to save programs.</p>
-                <StampButton>Upgrade — $9.99/mo</StampButton>
+              <div className="mt-4">
+                <PremiumGate title="Saved Programs" subtitle="Save your favorite drills and build custom playlists with the All-SZN Pass." />
               </div>
             ) : savedPrograms.length === 0 ? (
               <div className="text-center py-16">
@@ -319,11 +308,8 @@ export default function Playbook() {
         {tab === "playlists" && (
           <div>
             {!isPremium ? (
-              <div className="rounded border-2 p-6 text-center mt-4" style={{ borderColor: '#00C853', background: 'var(--theme-surface)' }}>
-                <Lock size={24} style={{ color: '#00C853', margin: '0 auto 12px' }} />
-                <h3 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>Premium Feature</h3>
-                <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Upgrade to create custom training playlists.</p>
-                <StampButton>Upgrade — $9.99/mo</StampButton>
+              <div className="mt-4">
+                <PremiumGate title="Custom Playlists" subtitle="Create and organize your own training playlists with the All-SZN Pass." />
               </div>
             ) : (
               <>
