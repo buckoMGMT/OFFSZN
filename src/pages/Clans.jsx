@@ -111,7 +111,7 @@ export default function Clans() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b mt-2" style={{ borderColor: 'var(--theme-border)' }}>
+        <div className="flex border-b mt-2" style={{ borderColor: 'var(--border-subtle)' }}>
           {[
             { id: "discover", label: "Discover" },
             { id: "leaderboard", label: "Roster" },
@@ -120,8 +120,8 @@ export default function Clans() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex-1 py-2 font-elite text-xs uppercase tracking-widest"
               style={{
-                color: tab === t.id ? '#00C853' : '#5A5D63',
-                borderBottom: tab === t.id ? '2px solid #00C853' : '2px solid transparent',
+                color: tab === t.id ? 'var(--accent)' : 'var(--text-tertiary)',
+                borderBottom: tab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
               }}>
               {t.label}
             </button>
@@ -132,21 +132,22 @@ export default function Clans() {
       <div className="px-4 py-4">
         {/* My Clan Banner */}
         {myClan && (
-          <div className="rounded border p-4 mb-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+          <div className="card-base p-4 mb-4 relative overflow-hidden">
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: 'var(--accent)' }} />
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)' }}>
-                <Shield size={18} style={{ color: '#00C853' }} />
+              <div className="w-11 h-11 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                <Shield size={18} style={{ color: 'var(--accent)' }} />
               </div>
               <div className="flex-1">
-                <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>My Team</p>
-                <h3 className="font-anton text-lg uppercase" style={{ color: 'var(--theme-ink)' }}>{myClan.name}</h3>
+                <p className="eyebrow">My Team</p>
+                <h3 className="font-anton text-lg uppercase" style={{ color: 'var(--text-primary)' }}>{myClan.name}</h3>
                 <div className="flex items-center gap-3 mt-0.5">
-                  <span className="font-elite text-[9px]" style={{ color: '#5A5D63' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length} members</span>
-                  <span className="font-elite text-[9px]" style={{ color: '#00C853' }}><Trophy size={9} className="inline mr-0.5" />{myClan.total_points} pts</span>
+                  <span className="font-elite text-[9px]" style={{ color: 'var(--text-tertiary)' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length} members</span>
+                  <span className="font-elite text-[9px]" style={{ color: 'var(--positive)' }}><Trophy size={9} className="inline mr-0.5" />{(myClan.total_points || 0).toLocaleString()} pts</span>
                 </div>
               </div>
-              <button onClick={leaveClan} className="p-1.5 rounded" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)' }}>
-                <X size={14} style={{ color: 'var(--theme-ink-soft)' }} />
+              <button onClick={leaveClan} className="p-1.5 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
+                <X size={14} style={{ color: 'var(--text-secondary)' }} />
               </button>
             </div>
             {myClan.announcement && (
@@ -174,7 +175,7 @@ export default function Clans() {
             ) : (
               <div className="space-y-3">
                 {filtered.map(clan => (
-                  <div key={clan.id} className="space-y-2">
+                  <div key={clan.id} className="space-y-2 animate-slide-up">
                     <ClanCard clan={clan} isJoined={myClan?.id === clan.id} onClick={!myClan ? () => joinClan(clan) : undefined} />
                     {!myClan && (
                       <StampButton onClick={() => joinClan(clan)} fullWidth>Join This Team</StampButton>
@@ -203,33 +204,34 @@ export default function Clans() {
               {clans.map((clan, i) => {
                 const isMe = myClan?.id === clan.id;
                 const isCircled = i === circledRow;
+                const isTop3 = i < 3;
                 return (
-                  <div key={clan.id} className="relative rounded border p-4 flex items-center gap-4"
+                  <div key={clan.id} className="relative card-base p-4 flex items-center gap-4 animate-slide-up"
                     style={{
-                      background: isMe ? '#00C85310' : 'var(--theme-surface)',
-                      borderColor: isMe ? '#00C853' : 'var(--theme-border)',
+                      borderColor: isMe ? 'var(--accent)' : 'var(--border-subtle)',
+                      borderWidth: isMe ? 2 : 1,
                     }}>
                     {isCircled && <CoachCircle />}
 
-                    {/* Rank */}
-                    <div className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0 font-elite text-base"
+                    {/* Rank — cone orange for top 3 */}
+                    <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0 stat-number text-base"
                       style={{
-                        background: i === 0 ? '#00C853' : 'var(--theme-surface-alt)',
-                        color: i === 0 ? '#fff' : 'var(--theme-ink)',
-                        border: '1px solid var(--theme-border)',
+                        background: isTop3 ? 'var(--accent-subtle)' : 'var(--surface-2)',
+                        color: isTop3 ? 'var(--accent)' : 'var(--text-secondary)',
+                        border: isTop3 ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
                       }}>
                       {i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-work font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>
+                      <p className="font-work font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                         {formatName(clan.name)}
                         {isMe && <span className="ink-stamp ml-2" style={{ fontSize: 8 }}>You</span>}
                       </p>
-                      <p className="font-elite text-[9px] uppercase tracking-wide" style={{ color: 'var(--theme-ink-soft)' }}>{(clan.member_ids || []).length} members</p>
+                      <p className="font-elite text-[9px] uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{(clan.member_ids || []).length} members</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-elite text-lg" style={{ color: i === 0 ? '#00C853' : 'var(--theme-ink)' }}>{(clan.total_points || 0).toLocaleString()}</p>
-                      <p className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>pts</p>
+                      <p className="stat-number text-xl" style={{ color: isTop3 ? 'var(--accent)' : 'var(--text-primary)' }}>{(clan.total_points || 0).toLocaleString()}</p>
+                      <p className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>pts</p>
                     </div>
                   </div>
                 );
