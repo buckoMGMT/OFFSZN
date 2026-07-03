@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Lock, Play, Clock, Target, Bookmark, BookmarkCheck, Plus, X, ListVideo } from "lucide-react";
-import VideoPlayer from "@/components/feed/VideoPlayer";
+import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
@@ -156,8 +156,8 @@ export default function Playbook() {
           <p className="font-work text-sm mb-4 leading-relaxed" style={{ color: 'var(--theme-ink-soft)' }}>{selected.description}</p>
 
           {selected.video_url && (
-            <div className="mb-6 rounded overflow-hidden border" style={{ borderColor: '#9BA3AC' }}>
-              <VideoPlayer url={selected.video_url} />
+            <div className="mb-6">
+              <ProtectedVideoPlayer url={selected.video_url} />
             </div>
           )}
 

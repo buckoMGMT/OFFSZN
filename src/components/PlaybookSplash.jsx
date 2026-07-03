@@ -26,8 +26,8 @@ function PlayDiagram() {
         [90, 122], [130, 122]
       ].map(([cx, cy], i) => (
         <g key={i}>
-          <line x1={cx-5} y1={cy-5} x2={cx+5} y2={cy+5} stroke="#00C853" strokeWidth="2" opacity="0.85" />
-          <line x1={cx+5} y1={cy-5} x2={cx-5} y2={cy+5} stroke="#00C853" strokeWidth="2" opacity="0.85" />
+          <line x1={cx-5} y1={cy-5} x2={cx+5} y2={cy+5} stroke="var(--accent)" strokeWidth="2" opacity="0.85" />
+          <line x1={cx+5} y1={cy-5} x2={cx-5} y2={cy+5} stroke="var(--accent)" strokeWidth="2" opacity="0.85" />
         </g>
       ))}
 
@@ -38,11 +38,11 @@ function PlayDiagram() {
       <path d="M125 90 L140 65" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeDasharray="3 3" />
 
       {/* Arrow QB to receiver */}
-      <path d="M105 70 L65 42" stroke="#00C853" strokeWidth="2" fill="none" opacity="0.8" markerEnd="url(#garrow)" />
+      <path d="M105 70 L65 42" stroke="var(--accent)" strokeWidth="2" fill="none" opacity="0.8" markerEnd="url(#garrow)" />
 
       <defs>
         <marker id="garrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-          <path d="M0,0 L6,3 L0,6 Z" fill="#00C853" opacity="0.8" />
+          <path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)" opacity="0.8" />
         </marker>
       </defs>
     </svg>
@@ -108,14 +108,14 @@ function PlaybookCover({ onDone }) {
   return (
     <motion.div
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "#0a1520", transformOrigin: "left center", perspective: "1200px" }}
+      style={{ background: "var(--surface-0)", transformOrigin: "left center", perspective: "1200px" }}
     >
       <PlaybookBackground />
 
       {/* Binding spine */}
       <div
         className="absolute left-0 top-0 bottom-0 w-8 z-10 flex flex-col items-center justify-center gap-1"
-        style={{ background: "linear-gradient(to right, #060e18, #0d1f30)" }}
+        style={{ background: "linear-gradient(to right, var(--surface-0), var(--surface-2))" }}
       >
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="w-3 h-0.5 rounded-full bg-white/10" />
@@ -158,7 +158,7 @@ function PlaybookCover({ onDone }) {
 
       {/* Page edge marks */}
       <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-around items-end px-1 py-8">
-        {["FIELD", "STATS", "PLAYS", "TEAMS", "PLAYER"].map((tab, i) => (
+        {["FIELD", "STATS", "DRILLS", "TEAMS", "LOCKER", "PLAYER"].map((tab, i) => (
           <div key={i} className="flex items-center gap-1">
             <span className="text-[8px] text-white/20 font-barlow uppercase tracking-widest">{tab}</span>
             <div className="w-1 h-4 rounded-l" style={{ background: "rgba(255,255,255,0.06)" }} />
@@ -199,7 +199,7 @@ export default function PlaybookSplash({ onDone }) {
         <motion.div
           key="flip"
           className="fixed inset-0 z-[100] overflow-hidden"
-          style={{ background: "#0a1520", transformOrigin: "right center" }}
+          style={{ background: "var(--surface-0)", transformOrigin: "right center" }}
           initial={{ rotateY: 0 }}
           animate={{ rotateY: -90 }}
           transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
