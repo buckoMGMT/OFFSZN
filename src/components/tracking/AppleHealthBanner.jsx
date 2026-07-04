@@ -79,24 +79,21 @@ export default function AppleHealthBanner({ log, onSync }) {
             {status === "synced" ? "Synced — steps, sleep & active cals imported" : "Connect to auto-log steps, sleep & calories"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {status !== "synced" && (
-            <button onClick={handleSync} disabled={status === "connecting"}
-              className="btn-stamp flex items-center gap-1.5 disabled:opacity-60">
-              {status === "connecting"
-                ? <><div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />Syncing</>
-                : <><Heart size={10} fill="currentColor" />Connect</>
-              }
-            </button>
-          )}
-          {status === "synced" && (
-            <div className="flex items-center gap-1 font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
-              <CheckCircle size={11} /> Live
-            </div>
-          )}
-          <button onClick={() => setDismissed(true)} className="font-elite text-xs" style={{ color: 'var(--text-tertiary)' }}>✕</button>
-        </div>
+        <button onClick={() => setDismissed(true)} className="font-elite text-xs" style={{ color: 'var(--text-tertiary)' }}>✕</button>
       </div>
+
+      {/* Connect button — full-width, always visible */}
+      {status !== "synced" && (
+        <div className="px-4 pb-3">
+          <button onClick={handleSync} disabled={status === "connecting"}
+            className="btn-primary w-full flex items-center justify-center gap-1.5 disabled:opacity-60">
+            {status === "connecting"
+              ? <><div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />Syncing…</>
+              : <><Heart size={13} fill="currentColor" />Connect Apple Health</>
+            }
+          </button>
+        </div>
+      )}
 
       {/* Synced metric grid */}
       {status === "synced" && healthData && (
