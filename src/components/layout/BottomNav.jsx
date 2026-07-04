@@ -43,11 +43,11 @@ export default function BottomNav() {
             >
               {active && (
                 <span
-                  className="absolute top-1 left-1/2 -translate-x-1/2 rounded-full"
-                  style={{ width: 5, height: 5, background: 'var(--accent)' }}
+                  className="absolute top-0 left-1/2 -translate-x-1/2"
+                  style={{ width: 18, height: 3, background: 'var(--accent)', borderRadius: 'var(--r-full)' }}
                 />
               )}
-              <Icon size={24} strokeWidth={active ? 2.25 : 1.75} color="currentColor" />
+              <Icon size={22} strokeWidth={active ? 2.25 : 1.75} color="currentColor" />
               <span
                 style={{
                   fontSize: '10px',

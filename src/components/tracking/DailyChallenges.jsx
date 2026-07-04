@@ -77,18 +77,18 @@ export default function DailyChallenges({ log, athlete }) {
 
       <div className="space-y-2">
         {challenges.map(c => (
-          <div key={c.id} className={`flex items-center gap-3 p-2.5 rounded-xl transition-all ${c.done ? "bg-green-500/8" : "bg-secondary/40"}`}>
+          <div key={c.id} className={`flex items-center gap-3 p-2.5 rounded-xl transition-all ${c.done ? "bg-primary/10" : "bg-secondary/40"}`}>
             {c.done
-              ? <CheckCircle size={18} className="text-green-400 flex-shrink-0" />
+              ? <CheckCircle size={18} className="text-primary flex-shrink-0" />
               : <Circle size={18} className="text-muted-foreground flex-shrink-0" />
             }
             <div className="flex-1 min-w-0">
-              <p className={`text-xs font-barlow font-bold uppercase ${c.done ? "text-green-400 line-through" : "text-foreground"}`}>
+              <p className={`text-xs font-barlow font-bold uppercase ${c.done ? "text-primary line-through" : "text-foreground"}`}>
                 {c.label}
               </p>
               <p className="text-[10px] text-muted-foreground">{c.desc}</p>
             </div>
-            <span className={`text-[10px] font-barlow font-bold px-2 py-0.5 rounded-full ${c.done ? "bg-green-500/20 text-green-400" : "bg-secondary text-muted-foreground"}`}>
+            <span className={`text-[10px] font-barlow font-bold px-2 py-0.5 rounded-full ${c.done ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"}`}>
               +{c.points}
             </span>
           </div>

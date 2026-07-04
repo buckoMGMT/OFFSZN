@@ -7,7 +7,7 @@ const BADGES = [
   { id: "points_1000", icon: Award, label: "Elite Athlete", desc: "1,000 points", color: "text-yellow-400", bg: "bg-yellow-400/15", border: "border-yellow-400/30", check: (a) => (a.total_points || 0) >= 1000 },
   { id: "premium", icon: Star, label: "All-SZN Pass", desc: "Premium member", color: "text-primary", bg: "bg-primary/15", border: "border-primary/30", check: (a) => a.subscription_tier === "premium" },
   { id: "clan", icon: Shield, label: "Clan Member", desc: "Joined a clan", color: "text-blue-400", bg: "bg-blue-400/15", border: "border-blue-400/30", check: (a) => !!a.clan_id },
-  { id: "weight_set", icon: Target, label: "Goal Setter", desc: "Set a weight goal", color: "text-green-400", bg: "bg-green-400/15", border: "border-green-400/30", check: (a) => !!a.goal_weight_lbs },
+  { id: "weight_set", icon: Target, label: "Goal Setter", desc: "Set a weight goal", color: "text-primary", bg: "bg-primary/15", border: "border-primary/30", check: (a) => !!a.goal_weight_lbs },
   { id: "macro_set", icon: Zap, label: "Nutrition Ready", desc: "Set macro goals", color: "text-purple-400", bg: "bg-purple-400/15", border: "border-purple-400/30", check: (a) => !!a.goal_calories },
   { id: "hydration", icon: Droplets, label: "Hydration Hero", desc: "Set hydration habits", color: "text-cyan-400", bg: "bg-cyan-400/15", border: "border-cyan-400/30", check: (a) => (a.total_points || 0) >= 100 },
   { id: "bio", icon: Heart, label: "Story Told", desc: "Wrote a bio", color: "text-pink-400", bg: "bg-pink-400/15", border: "border-pink-400/30", check: (a) => !!a.bio },

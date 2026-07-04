@@ -9,7 +9,7 @@ const STREAK_MILESTONES = [3, 7, 14, 30, 60, 90];
 
 function getMilestoneMessage(type, value) {
   if (type === 'points') {
-    if (value >= 10000) return { title: 'LEGEND STATUS', body: `${value.toLocaleString()} points earned. You're elite.`, icon: Trophy, semantic: 'positive' };
+    if (value >= 10000) return { title: 'LEGEND STATUS', body: `${value.toLocaleString()} points earned. You're elite.`, icon: Trophy, semantic: 'accent' };
     if (value >= 5000) return { title: 'POWER PLAY', body: `${value.toLocaleString()} points — halfway to your first reward!`, icon: Zap, semantic: 'accent' };
     return { title: 'MILESTONE HIT', body: `${value.toLocaleString()} points in the bank. Keep stacking.`, icon: Trophy, semantic: 'accent' };
   }

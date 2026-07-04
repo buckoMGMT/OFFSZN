@@ -21,10 +21,10 @@ function PointsBar({ current, target, label }) {
     <div>
       <div className="flex justify-between mb-1">
         <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{label}</span>
-        <span className="font-elite text-[9px]" style={{ color: '#00C853' }}>{current.toLocaleString()} / {target.toLocaleString()}</span>
+        <span className="font-elite text-[9px]" style={{ color: 'var(--accent)' }}>{current.toLocaleString()} / {target.toLocaleString()}</span>
         </div>
         <div className="h-2 rounded-full overflow-hidden" style={{ background: '#9BA3AC44' }}>
-        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: '#00C853' }} />
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: 'var(--accent)' }} />
       </div>
     </div>
   );
@@ -178,7 +178,7 @@ export default function Rewards() {
   );
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
+    <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Header */}
       <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
         <div className="flex items-center justify-between mb-1">
@@ -186,11 +186,16 @@ export default function Rewards() {
           <PageLabel number={5} />
         </div>
 
-        {/* Points balance */}
-        <div className="flex items-center gap-2 mb-3">
-          <Zap size={13} style={{ color: 'var(--accent)' }} />
-          <span className="font-elite text-base" style={{ color: 'var(--accent)' }}>{points.toLocaleString()}</span>
-          <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>pts available</span>
+        {/* Points balance — nameplate treatment */}
+        <div className="relative mb-3" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', borderRadius: 'var(--r-md)', padding: '12px 14px 10px' }}>
+          <span style={{ position: 'absolute', top: 6, left: 6, width: 3, height: 3, borderRadius: '50%', background: 'var(--border-strong)' }} />
+          <span style={{ position: 'absolute', top: 6, right: 6, width: 3, height: 3, borderRadius: '50%', background: 'var(--border-strong)' }} />
+          <p className="eyebrow" style={{ textAlign: 'center' }}>Your Balance</p>
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <Zap size={15} style={{ color: 'var(--accent)' }} />
+            <span style={{ fontFamily: "'Archivo Black', sans-serif", fontVariantNumeric: 'tabular-nums', fontSize: 'var(--text-xl)', color: 'var(--accent)' }}>{points.toLocaleString()}</span>
+            <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>pts</span>
+          </div>
         </div>
 
         {/* Progress to next gift card */}

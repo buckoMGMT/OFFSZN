@@ -88,9 +88,9 @@ export default function CoachTier({ athlete, onUpdate }) {
 
       {/* Upload Button */}
       {submitted ? (
-        <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-xl">
-          <CheckCircle size={16} className="text-green-500" />
-          <p className="text-sm text-green-400 font-medium">Submitted for review!</p>
+        <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/30 rounded-xl">
+          <CheckCircle size={16} className="text-primary" />
+          <p className="text-sm text-primary font-medium">Submitted for review!</p>
         </div>
       ) : (
         <button onClick={() => setShowUpload(!showUpload)}

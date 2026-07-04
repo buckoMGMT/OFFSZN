@@ -8,7 +8,7 @@ const RECRUITER_BONUS_FIRST = 1500;
 const RECRUITER_BONUS_SUBSEQUENT = 100;
 
 function statusColor(s) {
-  if (s === "bonus_earned") return 'var(--positive)';
+  if (s === "bonus_earned") return 'var(--accent)';
   if (s === "joined") return 'var(--text-secondary)';
   return 'var(--text-tertiary)';
 }
@@ -114,7 +114,7 @@ export default function ReferralPanel({ athlete, referrals, onReferred }) {
         <div className="flex items-center gap-2 rounded px-3 py-2.5 mb-3" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)' }}>
           <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{referralLink}</span>
           <button onClick={copyLink} className="flex-shrink-0 p-1 rounded" style={{ background: 'var(--surface-3)' }}>
-            {copied ? <Check size={14} style={{ color: 'var(--positive)' }} /> : <Copy size={14} style={{ color: 'var(--text-tertiary)' }} />}
+            {copied ? <Check size={14} style={{ color: 'var(--accent)' }} /> : <Copy size={14} style={{ color: 'var(--text-tertiary)' }} />}
           </button>
         </div>
 

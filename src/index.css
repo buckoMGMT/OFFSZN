@@ -525,6 +525,75 @@ html {
   }
 }
 
+  /* ── Stadium light wash — single warm light source per screen ── */
+  .stadium-light {
+    background: radial-gradient(ellipse 90% 45% at 50% -10%, rgba(255,90,31,0.06), transparent 60%);
+  }
+
+  /* ── Environmental texture layers — ≤5% opacity, backgrounds only ── */
+  .env-field {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 118px,
+      rgba(245,245,240,0.04) 118px,
+      rgba(245,245,240,0.04) 120px
+    );
+  }
+  .env-film {
+    background-image:
+      linear-gradient(rgba(245,245,240,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,245,240,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .env-locker {
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 10px,
+      rgba(245,245,240,0.04) 10px,
+      rgba(245,245,240,0.04) 12px
+    );
+  }
+
+  /* ── PR chip — accent-subtle fill, accent text + hairline ── */
+  .pr-chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: var(--accent-subtle);
+    border: 1px solid var(--accent);
+    padding: 2px 8px;
+    border-radius: var(--r-sm);
+    line-height: 1.4;
+  }
+
+  /* ── Live-from-the-field rule ── */
+  .live-rule {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-tertiary);
+    padding: 0 4px;
+  }
+  .live-rule::before,
+  .live-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+
 /* ─────────────────────────────────────────────────────────────────────────────
    KEYFRAMES
 ───────────────────────────────────────────────────────────────────────────── */

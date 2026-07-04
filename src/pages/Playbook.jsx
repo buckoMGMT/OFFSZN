@@ -35,10 +35,10 @@ function XsOs({ size = 28 }) {
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
       <circle cx="8" cy="8" r="4" stroke="#9BA3AC" strokeWidth="1.5" fill="none" />
       <circle cx="20" cy="8" r="4" stroke="#9BA3AC" strokeWidth="1.5" fill="none" />
-      <line x1="5" y1="19" x2="11" y2="25" stroke="#00C853" strokeWidth="1.5" />
-      <line x1="11" y1="19" x2="5" y2="25" stroke="#00C853" strokeWidth="1.5" />
-      <line x1="17" y1="19" x2="23" y2="25" stroke="#00C853" strokeWidth="1.5" />
-      <line x1="23" y1="19" x2="17" y2="25" stroke="#00C853" strokeWidth="1.5" />
+      <line x1="5" y1="19" x2="11" y2="25" stroke="var(--accent)" strokeWidth="1.5" />
+      <line x1="11" y1="19" x2="5" y2="25" stroke="var(--accent)" strokeWidth="1.5" />
+      <line x1="17" y1="19" x2="23" y2="25" stroke="var(--accent)" strokeWidth="1.5" />
+      <line x1="23" y1="19" x2="17" y2="25" stroke="var(--accent)" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -99,7 +99,7 @@ export default function Playbook() {
     const isSaved = savedIds.includes(selected.id);
     const locked = selected.isPremium && !isPremium;
     return (
-      <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
+      <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
         <div className="relative h-52 w-full overflow-hidden">
           <img src={selected.cover} alt={selected.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, var(--theme-bg) 10%, transparent 80%)' }} />
@@ -112,7 +112,7 @@ export default function Playbook() {
             <button onClick={(e) => toggleSave(selected, e)}
               className="absolute top-14 right-4 p-2 rounded"
               style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)' }}>
-              {isSaved ?               <BookmarkCheck size={16} style={{ color: '#00C853' }} /> : <Bookmark size={16} style={{ color: '#5A5D63' }} />}
+              {isSaved ?               <BookmarkCheck size={16} style={{ color: 'var(--accent)' }} /> : <Bookmark size={16} style={{ color: '#5A5D63' }} />}
             </button>
           )}
         </div>
@@ -174,7 +174,7 @@ export default function Playbook() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
+    <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Header */}
       <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'rgba(10,11,13,0.72)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
         <div className="flex items-center justify-between mb-1">
@@ -370,13 +370,13 @@ export default function Playbook() {
                 return (
                   <button key={p.id} onClick={() => setPlaylistPrograms(prev => included ? prev.filter(id => id !== p.id) : [...prev, p.id])}
                     className="w-full flex items-center gap-3 p-2.5 rounded border text-left"
-                    style={{ border: included ? '2px solid #00C853' : '1px solid var(--theme-border)', background: included ? '#00C85310' : 'var(--theme-surface)' }}>
+                    style={{ border: included ? '2px solid var(--accent)' : '1px solid var(--theme-border)', background: included ? 'var(--accent-subtle)' : 'var(--theme-surface)' }}>
                     <img src={p.cover} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-work text-xs font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>{p.title}</p>
                       <p className="font-elite text-[9px] uppercase" style={{ color: 'var(--theme-ink-soft)' }}>{p.duration}m</p>
                     </div>
-                    {included && <span style={{ color: '#00C853', fontSize: 14 }}>✓</span>}
+                    {included && <span style={{ color: 'var(--accent)', fontSize: 14 }}>✓</span>}
                   </button>
                 );
               })}

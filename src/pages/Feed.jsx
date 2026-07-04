@@ -59,9 +59,9 @@ export default function Feed() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
+    <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b field-lines" style={{ background: 'color-mix(in srgb, var(--surface-0) 82%, transparent)', borderColor: 'var(--border-strong)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
+      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b" style={{ background: 'color-mix(in srgb, var(--surface-0) 82%, transparent)', borderColor: 'var(--border-strong)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
         {/* Accent top stripe */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--accent)', opacity: 0.9 }} />
         <div className="flex items-center justify-between mb-1">
@@ -93,6 +93,10 @@ export default function Feed() {
       </div>
 
       <div className="px-5 py-4">
+        {/* Live-from-the-field rule */}
+        {feedFilter !== "clan" && (
+          <div className="live-rule mb-4">Live from the Field</div>
+        )}
         {/* Clan feed */}
         {feedFilter === "clan" && <ClanFeed athlete={athlete} />}
 
@@ -129,10 +133,10 @@ export default function Feed() {
               </div>
             ) : (
               <button onClick={() => setShowCompose(true)} className="w-full flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: '#9BA3AC' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--surface-3)', border: (athlete.current_streak_days || 0) > 0 ? '1.5px solid var(--accent)' : '1px solid var(--border-subtle)' }}>
                   {athlete.avatar_url
                     ? <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
-                    : <span className="text-xs font-elite text-white">{(athlete.display_name || "A")[0].toUpperCase()}</span>
+                    : <span className="text-xs font-elite" style={{ color: 'var(--accent)' }}>{(athlete.display_name || "A")[0].toUpperCase()}</span>
                   }
                 </div>
                 <span className="text-sm font-work flex-1" style={{ color: 'var(--theme-ink-soft)' }}>Log a win…</span>
