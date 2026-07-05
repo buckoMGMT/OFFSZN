@@ -14,6 +14,7 @@ const ROWS = [
   { label: "Buy coach content à la carte", free: true },
   { label: "Post your content to The Field", free: false },
   { label: "Full OFFSZN premium drill library", free: false },
+  { label: "Save drills & build custom playlists", free: false },
   { label: "Advanced stats — Readiness index & percentile benchmarks", free: false },
   { label: "Projected Peak forecasting & position leaderboards", free: false },
   { label: "Create your own Team & run the roster", free: false },

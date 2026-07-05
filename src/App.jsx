@@ -18,6 +18,10 @@ import { ThemeProvider } from '@/lib/ThemeContext';
 import GeoBlocker from '@/components/GeoBlocker';
 import BrandMark from '@/components/BrandMark';
 import { MilestoneNotifierProvider } from '@/lib/MilestoneNotifier';
+import { initAccent } from '@/lib/accentColor';
+
+// Apply any saved custom accent before first paint — covers the splash screen too
+initAccent();
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();

@@ -14,6 +14,7 @@ import PlayDiagram from "@/components/ui/PlayDiagram";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import AdvancedStats from "@/components/analytics/AdvancedStats";
+import AccentColorPicker from "@/components/profile/AccentColorPicker";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -310,6 +311,7 @@ export default function Profile() {
                     style={{ left: darkMode ? '26px' : '2px' }} />
                 </button>
               </div>
+              <AccentColorPicker />
             </div>
 
             {/* Notifications */}
