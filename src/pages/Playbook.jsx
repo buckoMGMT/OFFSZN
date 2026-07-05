@@ -7,6 +7,8 @@ import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import ExploreGrid from "@/components/playbook/ExploreGrid";
+import SubscriptionsTab from "@/components/playbook/SubscriptionsTab";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import PassRibbon from "@/components/monetization/PassRibbon";
 
@@ -184,7 +186,10 @@ export default function Playbook() {
       <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'rgba(10,11,13,0.72)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
         <div className="flex items-center justify-between mb-1">
           <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--text-primary)' }}>Drills</h1>
-          <PageLabel number={3} />
+          <div className="flex items-center gap-2">
+            <NotificationBell athlete={athlete} />
+            <PageLabel number={3} />
+          </div>
         </div>
         <p className="eyebrow mb-3">Training Programs — Select a Drill</p>
 
@@ -192,6 +197,7 @@ export default function Playbook() {
         <div className="flex border-b" style={{ borderColor: 'var(--border-subtle)' }}>
           {[
             { id: "explore", label: "Explore" },
+            { id: "subs", label: "Subs" },
             { id: "saved", label: `Saved${savedIds.length ? ` (${savedIds.length})` : ""}` },
             { id: "playlists", label: "Playlists" },
           ].map(t => (
@@ -229,10 +235,13 @@ export default function Playbook() {
             programs={filtered}
             sportFilter={sportFilter}
             isPremium={isPremium}
+            athlete={athlete}
             onSelectProgram={setSelected}
             onLockedProgram={() => setShowPaywall(true)}
           />
         )}
+
+        {tab === "subs" && <SubscriptionsTab athlete={athlete} />}
 
         {tab === "saved" && (
           <div>

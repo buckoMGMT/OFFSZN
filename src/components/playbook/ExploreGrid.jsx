@@ -7,6 +7,7 @@ import PassRibbon from "@/components/monetization/PassRibbon";
 import CoachProfileSheet from "@/components/playbook/CoachProfileSheet";
 import CoachPurchaseSheet from "@/components/monetization/CoachPurchaseSheet";
 import ExploreVideoSheet from "@/components/playbook/ExploreVideoSheet";
+import useSubscriptions from "@/lib/useSubscriptions";
 
 const SPORT_THUMBS = {
   football: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&q=80",
@@ -48,7 +49,8 @@ function buildItems(programs, videos) {
   return out;
 }
 
-export default function ExploreGrid({ programs, sportFilter, isPremium, onSelectProgram, onLockedProgram }) {
+export default function ExploreGrid({ programs, sportFilter, isPremium, athlete, onSelectProgram, onLockedProgram }) {
+  const { subscribedIds, toggle } = useSubscriptions(athlete);
   const [videos, setVideos] = useState([]);
   const [authors, setAuthors] = useState({});
   const [loading, setLoading] = useState(true);
@@ -196,6 +198,8 @@ export default function ExploreGrid({ programs, sportFilter, isPremium, onSelect
         coach={profileCoach}
         videos={profileCoach ? videos.filter(v => v.athlete_id === profileCoach.id) : []}
         onSelectVideo={(v) => { setProfileCoach(null); playOrBuy(v); }}
+        isSubscribed={profileCoach ? subscribedIds.includes(profileCoach.id) : false}
+        onToggleSubscribe={toggle}
       />
 
       <CoachPurchaseSheet

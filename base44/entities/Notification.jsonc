@@ -1,0 +1,44 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "description": "In-app notification for athletes and coaches.",
+  "properties": {
+    "recipient_athlete_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "new_subscriber",
+        "new_video",
+        "video_purchased",
+        "video_approved",
+        "milestone_views",
+        "payout",
+        "streak_risk",
+        "clan_challenge"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "actor_name": {
+      "type": "string"
+    },
+    "actor_avatar": {
+      "type": "string"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "recipient_athlete_id",
+    "type",
+    "title"
+  ]
+}

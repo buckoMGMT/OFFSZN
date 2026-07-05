@@ -1,0 +1,21 @@
+{
+  "name": "CoachSubscription",
+  "type": "object",
+  "description": "An athlete following/subscribing to a coach's account for content updates.",
+  "properties": {
+    "subscriber_athlete_id": {
+      "type": "string"
+    },
+    "coach_athlete_id": {
+      "type": "string"
+    },
+    "notify_new_content": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "subscriber_athlete_id",
+    "coach_athlete_id"
+  ]
+}

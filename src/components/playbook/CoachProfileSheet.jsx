@@ -1,5 +1,5 @@
 // Coach storefront sheet — verified coach identity, stats, and their video catalog.
-import { X, BadgeCheck, Eye, Play } from "lucide-react";
+import { X, BadgeCheck, Eye, Play, BellRing, BellPlus } from "lucide-react";
 import PricePill from "@/components/monetization/PricePill";
 
 function fmt(n) {
@@ -8,7 +8,7 @@ function fmt(n) {
   return `${n || 0}`;
 }
 
-export default function CoachProfileSheet({ open, onClose, coach, videos = [], onSelectVideo }) {
+export default function CoachProfileSheet({ open, onClose, coach, videos = [], onSelectVideo, isSubscribed, onToggleSubscribe }) {
   if (!open || !coach) return null;
   const totalViews = videos.reduce((s, v) => s + (v.views || 0), 0);
   return (
@@ -36,6 +36,16 @@ export default function CoachProfileSheet({ open, onClose, coach, videos = [], o
           </div>
 
           {coach.bio && <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{coach.bio}</p>}
+
+          {onToggleSubscribe && (
+            <button onClick={() => onToggleSubscribe(coach)}
+              className="w-full flex items-center justify-center gap-2 mb-4 py-2.5 rounded font-elite text-[10px] uppercase tracking-widest"
+              style={isSubscribed
+                ? { background: 'var(--surface-2)', border: '1px solid var(--border-strong)', color: 'var(--text-secondary)' }
+                : { background: 'var(--accent)', color: 'var(--on-accent)', border: 'none' }}>
+              {isSubscribed ? <><BellRing size={12} style={{ color: 'var(--accent)' }} /> Subscribed — Notifications On</> : <><BellPlus size={12} /> Subscribe</>}
+            </button>
+          )}
 
           <div className="grid grid-cols-3 gap-2 mb-5">
             {[
