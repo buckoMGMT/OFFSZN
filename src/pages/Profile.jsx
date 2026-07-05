@@ -12,6 +12,7 @@ import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import AvatarUpload from "@/components/profile/AvatarUpload";
+import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -41,6 +42,7 @@ export default function Profile() {
   const [notifications, setNotifications] = useState(() => localStorage.getItem('pb_notifs') !== 'off');
   const [units, setUnits] = useState(() => localStorage.getItem('pb_units') || 'imperial');
   const [privacy, setPrivacy] = useState(() => localStorage.getItem('pb_privacy') || 'public');
+  const [showPaywall, setShowPaywall] = useState(false);
 
 
 
@@ -137,7 +139,7 @@ export default function Profile() {
           )}
           {isPremium
             ? <div className="ml-auto"><ChromeSeal /></div>
-            : <button className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Get ALL-SZN Pass →</button>
+            : <button onClick={() => setShowPaywall(true)} className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Get ALL-SZN Pass →</button>
           }
         </div>
       </div>
@@ -369,11 +371,11 @@ export default function Profile() {
                     <Crown size={14} style={{ color: 'var(--accent)' }} />
                     <span className="font-anton text-base uppercase" style={{ color: 'var(--theme-ink)' }}>ALL-SZN Pass</span>
                   </div>
-                  <p className="font-work text-xs" style={{ color: 'var(--theme-ink-soft)' }}>Elite programs · Advanced analytics</p>
+                  <p className="font-work text-xs" style={{ color: 'var(--theme-ink-soft)' }}>Unlock the platform. Coach programs sold separately.</p>
                 </div>
                 <div className="text-right">
                   <p className="font-elite text-xl" style={{ color: 'var(--accent)' }}>$9.99<span style={{ fontSize: 11 }}>/mo</span></p>
-                  <StampButton className="text-[10px] px-3 py-1 mt-1">Upgrade</StampButton>
+                  <StampButton onClick={() => setShowPaywall(true)} className="text-[10px] px-3 py-1 mt-1">Upgrade</StampButton>
                 </div>
               </div>
             )}
@@ -419,6 +421,8 @@ export default function Profile() {
           </div>
         )}
       </div>
+
+      <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 }

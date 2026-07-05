@@ -8,6 +8,8 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import { StaggerList, motion } from "@/lib/motion.jsx";
 import CommunityDrills from "@/components/playbook/CommunityDrills";
+import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
+import PassRibbon from "@/components/monetization/PassRibbon";
 
 const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming", "Lacrosse"];
 
@@ -58,6 +60,7 @@ export default function Playbook() {
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [playlistName, setPlaylistName] = useState("");
   const [playlistPrograms, setPlaylistPrograms] = useState([]);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   useEffect(() => {
     base44.entities.Athlete.list("-created_date", 1).then(list => {
@@ -121,7 +124,7 @@ export default function Playbook() {
         <div className="px-4 -mt-6 relative z-10 pb-8">
           <div className="flex items-start justify-between gap-2 mb-1">
             <h1 className="font-anton text-2xl uppercase leading-tight" style={{ color: locked ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>
-              {locked ? "🔒 Classified Program" : selected.title}
+              {locked ? "All-SZN Program" : selected.title}
             </h1>
             <span className="ink-stamp mt-1.5 flex-shrink-0">LVL {difficultyNum(selected.difficulty)}</span>
           </div>
@@ -160,7 +163,8 @@ export default function Playbook() {
           {locked ? (
             <PremiumGate
               title="All-SZN Pass Required"
-              subtitle="This is private coach content. Unlock full access to every program, drill, and protected video."
+              subtitle="The full library opens with the All-SZN Pass."
+              onUpgrade={() => setShowPaywall(true)}
             />
           ) : (
             <div className="flex justify-center">
@@ -170,6 +174,7 @@ export default function Playbook() {
             </div>
           )}
         </div>
+        <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
       </div>
     );
   }
@@ -227,21 +232,14 @@ export default function Playbook() {
               const locked = program.isPremium && !isPremium;
               const isSaved = savedIds.includes(program.id);
               return (
-                <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.2, 0, 0, 1] } } }} key={program.id} className="break-inside-avoid mb-3 cursor-pointer" onClick={() => setSelected(program)}>
+                <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.2, 0, 0, 1] } } }} key={program.id} className="break-inside-avoid mb-3 cursor-pointer" onClick={() => locked ? setShowPaywall(true) : setSelected(program)}>
                 <div className="relative rounded-lg overflow-hidden border" style={{ background: 'var(--surface-1)', borderColor: locked ? 'var(--accent)' : 'var(--border-subtle)', borderWidth: locked ? 1.5 : 1 }}>
                     <div className="relative">
                       <img src={program.cover} alt={program.title} className="w-full object-cover" style={{ height: program.id % 3 === 0 ? 170 : 130, filter: locked ? 'blur(7px) brightness(0.5)' : 'none' }} />
                       <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,11,13,0.85) 0%, transparent 60%)' }} />
 
-                      {/* Glassmorphic lock overlay on premium — teases the blurred content */}
-                      {locked && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'rgba(10,11,13,0.35)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)' }}>
-                          <div className="w-9 h-9 rounded-full flex items-center justify-center mb-1" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
-                            <Lock size={16} style={{ color: 'var(--accent)' }} />
-                          </div>
-                          <span className="eyebrow" style={{ color: 'var(--accent)', fontSize: '8px' }}>All-SZN Pass</span>
-                        </div>
-                      )}
+                      {/* Pass-locked treatment — ALL-SZN corner ribbon (never on coach-priced items) */}
+                      {locked && <PassRibbon />}
 
                       {isPremium && !locked && (
                         <button onClick={(e) => toggleSave(program, e)} className="absolute top-2 right-2 p-1 rounded" style={{ background: 'rgba(10,11,13,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
@@ -288,7 +286,7 @@ export default function Playbook() {
           <div>
             {!isPremium ? (
               <div className="mt-4">
-                <PremiumGate title="Saved Programs" subtitle="Save your favorite drills and build custom playlists with the All-SZN Pass." />
+                <PremiumGate title="Saved Programs" subtitle="Save your favorite drills and build custom playlists with the All-SZN Pass." onUpgrade={() => setShowPaywall(true)} />
               </div>
             ) : savedPrograms.length === 0 ? (
               <div className="text-center py-16">
@@ -316,7 +314,7 @@ export default function Playbook() {
           <div>
             {!isPremium ? (
               <div className="mt-4">
-                <PremiumGate title="Custom Playlists" subtitle="Create and organize your own training playlists with the All-SZN Pass." />
+                <PremiumGate title="Custom Playlists" subtitle="Create and organize your own training playlists with the All-SZN Pass." onUpgrade={() => setShowPaywall(true)} />
               </div>
             ) : (
               <>
@@ -393,6 +391,8 @@ export default function Playbook() {
           </div>
         </div>
       )}
+
+      <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 }
