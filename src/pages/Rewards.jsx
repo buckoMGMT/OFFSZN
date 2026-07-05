@@ -6,6 +6,7 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import RedeemModal from "@/components/rewards/RedeemModal";
 import ReferralPanel from "@/components/rewards/ReferralPanel";
+import MysteryBoxCard from "@/components/rewards/MysteryBoxCard";
 
 const DAILY_BREAKDOWN = [
   { action: "Hit your water goal (80oz)", pts: 10 },
@@ -263,6 +264,7 @@ export default function Rewards() {
             )}
 
             <div className="grid grid-cols-2 gap-3">
+              {filter !== "gift_card" && <MysteryBoxCard />}
               {sorted.map(item => (
                 <RewardCard key={item.id} item={item} athletePoints={points} onRedeem={setRedeemTarget} />
               ))}
