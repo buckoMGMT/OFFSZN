@@ -7,6 +7,7 @@ import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import ExploreGrid from "@/components/playbook/ExploreGrid";
+import DiscoveryBar from "@/components/playbook/DiscoveryBar";
 import SubscriptionsTab from "@/components/playbook/SubscriptionsTab";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
@@ -62,6 +63,9 @@ export default function Playbook() {
   const [playlistName, setPlaylistName] = useState("");
   const [playlistPrograms, setPlaylistPrograms] = useState([]);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [sortBy, setSortBy] = useState("featured");
+  const [priceFilter, setPriceFilter] = useState("all");
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
 
   useEffect(() => {
     base44.entities.Athlete.list("-created_date", 1).then(list => {
@@ -96,7 +100,14 @@ export default function Playbook() {
     setShowCreatePlaylist(false); setPlaylistName(""); setPlaylistPrograms([]);
   };
 
-  const filtered = PROGRAMS.filter(p => sportFilter === "All" || p.sport === sportFilter);
+  let filtered = PROGRAMS.filter(p =>
+    (sportFilter === "All" || p.sport === sportFilter) &&
+    (difficultyFilter === "all" || p.difficulty.toLowerCase() === difficultyFilter) &&
+    (priceFilter === "all" || (priceFilter === "paid" ? p.isPremium : !p.isPremium))
+  );
+  if (sortBy === "newest") filtered = [...filtered].sort((a, b) => b.id - a.id);
+  else if (sortBy === "price_low") filtered = [...filtered].sort((a, b) => (a.isPremium ? 1 : 0) - (b.isPremium ? 1 : 0));
+  else if (sortBy === "price_high") filtered = [...filtered].sort((a, b) => (b.isPremium ? 1 : 0) - (a.isPremium ? 1 : 0));
   const savedPrograms = PROGRAMS.filter(p => savedIds.includes(p.id));
 
   // Detail view
@@ -231,14 +242,27 @@ export default function Playbook() {
 
       <div className="px-4 py-4">
         {tab === "explore" && (
-          <ExploreGrid
-            programs={filtered}
-            sportFilter={sportFilter}
-            isPremium={isPremium}
-            athlete={athlete}
-            onSelectProgram={setSelected}
-            onLockedProgram={() => setShowPaywall(true)}
-          />
+          <>
+            <DiscoveryBar
+              athlete={athlete}
+              programs={PROGRAMS}
+              onSelectProgram={setSelected}
+              sortBy={sortBy} setSortBy={setSortBy}
+              priceFilter={priceFilter} setPriceFilter={setPriceFilter}
+              difficultyFilter={difficultyFilter} setDifficultyFilter={setDifficultyFilter}
+            />
+            <ExploreGrid
+              programs={filtered}
+              sportFilter={sportFilter}
+              isPremium={isPremium}
+              athlete={athlete}
+              sortBy={sortBy}
+              priceFilter={priceFilter}
+              difficultyFilter={difficultyFilter}
+              onSelectProgram={setSelected}
+              onLockedProgram={() => setShowPaywall(true)}
+            />
+          </>
         )}
 
         {tab === "subs" && <SubscriptionsTab athlete={athlete} />}

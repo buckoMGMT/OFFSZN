@@ -27,8 +27,26 @@ function fmt(n) {
   return `${n || 0}`;
 }
 
+const VIDEO_SORTERS = {
+  newest: (a, b) => new Date(b.created_date) - new Date(a.created_date),
+  popular: (a, b) => (b.views || 0) - (a.views || 0),
+  top_rated: (a, b) => (b.likes || 0) - (a.likes || 0),
+  price_low: (a, b) => (a.price_usd || 0) - (b.price_usd || 0),
+  price_high: (a, b) => (b.price_usd || 0) - (a.price_usd || 0),
+};
+
 // Paid coach videos become the big featured tiles; free videos and programs fill around them.
-function buildItems(programs, videos) {
+// When a non-featured sort is active, the strict sorted order is respected (no big-tile promotion).
+function buildItems(programs, videos, featured = true) {
+  if (!featured) {
+    const out = [];
+    const max = Math.max(programs.length, videos.length);
+    for (let i = 0; i < max; i++) {
+      if (videos[i]) out.push({ kind: "video", data: videos[i], key: `v-${videos[i].id}` });
+      if (programs[i]) out.push({ kind: "program", data: programs[i], key: `p-${programs[i].id}` });
+    }
+    return out;
+  }
   const paid = videos.filter(v => v.price_usd > 0);
   const free = videos.filter(v => !(v.price_usd > 0));
   const rest = [];
@@ -49,7 +67,7 @@ function buildItems(programs, videos) {
   return out;
 }
 
-export default function ExploreGrid({ programs, sportFilter, isPremium, athlete, onSelectProgram, onLockedProgram }) {
+export default function ExploreGrid({ programs, sportFilter, isPremium, athlete, sortBy = "featured", priceFilter = "all", difficultyFilter = "all", onSelectProgram, onLockedProgram }) {
   const { subscribedIds, toggle } = useSubscriptions(athlete);
   const [videos, setVideos] = useState([]);
   const [authors, setAuthors] = useState({});
@@ -70,9 +88,12 @@ export default function ExploreGrid({ programs, sportFilter, isPremium, athlete,
     });
   }, []);
 
-  const filteredVideos = sportFilter === "All"
-    ? videos
-    : videos.filter(v => (v.sport || "").toLowerCase() === sportFilter.toLowerCase());
+  let filteredVideos = videos.filter(v =>
+    (sportFilter === "All" || (v.sport || "").toLowerCase() === sportFilter.toLowerCase()) &&
+    (priceFilter === "all" || (priceFilter === "paid" ? v.price_usd > 0 : !(v.price_usd > 0))) &&
+    (difficultyFilter === "all" || (v.difficulty || "").toLowerCase() === difficultyFilter)
+  );
+  if (VIDEO_SORTERS[sortBy]) filteredVideos = [...filteredVideos].sort(VIDEO_SORTERS[sortBy]);
 
   // Tap a video anywhere → open the creator's profile (their storefront)
   const openVideo = (v) => {
@@ -99,7 +120,7 @@ export default function ExploreGrid({ programs, sportFilter, isPremium, athlete,
     </div>
   );
 
-  const items = buildItems(programs, filteredVideos);
+  const items = buildItems(programs, filteredVideos, sortBy === "featured");
   const buyingCoach = buying ? authors[buying.athlete_id] : null;
 
   return (
