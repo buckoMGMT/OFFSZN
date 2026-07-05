@@ -91,19 +91,25 @@ function RewardCard({ item, athletePoints, onRedeem }) {
           <p className="font-work text-sm font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>{item.name}</p>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-1 whitespace-nowrap">
             <Zap size={10} style={{ color: 'var(--accent)' }} />
-            <span className="font-elite text-sm" style={{ color: 'var(--accent)' }}>{item.points_required.toLocaleString()}</span>
-            <span className="font-elite text-[9px]" style={{ color: '#9BA3AC' }}>pts</span>
+            <span className="tabular-nums text-sm font-semibold" style={{ color: 'var(--accent)' }}>{item.points_required.toLocaleString()}</span>
+            <span className="font-work text-[9px] uppercase" style={{ color: 'var(--text-tertiary)' }}>pts</span>
           </div>
           {isUnavailable
-            ? <span className="font-elite text-[9px] uppercase" style={{ color: '#9BA3AC' }}>Unavailable</span>
+            ? (
+              <span className="font-work text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap px-2 py-0.5 rounded"
+                style={{ color: 'var(--accent)', background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                Coming Soon
+              </span>
+            )
             : canAfford
               ? <StampButton onClick={() => onRedeem(item)} className="text-[10px] px-3 py-1">Redeem</StampButton>
               : (
-                <span className="font-elite text-[9px] uppercase" style={{ color: '#9BA3AC' }}>
-                  {(item.points_required - athletePoints).toLocaleString()} more
+                <span className="font-work text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap px-2 py-0.5 rounded"
+                  style={{ color: 'var(--warning)', background: 'rgba(245,184,65,0.12)' }}>
+                  {(item.points_required - athletePoints).toLocaleString()} to go
                 </span>
               )
           }
@@ -249,19 +255,6 @@ export default function Rewards() {
                 </button>
               ))}
             </div>
-
-            {/* Merch nudge banner */}
-            {filter !== "gift_card" && (
-              <div className="rounded border-2 p-3 mb-4 flex items-start gap-3" style={{ borderColor: 'var(--accent)', background: 'var(--accent-subtle)' }}>
-                <Shirt size={18} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
-                <div>
-                  <p className="eyebrow mb-0.5" style={{ color: 'var(--accent)' }}>Rep the Brand → Earn Faster</p>
-                  <p className="font-work text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    Merch costs <strong>40% fewer points</strong> than gift cards. Earn your gear, wear it with pride.
-                  </p>
-                </div>
-              </div>
-            )}
 
             <div className="grid grid-cols-2 gap-3">
               {filter !== "gift_card" && <MysteryBoxCard />}
