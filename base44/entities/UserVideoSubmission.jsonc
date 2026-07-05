@@ -87,6 +87,10 @@
     "views": {
       "type": "number",
       "default": 0
+    },
+    "price_usd": {
+      "type": "number",
+      "description": "Coach-set one-time price. Absent or 0 = free to watch."
     }
   },
   "required": [
