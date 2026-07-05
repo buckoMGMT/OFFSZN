@@ -140,7 +140,10 @@ export default function Profile() {
             </div>
           )}
           {isPremium
-            ? <div className="ml-auto"><ChromeSeal /></div>
+            ? <div className="ml-auto flex items-center gap-2">
+                <button onClick={() => setShowPaywall(true)} className="font-elite text-[9px] uppercase tracking-widest underline" style={{ color: 'var(--text-tertiary)' }}>Compare Plans</button>
+                <ChromeSeal />
+              </div>
             : <button onClick={() => setShowPaywall(true)} className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Get ALL-SZN Pass →</button>
           }
         </div>

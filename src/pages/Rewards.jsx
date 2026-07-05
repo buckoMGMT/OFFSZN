@@ -7,6 +7,7 @@ import PlayDiagram from "@/components/ui/PlayDiagram";
 import RedeemModal from "@/components/rewards/RedeemModal";
 import ReferralPanel from "@/components/rewards/ReferralPanel";
 import MysteryBoxCard from "@/components/rewards/MysteryBoxCard";
+import MysteryWinTicker from "@/components/rewards/MysteryWinTicker";
 
 const DAILY_BREAKDOWN = [
   { action: "Hit your water goal (80oz)", pts: 10 },
@@ -230,6 +231,9 @@ export default function Rewards() {
           ))}
         </div>
       </div>
+
+      {/* Live mystery box wins ticker */}
+      <MysteryWinTicker />
 
       <div className="px-4 py-4">
 

@@ -6,8 +6,7 @@ import PremiumGate from "@/components/ui/PremiumGate";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
-import { StaggerList, motion } from "@/lib/motion.jsx";
-import CommunityDrills from "@/components/playbook/CommunityDrills";
+import ExploreGrid from "@/components/playbook/ExploreGrid";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import PassRibbon from "@/components/monetization/PassRibbon";
 
@@ -56,7 +55,7 @@ export default function Playbook() {
   const [selected, setSelected] = useState(null);
   const [savedIds, setSavedIds] = useState([]);
   const [playlists, setPlaylists] = useState([]);
-  const [tab, setTab] = useState("programs");
+  const [tab, setTab] = useState("explore");
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [playlistName, setPlaylistName] = useState("");
   const [playlistPrograms, setPlaylistPrograms] = useState([]);
@@ -192,8 +191,7 @@ export default function Playbook() {
         {/* Tab bar */}
         <div className="flex border-b" style={{ borderColor: 'var(--border-subtle)' }}>
           {[
-            { id: "programs", label: "Programs" },
-            { id: "community", label: "Community" },
+            { id: "explore", label: "Explore" },
             { id: "saved", label: `Saved${savedIds.length ? ` (${savedIds.length})` : ""}` },
             { id: "playlists", label: "Playlists" },
           ].map(t => (
@@ -208,7 +206,7 @@ export default function Playbook() {
           ))}
         </div>
 
-        {tab === "programs" && (
+        {tab === "explore" && (
           <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2">
             {SPORT_FILTERS.map(sport => (
               <button key={sport} onClick={() => setSportFilter(sport)}
@@ -226,61 +224,15 @@ export default function Playbook() {
       </div>
 
       <div className="px-4 py-4">
-        {tab === "programs" && (
-          <StaggerList className="columns-2 gap-3">
-            {filtered.map(program => {
-              const locked = program.isPremium && !isPremium;
-              const isSaved = savedIds.includes(program.id);
-              return (
-                <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.2, 0, 0, 1] } } }} key={program.id} className="break-inside-avoid mb-3 cursor-pointer" onClick={() => locked ? setShowPaywall(true) : setSelected(program)}>
-                <div className="relative rounded-lg overflow-hidden border" style={{ background: 'var(--surface-1)', borderColor: locked ? 'var(--accent)' : 'var(--border-subtle)', borderWidth: locked ? 1.5 : 1 }}>
-                    <div className="relative">
-                      <img src={program.cover} alt={program.title} className="w-full object-cover" style={{ height: program.id % 3 === 0 ? 170 : 130, filter: locked ? 'blur(7px) brightness(0.5)' : 'none' }} />
-                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,11,13,0.85) 0%, transparent 60%)' }} />
-
-                      {/* Pass-locked treatment — ALL-SZN corner ribbon (never on coach-priced items) */}
-                      {locked && <PassRibbon />}
-
-                      {isPremium && !locked && (
-                        <button onClick={(e) => toggleSave(program, e)} className="absolute top-2 right-2 p-1 rounded" style={{ background: 'rgba(10,11,13,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                          {isSaved ? <BookmarkCheck size={11} style={{ color: 'var(--accent)' }} /> : <Bookmark size={11} style={{ color: 'var(--text-secondary)' }} />}
-                        </button>
-                      )}
-
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <p className="font-elite text-[9px] uppercase tracking-widest mb-0.5" style={{ color: '#fff' }}>
-                          {program.category}
-                        </p>
-                        <p className="font-work text-xs font-semibold" style={{ color: '#fff' }}>{locked ? "Premium Program" : program.title}</p>
-                      </div>
-                    </div>
-
-                    <div className="p-2.5 space-y-1.5" style={{ background: 'var(--surface-1)' }}>
-                    <div className="flex items-center justify-between">
-                      <XsOs size={22} />
-                        <span className="ink-stamp" style={{ fontSize: '8px', padding: '1px 5px', transform: 'rotate(-2deg)', display: 'inline-block' }}>
-                          LVL {difficultyNum(program.difficulty)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1" style={{ color: 'var(--text-tertiary)' }}>
-                        <Clock size={9} />
-                        <span className="font-elite text-[9px] uppercase">{program.duration}m</span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-            {filtered.length === 0 && (
-              <div className="col-span-2 text-center py-16">
-                <PlayDiagram size={130} />
-                <p className="font-work text-sm mt-4" style={{ color: '#5A5D63' }}>No programs match that sport.</p>
-              </div>
-            )}
-          </StaggerList>
+        {tab === "explore" && (
+          <ExploreGrid
+            programs={filtered}
+            sportFilter={sportFilter}
+            isPremium={isPremium}
+            onSelectProgram={setSelected}
+            onLockedProgram={() => setShowPaywall(true)}
+          />
         )}
-
-        {tab === "community" && <CommunityDrills />}
 
         {tab === "saved" && (
           <div>
