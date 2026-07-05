@@ -9,7 +9,7 @@ const FAQS = [
 },
 {
   q: "Why do coach programs cost extra?",
-  a: "Coaches on OFFSZN are verified professionals who set their own prices, and they keep the large majority of every sale. The Pass unlocks the platform; the marketplace pays the people who've done it."
+  a: "Coaches on OFFSZN are verified professionals who set their own prices, and they keep the large majority of every sale. The Pass unlocks the platform; the marketplace pays the coaches who've perfected it."
 },
 {
   q: "Do I need the Pass to buy a coach's program?",
