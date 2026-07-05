@@ -20,7 +20,7 @@ function PointsBar({ current, target, label }) {
   return (
     <div>
       <div className="flex justify-between mb-1">
-        <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{label}</span>
+        <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>{label}</span>
         <span className="font-elite text-[9px]" style={{ color: 'var(--accent)' }}>{current.toLocaleString()} / {target.toLocaleString()}</span>
         </div>
         <div className="h-2 rounded-full overflow-hidden" style={{ background: '#9BA3AC44' }}>
@@ -34,7 +34,8 @@ function RewardCard({ item, athletePoints, onRedeem }) {
   const isMerch = item.type === "merch";
   const isUnavailable = isMerch;
   const canAfford = !isUnavailable && athletePoints >= item.points_required;
-  const savings = item.real_world_value_usd
+  // Only gift cards show their dollar value — merch stays value-free
+  const savings = !isMerch && item.real_world_value_usd
     ? `$${item.real_world_value_usd} value`
     : null;
 
@@ -85,8 +86,8 @@ function RewardCard({ item, athletePoints, onRedeem }) {
 
       <div className="p-3 space-y-2">
         <div>
-          <p className="font-elite text-[8px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{item.brand}</p>
-          <p className="font-work text-sm font-semibold leading-tight" style={{ color: '#15151A' }}>{item.name}</p>
+          <p className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>{item.brand}</p>
+          <p className="font-work text-sm font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>{item.name}</p>
         </div>
 
         <div className="flex items-center justify-between">
@@ -255,7 +256,7 @@ export default function Rewards() {
                 <div>
                   <p className="eyebrow mb-0.5" style={{ color: 'var(--accent)' }}>Rep the Brand → Earn Faster</p>
                   <p className="font-work text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    Merch items cost <strong>40% fewer points</strong> than gift cards — and you become a walking billboard for OFFSZN.
+                    Merch costs <strong>40% fewer points</strong> than gift cards. Earn your gear, wear it with pride.
                   </p>
                 </div>
               </div>
@@ -279,9 +280,9 @@ export default function Rewards() {
           <div>
             {redemptions.length === 0 ? (
               <div className="text-center py-16">
-                <Package size={40} style={{ color: '#9BA3AC' }} className="mx-auto mb-4" />
-                <h3 className="font-anton text-xl uppercase mb-2" style={{ color: '#15151A' }}>No Orders Yet</h3>
-                <p className="font-work text-sm" style={{ color: '#5A5D63' }}>Keep earning and redeem your first reward.</p>
+                <Package size={40} style={{ color: 'var(--text-tertiary)' }} className="mx-auto mb-4" />
+                <h3 className="font-anton text-xl uppercase mb-2" style={{ color: 'var(--text-primary)' }}>No Orders Yet</h3>
+                <p className="font-work text-sm" style={{ color: 'var(--text-secondary)' }}>Keep earning and redeem your first reward.</p>
               </div>
             ) : (
               <div className="space-y-3">
