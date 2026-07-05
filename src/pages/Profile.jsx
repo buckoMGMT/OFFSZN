@@ -7,6 +7,7 @@ import BadgesSection from "@/components/profile/BadgesSection";
 import StrengthMaxes from "@/components/profile/StrengthMaxes";
 import HighlightReel from "@/components/profile/HighlightReel";
 import CoachTier from "@/components/profile/CoachTier";
+import CoachStudio from "@/components/profile/CoachStudio";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
@@ -277,7 +278,12 @@ export default function Profile() {
           </div>
         )}
 
-        {activeSection === "coach" && <div className="mt-3"><CoachTier athlete={athlete} onUpdate={reload} /></div>}
+        {activeSection === "coach" && (
+          <div className="mt-3 space-y-4">
+            <CoachStudio athlete={athlete} />
+            <CoachTier athlete={athlete} onUpdate={reload} />
+          </div>
+        )}
 
         {activeSection === "settings" && (
           <div className="space-y-4 mt-3">
