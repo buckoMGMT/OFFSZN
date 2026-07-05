@@ -34,19 +34,19 @@ export default function PlayDiagram({ size = 180, className = "" }) {
         <path d="M38 102 L38 68 Q38 52 54 52 Q68 52 68 66" stroke="var(--accent)" strokeWidth="1.5" fill="none"
           strokeDasharray="200" strokeLinecap="round"
           style={{ animation: 'drawRoute 0.9s ease-out 0.1s both' }} className="draw-route" />
-        <polygon points="68,60 64,72 72,70" fill="#00C853" style={{ opacity: drawn ? 1 : 0, transition: 'opacity 0.3s 0.9s' }} />
+        <polygon points="68,60 64,72 72,70" fill="var(--accent)" style={{ opacity: drawn ? 1 : 0, transition: 'opacity 0.3s 0.9s' }} />
 
         {/* Fly route right */}
         <path d="M142 102 L142 46" stroke="var(--accent)" strokeWidth="1.5" fill="none"
           strokeDasharray="200" strokeLinecap="round"
           style={{ animation: 'drawRoute 0.7s ease-out 0.3s both' }} className="draw-route" />
-        <polygon points="142,40 138,52 146,52" fill="#00C853" style={{ opacity: drawn ? 1 : 0, transition: 'opacity 0.3s 0.8s' }} />
+        <polygon points="142,40 138,52 146,52" fill="var(--accent)" style={{ opacity: drawn ? 1 : 0, transition: 'opacity 0.3s 0.8s' }} />
 
         {/* Crossing route */}
         <path d="M62 102 L62 74 L118 74" stroke="var(--accent)" strokeWidth="1.5" fill="none"
           strokeDasharray="200" strokeLinecap="round"
           style={{ animation: 'drawRoute 1s ease-out 0.5s both' }} className="draw-route" />
-        <polygon points="124,74 112,70 112,78" fill="#00C853" style={{ opacity: drawn ? 1 : 0, transition: 'opacity 0.3s 1.3s' }} />
+        <polygon points="124,74 112,70 112,78" fill="var(--accent)" style={{ opacity: drawn ? 1 : 0, transition: 'opacity 0.3s 1.3s' }} />
       </>}
     </svg>
   );
