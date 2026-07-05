@@ -168,7 +168,7 @@ export default function Profile() {
             <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Edit Player Card</p>
             {[
               { placeholder: "Display name", field: "display_name" },
-              { placeholder: "School name", field: "school" },
+              { placeholder: "Club name", field: "school" },
               { placeholder: "Position", field: "position" },
             ].map(({ placeholder, field }) => (
               <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
