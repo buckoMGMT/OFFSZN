@@ -7,6 +7,7 @@ import StampButton from "@/components/ui/StampButton";
 import CoachCircle from "@/components/ui/CoachCircle";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import TeamRoster from "@/components/clans/TeamRoster";
+import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "other"];
 const TYPES = ["high_school", "club", "college", "other"];
@@ -41,7 +42,9 @@ export default function Clans() {
   const [createForm, setCreateForm] = useState({ name: "", type: "high_school", sport: "football", school_name: "", description: "" });
   const [creating, setCreating] = useState(false);
   const [tab, setTab] = useState("discover");
+  const [showPaywall, setShowPaywall] = useState(false);
   const circledRow = useCircledRow(clans.length);
+  const isPremiumUser = athlete?.subscription_tier === "premium";
 
   const load = useCallback(async () => {
     const [athletes, clanList] = await Promise.all([
@@ -104,7 +107,7 @@ export default function Clans() {
           <div className="flex items-center gap-3">
             <PageLabel number={4} />
             {!myClan && (
-              <StampButton onClick={() => setShowCreate(true)}>
+              <StampButton onClick={() => isPremiumUser ? setShowCreate(true) : setShowPaywall(true)}>
                 <Plus size={12} /> Create
               </StampButton>
             )}
@@ -309,6 +312,8 @@ export default function Clans() {
           </div>
         </div>
       )}
+
+      <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 }

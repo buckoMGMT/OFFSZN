@@ -13,6 +13,7 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
+import AdvancedStats from "@/components/analytics/AdvancedStats";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -222,6 +223,7 @@ export default function Profile() {
               ))}
             </div>
             <StrengthMaxes athlete={athlete} onUpdate={reload} />
+            <AdvancedStats athlete={athlete} isPremium={isPremium} onUpgrade={() => setShowPaywall(true)} />
             {athlete.bio && (
               <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
                 <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Bio</p>

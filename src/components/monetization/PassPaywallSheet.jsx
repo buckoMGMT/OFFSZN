@@ -14,7 +14,9 @@ const ROWS = [
   { label: "Buy coach content à la carte", free: true },
   { label: "Post your content to The Field", free: false },
   { label: "Full OFFSZN premium drill library", free: false },
-  { label: "Advanced stat breakdowns & analytics", free: false },
+  { label: "Advanced stats — Readiness index & percentile benchmarks", free: false },
+  { label: "Projected Peak forecasting & position leaderboards", free: false },
+  { label: "Create your own Team & run the roster", free: false },
   { label: "Apply for verified Coach status", free: false },
   { label: "No Promoted content in your feed", free: false },
 ];
@@ -80,6 +82,8 @@ export default function PassPaywallSheet({ open, onClose }) {
 
           <p className="eyebrow mb-2">Questions</p>
           <PricingFAQ />
+          {/* Breathing room so the last FAQ answer clears the safe area when expanded */}
+          <div style={{ height: 48 }} />
         </div>
       </div>
     </div>

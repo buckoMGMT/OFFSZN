@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 const FAQS = [
   {
     q: "What does the All-SZN Pass include?",
-    a: "Everything free athletes get, plus: post your own content to The Field, the full OFFSZN premium drill library, advanced stat breakdowns and progress analytics, eligibility to apply for verified Coach status, and no Promoted content in your feed. Coach programs are priced by each coach and sold separately.",
+    a: "Everything free athletes get, plus: post your own content to The Field, the full OFFSZN premium drill library, advanced stats (Readiness index, percentile benchmarks, Projected Peak forecasting, position leaderboards), the ability to create your own Team, eligibility to apply for verified Coach status, and no Promoted content in your feed. Coach programs are priced by each coach and sold separately.",
   },
   {
     q: "Why do coach programs cost extra?",
