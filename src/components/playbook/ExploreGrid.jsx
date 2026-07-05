@@ -26,12 +26,24 @@ function fmt(n) {
   return `${n || 0}`;
 }
 
-function interleave(programs, videos) {
-  const out = [];
-  const max = Math.max(programs.length, videos.length);
+// Paid coach videos become the big featured tiles; free videos and programs fill around them.
+function buildItems(programs, videos) {
+  const paid = videos.filter(v => v.price_usd > 0);
+  const free = videos.filter(v => !(v.price_usd > 0));
+  const rest = [];
+  const max = Math.max(programs.length, free.length);
   for (let i = 0; i < max; i++) {
-    if (videos[i]) out.push({ kind: "video", data: videos[i], key: `v-${videos[i].id}` });
-    if (programs[i]) out.push({ kind: "program", data: programs[i], key: `p-${programs[i].id}` });
+    if (free[i]) rest.push({ kind: "video", data: free[i], key: `v-${free[i].id}` });
+    if (programs[i]) rest.push({ kind: "program", data: programs[i], key: `p-${programs[i].id}` });
+  }
+  const out = [];
+  let pi = 0;
+  while (rest.length || pi < paid.length) {
+    if (pi < paid.length) {
+      out.push({ kind: "video", data: paid[pi], key: `v-${paid[pi].id}`, big: true });
+      pi++;
+    }
+    out.push(...rest.splice(0, 6));
   }
   return out;
 }
@@ -85,14 +97,14 @@ export default function ExploreGrid({ programs, sportFilter, isPremium, onSelect
     </div>
   );
 
-  const items = interleave(programs, filteredVideos);
+  const items = buildItems(programs, filteredVideos);
   const buyingCoach = buying ? authors[buying.athlete_id] : null;
 
   return (
     <>
       <div className="grid grid-cols-3 gap-0.5 -mx-4" style={{ gridAutoFlow: 'dense' }}>
-        {items.map((item, i) => {
-          const big = i % 7 === 0;
+        {items.map((item) => {
+          const big = !!item.big;
           if (item.kind === "program") {
             const p = item.data;
             const locked = p.isPremium && !isPremium;
@@ -118,13 +130,46 @@ export default function ExploreGrid({ programs, sportFilter, isPremium, onSelect
           const author = authors[v.athlete_id];
           const owned = purchasedIds.includes(v.id);
           const priced = v.price_usd > 0 && !owned;
+          const thumb = v.thumbnail_url || SPORT_THUMBS[v.sport] || DEFAULT_THUMB;
+          if (big) {
+            const handle = "@" + (author?.display_name || "coach").toLowerCase().replace(/[^a-z0-9]/g, "");
+            return (
+              <button key={item.key} onClick={() => openVideo(v)}
+                className="relative col-span-2 row-span-2 overflow-hidden text-left flex flex-col"
+                style={{ background: 'var(--surface-1)' }}>
+                <div className="relative flex-1 min-h-0 w-full">
+                  <img src={thumb} alt={v.title} className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,11,13,0.7) 0%, transparent 45%)' }} />
+                  <Play size={16} fill="#fff" className="absolute top-2 right-2" style={{ color: '#fff', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }} />
+                  <p className="absolute bottom-1.5 left-2 right-2 font-work text-sm font-semibold leading-tight" style={{ color: '#fff' }}>{v.title}</p>
+                </div>
+                {/* Coach profile bar under the featured video */}
+                <div className="flex items-center gap-2 w-full px-2 py-1.5 flex-shrink-0" style={{ background: 'var(--surface-1)', borderTop: '1px solid var(--border-subtle)' }}>
+                  {author?.avatar_url && <img src={author.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover flex-shrink-0" style={{ border: '1px solid var(--accent)' }} />}
+                  <div className="flex-1 min-w-0">
+                    <span className="flex items-center gap-1 font-work text-[10px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                      {author?.display_name || "Coach"}
+                      {author?.is_coach_verified && <BadgeCheck size={10} style={{ color: 'var(--accent)', flexShrink: 0 }} />}
+                    </span>
+                    <span className="block font-elite text-[8px] uppercase tracking-wide truncate" style={{ color: 'var(--text-tertiary)' }}>{handle} · {fmt(v.views)} views</span>
+                  </div>
+                  {priced && (
+                    <span className="tabular-nums text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}>
+                      ${v.price_usd.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          }
           return (
             <button key={item.key} onClick={() => openVideo(v)}
-              className={`relative overflow-hidden text-left ${big ? "col-span-2 row-span-2" : "aspect-square"}`}>
-              <img src={SPORT_THUMBS[v.sport] || DEFAULT_THUMB} alt={v.title} className="absolute inset-0 w-full h-full object-cover" />
+              className="relative overflow-hidden text-left aspect-square">
+              <img src={thumb} alt={v.title} className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,11,13,0.88) 0%, transparent 55%)' }} />
               <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
-                <Play size={big ? 14 : 11} fill="#fff" style={{ color: '#fff', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }} />
+                <Play size={11} fill="#fff" style={{ color: '#fff', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }} />
               </div>
               {priced && (
                 <span className="absolute top-1.5 left-1.5 tabular-nums text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
@@ -133,7 +178,7 @@ export default function ExploreGrid({ programs, sportFilter, isPremium, onSelect
                 </span>
               )}
               <div className="absolute bottom-1.5 left-1.5 right-1.5">
-                <p className={`font-work font-semibold leading-tight ${big ? "text-sm" : "text-[10px]"}`} style={{ color: '#fff' }}>{v.title}</p>
+                <p className="font-work font-semibold leading-tight text-[10px]" style={{ color: '#fff' }}>{v.title}</p>
                 <span className="flex items-center gap-1 font-elite text-[8px] uppercase tracking-wide mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>
                   {author?.display_name || "Athlete"}
                   {author?.is_coach_verified && <BadgeCheck size={9} style={{ color: 'var(--accent)', flexShrink: 0 }} />}
