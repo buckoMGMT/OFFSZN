@@ -10,6 +10,7 @@ import CoachTier from "@/components/profile/CoachTier";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
+import AvatarUpload from "@/components/profile/AvatarUpload";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -101,13 +102,8 @@ export default function Profile() {
       <div className="px-5 pt-14 pb-5 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-1)' }}>
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-16 h-16 rounded border-2 flex items-center justify-center overflow-hidden flex-shrink-0" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg)' }}>
-              {athlete.avatar_url
-                ? <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
-                :             <span className="font-anton text-2xl" style={{ color: 'var(--accent)' }}>{(athlete.display_name || "A")[0].toUpperCase()}</span>
-              }
-            </div>
+            {/* Avatar — tap to change photo */}
+            <AvatarUpload athlete={athlete} onUpdated={reload} />
             <div>
               <h1 className="font-anton text-xl uppercase leading-tight" style={{ color: 'var(--theme-ink)' }}>{athlete.display_name || "Athlete"}</h1>
               <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>
@@ -172,7 +168,6 @@ export default function Profile() {
             <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Edit Player Card</p>
             {[
               { placeholder: "Display name", field: "display_name" },
-              { placeholder: "Profile picture URL", field: "avatar_url" },
               { placeholder: "School name", field: "school" },
               { placeholder: "Position", field: "position" },
             ].map(({ placeholder, field }) => (

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Play, Pin, Upload } from "lucide-react";
+import { Play, Pin, Upload, Video } from "lucide-react";
 
 function getYtId(url) {
   const m = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -12,6 +12,21 @@ export default function HighlightReel({ athlete, onUpdate }) {
   const [url, setUrl] = useState(athlete?.highlight_url || "");
   const [saving, setSaving] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+
+  // Upload a clip from the device camera roll (native permission prompt on mobile)
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    await base44.entities.Athlete.update(athlete.id, { highlight_url: file_url });
+    setUploading(false);
+    setEditing(false);
+    setPlaying(false);
+    if (onUpdate) onUpdate();
+  };
 
   const save = async () => {
     setSaving(true);
@@ -38,6 +53,17 @@ export default function HighlightReel({ athlete, onUpdate }) {
 
       {editing ? (
         <div className="p-4 space-y-3">
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-40"
+            style={{ background: 'var(--accent-subtle)', color: 'var(--accent)', border: '1px dashed var(--accent)' }}
+          >
+            <Video size={15} />
+            {uploading ? "Uploading…" : "Upload from camera roll"}
+          </button>
+          <input ref={fileRef} type="file" accept="video/*" className="hidden" onChange={handleFile} />
+          <p className="text-center text-xs text-muted-foreground">— or —</p>
           <input
             type="text"
             placeholder="Paste YouTube link (e.g. dunking, big play…)"
@@ -55,7 +81,9 @@ export default function HighlightReel({ athlete, onUpdate }) {
         </div>
       ) : athlete?.highlight_url ? (
         <div className="relative aspect-video bg-black">
-          {playing ? (
+          {!ytId ? (
+            <video src={athlete.highlight_url} controls playsInline className="w-full h-full object-contain" />
+          ) : playing ? (
             <iframe
               src={`https://www.youtube.com/embed/${ytId}?autoplay=1`}
               className="w-full h-full"
