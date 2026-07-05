@@ -9,20 +9,27 @@ const STREAK_MILESTONES = [3, 7, 14, 30, 60, 90];
 
 function getMilestoneMessage(type, value) {
   if (type === 'points') {
-    if (value >= 10000) return { title: '🏆 LEGEND STATUS', body: `${value.toLocaleString()} points earned. You're elite.`, icon: Trophy, color: '#D7263D' };
-    if (value >= 5000) return { title: '⚡ POWER PLAY', body: `${value.toLocaleString()} points — halfway to your first reward!`, icon: Zap, color: '#D7263D' };
-    return { title: '🎯 MILESTONE HIT', body: `${value.toLocaleString()} points in the bank. Keep stacking.`, icon: Trophy, color: '#D7263D' };
+    if (value >= 10000) return { title: 'LEGEND STATUS', body: `${value.toLocaleString()} points earned. You're elite.`, icon: Trophy, semantic: 'accent' };
+    if (value >= 5000) return { title: 'POWER PLAY', body: `${value.toLocaleString()} points — halfway to your first reward!`, icon: Zap, semantic: 'accent' };
+    return { title: 'MILESTONE HIT', body: `${value.toLocaleString()} points in the bank. Keep stacking.`, icon: Trophy, semantic: 'accent' };
   }
   if (type === 'streak') {
-    if (value >= 30) return { title: `🔥 ${value}-DAY WARRIOR`, body: `${value} days straight. Iron discipline.`, icon: Flame, color: '#D7263D' };
-    if (value >= 7) return { title: `🔥 WEEK STREAK`, body: `${value} days in a row! You're on fire.`, icon: Flame, color: '#D7263D' };
-    return { title: `🔥 ${value}-DAY STREAK`, body: `${value} days consistent — don't break the chain!`, icon: Flame, color: '#D7263D' };
+    if (value >= 30) return { title: `${value}-DAY WARRIOR`, body: `${value} days straight. Iron discipline.`, icon: Flame, semantic: 'warning' };
+    if (value >= 7) return { title: 'WEEK STREAK', body: `${value} days in a row! You're on fire.`, icon: Flame, semantic: 'warning' };
+    return { title: `${value}-DAY STREAK`, body: `${value} days consistent — don't break the chain!`, icon: Flame, semantic: 'warning' };
   }
-  return { title: '⭐ ACHIEVEMENT', body: value, icon: Star, color: '#D7263D' };
+  return { title: 'ACHIEVEMENT', body: value, icon: Star, semantic: 'accent' };
 }
 
+const SEMANTIC_TOKENS = {
+  accent:   { border: 'var(--accent)',        iconBg: 'var(--accent)',  iconFg: 'var(--on-accent)', title: 'var(--accent)' },
+  positive: { border: 'var(--positive)',      iconBg: 'var(--positive)', iconFg: 'var(--surface-0)', title: 'var(--positive)' },
+  warning:  { border: 'var(--warning)',        iconBg: 'var(--warning)',  iconFg: 'var(--surface-0)', title: 'var(--warning)' },
+};
+
 function NotificationBanner({ notification, onDismiss }) {
-  const { title, body, icon: Icon, color } = notification;
+  const { title, body, icon: Icon, semantic = 'accent' } = notification;
+  const tone = SEMANTIC_TOKENS[semantic] || SEMANTIC_TOKENS.accent;
   const [exiting, setExiting] = useState(false);
 
   const dismiss = useCallback(() => {
@@ -40,10 +47,10 @@ function NotificationBanner({ notification, onDismiss }) {
       onClick={dismiss}
       style={{
         position: 'fixed',
-        top: 60,
+        top: 'calc(env(safe-area-inset-top, 0px) + 64px)',
         left: '50%',
         transform: `translateX(-50%) translateY(${exiting ? '-120%' : '0'})`,
-        transition: 'transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease',
+        transition: 'transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out)',
         opacity: exiting ? 0 : 1,
         zIndex: 9999,
         width: 'min(340px, 92vw)',
@@ -51,31 +58,32 @@ function NotificationBanner({ notification, onDismiss }) {
       }}
     >
       <div style={{
-        background: 'var(--theme-surface, #1B1B1D)',
-        border: `2px solid ${color}`,
-        borderRadius: 6,
-        padding: '12px 16px',
+        background: 'color-mix(in srgb, var(--surface-1) 88%, transparent)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        border: `1px solid ${tone.border}`,
+        borderRadius: 'var(--r-lg)',
+        padding: '14px 16px',
         display: 'flex',
         alignItems: 'flex-start',
         gap: 12,
-        boxShadow: `0 4px 20px rgba(215,38,61,0.25)`,
+        boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
       }}>
         <div style={{
-          width: 36, height: 36, borderRadius: 4, flexShrink: 0,
-          background: color, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transform: 'rotate(-2deg)',
+          width: 36, height: 36, borderRadius: 'var(--r-sm)', flexShrink: 0,
+          background: tone.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <Icon size={18} color="#fff" />
+          <Icon size={18} color={tone.iconFg} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: "'Anton', sans-serif", fontSize: 13, color: color, letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1.2 }}>
+          <p style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-xs)', color: tone.title, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.2 }}>
             {title}
           </p>
-          <p style={{ fontFamily: "'Work Sans', sans-serif", fontSize: 12, color: 'var(--theme-ink-soft, #9BA3AC)', marginTop: 3, lineHeight: 1.4 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.4 }}>
             {body}
           </p>
         </div>
-        <button style={{ color: 'var(--theme-ink-soft, #9BA3AC)', fontSize: 16, lineHeight: 1, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>×</button>
+        <button style={{ color: 'var(--text-tertiary)', fontSize: 18, lineHeight: 1, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>×</button>
       </div>
     </div>
   );

@@ -1,168 +1,498 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@300;400;500;600&family=Special+Elite&family=Permanent+Marker&display=swap');
+/* ─────────────────────────────────────────────────────────────────────────────
+   OFFSZN Design System — v2 "Top-5 Fitness" Edition
+   Font rationale: Archivo Black = athletic identity / display numerals.
+   Inter = high-legibility UI at every weight. Both via Google Fonts.
+   Cone Orange rationale: complementary to turf green in every field photo;
+   native to athlete's world (practice cones, sideline gear); ~6:1 contrast
+   on surface-0 passes WCAG for large text and UI elements.
+───────────────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Global render quality ─── */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 @layer base {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     DARK THEME (default — pre-dawn workout energy)
+     Surface ladder: each step ~4-5% lighter, depth = elevation, no shadows.
+  ═══════════════════════════════════════════════════════════════════════════ */
   :root {
-    /* Floor / shell */
-    --background:       215 8% 6%;      /* #0D0D0F near-black */
-    --foreground:       220 5% 10%;     /* #15151A ink on page surfaces */
+    /* Surface ladder */
+    --surface-0: #0A0B0D;
+    --surface-1: #121417;
+    --surface-2: #1A1D21;
+    --surface-3: #23272C;
 
-    /* Cover surfaces — nav, headers, footers */
-    --cover:            220 5% 11%;     /* #1B1B1D */
-    --cover-lift:       220 4% 15%;     /* #272729 */
+    /* Borders */
+    --border-subtle: rgba(245,245,240,0.08);
+    --border-strong: rgba(245,245,240,0.16);
 
-    /* Page surfaces — main content area */
-    --page:             216 6% 93%;     /* #EDEEF0 chalk white */
-    --page-alt:         216 6% 87%;     /* #DCDEE1 card within page */
+    /* Text hierarchy — 3 levels only */
+    --text-primary:   #F5F5F0;
+    --text-secondary: rgba(245,245,240,0.64);
+    --text-tertiary:  rgba(245,245,240,0.40);
 
-    /* Primary accent: Athletic Red */
-    --primary:          351 71% 51%;    /* #D7263D */
-    --primary-foreground: 0 0% 100%;
+    /* ── Cone Orange — THE accent. One per screen. ── */
+    --accent:         #FF5A1F;
+    --accent-hover:   #FF6B35;
+    --accent-pressed: #E64A12;
+    --accent-subtle:  rgba(255,90,31,0.12);
+    --on-accent:      #0A0B0D;
 
-    /* Chrome / steel */
-    --chrome-light:     210 7% 65%;     /* #9BA3AC */
-    --chrome-dark:      210 6% 39%;     /* #5E646B */
+    /* Semantic — meaning only, never decoration */
+    --positive: #2FBF71;   /* goal complete, PR hit */
+    --warning:  #F5B841;   /* streak at risk */
+    --negative: #E5484D;   /* errors, flags */
 
-    /* Ink */
-    --ink:              240 5% 10%;     /* #15151A */
-    --ink-soft:         218 4% 37%;     /* #5A5D63 */
+    /* Radius scale */
+    --r-sm:   8px;
+    --r-md:   12px;
+    --r-lg:   16px;
+    --r-xl:   24px;
+    --r-full: 9999px;
 
-    /* Yellow — sticky note ONLY */
-    --sticky:           45 100% 62%;    /* #FFD93D */
+    /* Motion tokens */
+    --dur-fast: 150ms;
+    --dur-base: 250ms;
+    --dur-slow: 500ms;
+    --ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Type scale */
+    --text-xs:   0.75rem;    /* 12px / line 16px */
+    --text-sm:   0.875rem;   /* 14px / line 20px */
+    --text-base: 1rem;       /* 16px / line 24px */
+    --text-lg:   1.125rem;   /* 18px / line 26px */
+    --text-xl:   1.375rem;   /* 22px / line 28px */
+    --text-2xl:  1.75rem;    /* 28px / line 34px */
+    --text-4xl:  2.5rem;     /* 40px / line 44px */
+    --text-hero: 4rem;       /* 64px / line 64px */
+
+    /* Legacy theme vars — kept for backward compat with existing component inline styles */
+    --theme-bg:          var(--surface-0);
+    --theme-surface:     var(--surface-1);
+    --theme-surface-alt: var(--surface-2);
+    --theme-ink:         var(--text-primary);
+    --theme-ink-soft:    var(--text-secondary);
+    --theme-border:      var(--border-subtle);
+    --theme-accent:      var(--accent);
 
     /* shadcn token aliases */
-    --card:             216 6% 93%;
-    --card-foreground:  240 5% 10%;
-    --popover:          216 6% 93%;
-    --popover-foreground: 240 5% 10%;
-    --secondary:        216 6% 87%;
-    --secondary-foreground: 240 5% 10%;
-    --muted:            216 6% 87%;
-    --muted-foreground: 218 4% 37%;
-    --accent:           351 71% 51%;
-    --accent-foreground: 0 0% 100%;
-    --destructive:      351 71% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border:           210 6% 39%;
-    --input:            216 6% 87%;
-    --ring:             351 71% 51%;
-    --radius:           0.5rem;
+    --background:       220 8% 4%;
+    --foreground:       60 5% 96%;
+    --card:             222 10% 8%;
+    --card-foreground:  60 5% 96%;
+    --popover:          222 10% 8%;
+    --popover-foreground: 60 5% 96%;
+    --primary:          20 100% 56%;   /* Cone Orange #FF5A1F */
+    --primary-foreground: 220 8% 4%;
+    --secondary:        220 7% 12%;
+    --secondary-foreground: 60 5% 96%;
+    --muted:            220 7% 12%;
+    --muted-foreground: 210 5% 55%;
+    --accent:           20 100% 56%;
+    --accent-foreground: 220 8% 4%;
+    --destructive:      3 74% 59%;
+    --destructive-foreground: 60 5% 96%;
+    --border:           220 5% 14%;
+    --input:            220 7% 12%;
+    --ring:             20 100% 56%;
+    --radius:           0.75rem;       /* --r-md */
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     LIGHT THEME — same tokens, inverted ladder
+  ═══════════════════════════════════════════════════════════════════════════ */
+  .light {
+    --surface-0: #FAFAF8;
+    --surface-1: #FFFFFF;
+    --surface-2: #F1F1EE;
+    --surface-3: #E8E8E4;
+    --border-subtle: rgba(20,21,23,0.08);
+    --border-strong: rgba(20,21,23,0.18);
+    --text-primary:   #141517;
+    --text-secondary: rgba(20,21,23,0.64);
+    --text-tertiary:  rgba(20,21,23,0.40);
+    --on-accent:      #141517;
+
+    --theme-bg:          var(--surface-0);
+    --theme-surface:     var(--surface-1);
+    --theme-surface-alt: var(--surface-2);
+    --theme-ink:         var(--text-primary);
+    --theme-ink-soft:    var(--text-secondary);
+    --theme-border:      var(--border-subtle);
+
+    --background:       60 5% 98%;
+    --foreground:       220 8% 8%;
+    --card:             0 0% 100%;
+    --card-foreground:  220 8% 8%;
+    --popover:          0 0% 100%;
+    --popover-foreground: 220 8% 8%;
+    --secondary:        60 3% 95%;
+    --secondary-foreground: 220 8% 8%;
+    --muted:            60 3% 95%;
+    --muted-foreground: 210 6% 40%;
+    --border:           220 5% 88%;
+    --input:            60 3% 95%;
   }
 }
 
 @layer base {
-  * { @apply border-border outline-ring/50; }
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
 
   body {
-    background: #0D0D0F;
-    color: #15151A;
-    font-family: 'Work Sans', sans-serif;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: var(--text-base);
+    line-height: 1.5;
+    min-height: 100dvh;
   }
 
-  /* Typography roles */
-  .font-anton   { font-family: 'Anton', sans-serif; letter-spacing: 0.03em; }
-  .font-elite   { font-family: 'Special Elite', cursive; }
-  .font-marker  { font-family: 'Permanent Marker', cursive; }
-  .font-work    { font-family: 'Work Sans', sans-serif; }
+  /* Display face — Archivo Black */
+  h1, h2, h3, .font-display, .font-anton, .font-barlow {
+    font-family: 'Archivo Black', 'Anton', sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
 
-  h1, h2 { font-family: 'Anton', sans-serif; letter-spacing: 0.03em; }
+  /* Body / UI face — Inter */
+  p, span, button, input, select, textarea, label, .font-work {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Tabular numerals everywhere metrics appear */
+  .tabular-nums, .font-mono, .font-elite {
+    font-variant-numeric: tabular-nums;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+  }
+
+  /* Headings max readable width */
+  h1, h2, h3, p {
+    max-width: 65ch;
+  }
+
+  /* Smooth page transitions */
+  @media (prefers-reduced-motion: no-preference) {
+    .page-enter {
+      animation: pageEnter var(--dur-base) var(--ease-out) forwards;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   UTILITY CLASSES — all from token system, no hex literals
+───────────────────────────────────────────────────────────────────────────── */
 @layer utilities {
-  /* ── Page surface ── */
-  .page-surface {
-    background: #EDEEF0;
-    color: #15151A;
-  }
-  .page-alt {
-    background: #DCDEE1;
-  }
 
-  /* ── Cover surface ── */
-  .cover-surface {
-    background: linear-gradient(180deg, #1B1B1D 0%, #272729 100%);
-  }
+  /* ── Surface shortcuts ── */
+  .surface-0 { background: var(--surface-0); }
+  .surface-1 { background: var(--surface-1); }
+  .surface-2 { background: var(--surface-2); }
+  .surface-3 { background: var(--surface-3); }
 
-  /* ── Stamp button — core signature interaction ── */
+  /* ── Text hierarchy shortcuts ── */
+  .text-primary-offszn   { color: var(--text-primary); }
+  .text-secondary-offszn { color: var(--text-secondary); }
+  .text-tertiary-offszn  { color: var(--text-tertiary); }
+
+  /* ── Borders ── */
+  .border-subtle { border-color: var(--border-subtle); }
+  .border-strong { border-color: var(--border-strong); }
+
+  /* ── Primary button — ONE primary action per screen ──
+     Psychology: Von Restorff — one orange element draws the eye exactly here.
+     Fitts: full-width, 52px min-height, thumb zone. ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 52px;
+    padding: 0 1.5rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: var(--text-sm);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--r-md);
+    border: none;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out),
+                transform var(--dur-fast) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-primary:hover  { background: var(--accent-hover); }
+  .btn-primary:active { background: var(--accent-pressed); transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Legacy alias — maps old .btn-stamp to new primary style */
   .btn-stamp {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
-    font-family: 'Special Elite', cursive;
-    font-size: 0.8rem;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 1.25rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #D7263D;
-    border: 3px solid #D7263D;
-    background: transparent;
-    border-radius: 4px;
-    padding: 0.5rem 1.25rem;
-    transform: rotate(-2deg);
-    transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease;
+    border-radius: var(--r-md);
+    border: none;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out),
+                transform var(--dur-fast) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
   }
-  .btn-stamp:active, .btn-stamp.stamped {
-    transform: rotate(0deg);
-    background: #D7263D;
-    color: #fff;
+  .btn-stamp:hover  { background: var(--accent-hover); }
+  .btn-stamp:active, .btn-stamp.stamped { background: var(--accent-pressed); transform: scale(0.98); }
+  .btn-stamp:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Secondary button */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 1.25rem;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+  .btn-secondary:hover  { background: var(--surface-3); }
+  .btn-secondary:active { transform: scale(0.99); }
+
+  /* ── Card base ── */
+  .card-base {
+    background: var(--surface-1);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border-subtle);
   }
 
-  /* ── Binder ring holes ── */
-  .binder-rings::before {
+  /* Tappable card pressed state */
+  .card-tappable {
+    background: var(--surface-1);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out),
+                transform var(--dur-fast) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card-tappable:active {
+    background: var(--surface-2);
+    transform: scale(0.99);
+  }
+
+  /* ── Skeleton shimmer ──
+     Replaces all spinners for content areas.
+     Perceived speed is a design property. ── */
+  .skeleton {
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .skeleton::after {
     content: '';
     position: absolute;
-    left: 10px;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 22px,
-      #9BA3AC 22px,
-      #9BA3AC 23px,
-      transparent 23px,
-      transparent 28px
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(245,245,240,0.06) 50%,
+      transparent 100%
+    );
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after { animation: none; }
+  }
+
+  /* ── Input base ── */
+  .input-base {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 1rem;
+    background: var(--surface-1);
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: var(--text-base);
+    outline: none;
+    transition: border-color var(--dur-fast) var(--ease-out),
+                box-shadow var(--dur-fast) var(--ease-out);
+  }
+  .input-base:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-subtle);
+  }
+
+  /* ── Eyebrow label — used above stats and section headers ── */
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-tertiary);
+  }
+
+  /* ── Stat number — Archivo Black tabular for metrics ── */
+  .stat-number {
+    font-family: 'Archivo Black', sans-serif;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+
+  /* ── Ink stamp — for PR badges, tags ── */
+  .ink-stamp {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 2px 8px;
+    border-radius: var(--r-sm);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ── Achievement stamp — when a goal is hit (semantic green) ── */
+  .stamp-achieved {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--positive);
+    border: 1px solid var(--positive);
+    padding: 2px 8px;
+    border-radius: var(--r-sm);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ── Page-number label ── */
+  .page-number {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--text-tertiary);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ── Accent subtle background — selected states, active rows ── */
+  .accent-bg {
+    background: var(--accent-subtle);
+  }
+
+  /* ── Overlay shadow — ONLY for true overlays (modals, sheets) ── */
+  .overlay-shadow {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  /* ── Scrim for photo backgrounds ── */
+  .photo-scrim {
+    background: linear-gradient(transparent 40%, rgba(10,11,13,0.85));
+  }
+
+  /* ── Turf texture (subtle field lines) ── */
+  .turf-texture {
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 3px,
+      rgba(255,90,31,0.02) 3px,
+      rgba(255,90,31,0.02) 6px
     );
   }
 
-  /* Small punched circles running down left margin */
-  .ring-holes {
+  /* ── Scrollbar hide ── */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── Field lines (decorative, layout bg) ── */
+  .field-lines {
     position: relative;
   }
-  .ring-holes::before {
+  .field-lines::before {
     content: '';
     position: absolute;
-    left: 6px;
-    top: 24px;
-    bottom: 24px;
-    width: 12px;
+    inset: 0;
     background: repeating-linear-gradient(
       to bottom,
       transparent 0px,
-      transparent 26px,
-      #9BA3AC44 26px,
-      #9BA3AC44 38px,
       transparent 38px,
-      transparent 64px
+      rgba(245,245,240,0.04) 38px,
+      rgba(245,245,240,0.04) 40px
     );
-    background-size: 12px 64px;
-    border-radius: 6px;
+    pointer-events: none;
   }
 
-  /* ── Graph paper background for charts ── */
+  /* Legacy compat */
+  .binder-tab {
+    clip-path: polygon(0% 20%, 6% 0%, 94% 0%, 100% 20%, 100% 100%, 0% 100%);
+    transition: all var(--dur-fast) var(--ease-out);
+  }
+  .ring-holes { position: relative; }
+  .sticky-note {
+    background: rgba(245,245,240,0.05);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    padding: 0.75rem 1rem;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border-subtle);
+    font-size: var(--text-sm);
+    font-style: italic;
+  }
   .graph-paper {
-    background-color: #EDEEF0;
+    background-color: var(--surface-1);
     background-image:
-      linear-gradient(rgba(91,100,107,0.15) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(91,100,107,0.15) 1px, transparent 1px);
+      linear-gradient(rgba(245,245,240,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,245,240,0.04) 1px, transparent 1px);
     background-size: 20px 20px;
   }
-
-  /* ── Redacted bar for locked premium content ── */
   .redacted {
     position: relative;
     color: transparent !important;
@@ -172,72 +502,146 @@
     content: '';
     position: absolute;
     inset: 0 -2px;
-    background: #15151A;
-    border-radius: 2px;
+    background: var(--accent);
+    border-radius: var(--r-sm);
+    opacity: 0.2;
+  }
+  /* accent-glow removed — no decorative glows on dark surfaces */
+  .accent-glow { /* intentionally empty — use border-strong instead */ }
+
+  /* Chalk note alias */
+  .page-alt { background: var(--surface-2); }
+  .page-surface { background: var(--surface-1); color: var(--text-primary); }
+  .cover-surface { background: var(--surface-0); }
+  .binder-rings::before { display: none; } /* retired */
+
+  /* stadium-header: subtle accent tint from top */
+  .stadium-header {
+    background: linear-gradient(
+      180deg,
+      rgba(255,90,31,0.06) 0%,
+      rgba(10,11,13,0) 100%
+    );
+  }
+}
+
+  /* ── Stadium light wash — single warm light source per screen ── */
+  .stadium-light {
+    background: radial-gradient(ellipse 90% 45% at 50% -10%, rgba(255,90,31,0.06), transparent 60%);
   }
 
-  /* ── Ink stamp badge ── */
-  .ink-stamp {
-    font-family: 'Special Elite', cursive;
-    font-size: 0.6rem;
+  /* ── Environmental texture layers — ≤5% opacity, backgrounds only ── */
+  .env-field {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 118px,
+      rgba(245,245,240,0.04) 118px,
+      rgba(245,245,240,0.04) 120px
+    );
+  }
+  .env-film {
+    background-image:
+      linear-gradient(rgba(245,245,240,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,245,240,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .env-locker {
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 10px,
+      rgba(245,245,240,0.04) 10px,
+      rgba(245,245,240,0.04) 12px
+    );
+  }
+
+  /* ── PR chip — accent-subtle fill, accent text + hairline ── */
+  .pr-chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #D7263D;
-    border: 2px solid #D7263D;
-    padding: 1px 5px;
-    border-radius: 3px;
-    transform: rotate(-4deg);
-    display: inline-block;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: var(--accent-subtle);
+    border: 1px solid var(--accent);
+    padding: 2px 8px;
+    border-radius: var(--r-sm);
+    line-height: 1.4;
   }
 
-  /* ── Red coach oval annotation ── */
-  @keyframes coachCircle {
-    0%   { stroke-dashoffset: 300; opacity: 0; }
-    40%  { opacity: 1; }
-    100% { stroke-dashoffset: 0; opacity: 1; }
-  }
-  .coach-circle {
-    animation: coachCircle 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
-    stroke-dasharray: 300;
-  }
-
-  /* ── Play diagram route draw-in ── */
-  @keyframes drawRoute {
-    from { stroke-dashoffset: 200; }
-    to   { stroke-dashoffset: 0; }
-  }
-  .draw-route {
-    stroke-dasharray: 200;
-    animation: drawRoute 0.9s ease-out forwards;
-  }
-
-  /* ── Page-number label ── */
-  .page-number {
-    font-family: 'Special Elite', cursive;
-    font-size: 0.6rem;
-    color: #5A5D63;
-    letter-spacing: 0.12em;
+  /* ── Live-from-the-field rule ── */
+  .live-rule {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-tertiary);
+    padding: 0 4px;
+  }
+  .live-rule::before,
+  .live-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
   }
 
-  /* ── Binder tab shapes ── */
-  .binder-tab {
-    clip-path: polygon(0% 30%, 8% 0%, 92% 0%, 100% 30%, 100% 100%, 0% 100%);
-    transition: all 0.15s ease;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   KEYFRAMES
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
 
-  /* Utilities */
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
 
-  /* Sticky note yellow — use sparingly */
-  .sticky-note {
-    background: #FFD93D;
-    font-family: 'Permanent Marker', cursive;
-    color: #15151A;
-    padding: 0.5rem 0.75rem;
-    transform: rotate(1.5deg);
-    border-radius: 2px;
-    box-shadow: 2px 3px 6px rgba(0,0,0,0.25);
-  }
+@keyframes pageEnter {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+@keyframes sweepArc {
+  from { stroke-dashoffset: var(--arc-length, 300); }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes goalCelebrate {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  70%  { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes coachCircle {
+  0%   { stroke-dashoffset: 300; opacity: 0; }
+  40%  { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes drawRoute {
+  from { stroke-dashoffset: 200; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes stampIn {
+  0%   { transform: scale(1.2); opacity: 0; }
+  60%  { transform: scale(0.97); }
+  100% { transform: scale(1); opacity: 1; }
 }

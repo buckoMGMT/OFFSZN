@@ -1,12 +1,14 @@
-// The primary CTA signature: ink-stamp style button
-// Transparent with red border at -2°, fills solid red on press
+// The primary CTA signature — now with native haptic-feel tap.
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function StampButton({ children, onClick, disabled, className = "", fullWidth = false }) {
   const [pressing, setPressing] = useState(false);
 
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.96 }}
+      transition={{ duration: 0.12, ease: [0.2, 0, 0, 1] }}
       className={`btn-stamp ${pressing ? "stamped" : ""} ${fullWidth ? "w-full" : ""} ${className}`}
       onMouseDown={() => setPressing(true)}
       onMouseUp={() => { setPressing(false); onClick?.(); }}
@@ -16,6 +18,6 @@ export default function StampButton({ children, onClick, disabled, className = "
       style={{ opacity: disabled ? 0.45 : 1, cursor: disabled ? "not-allowed" : "pointer" }}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }

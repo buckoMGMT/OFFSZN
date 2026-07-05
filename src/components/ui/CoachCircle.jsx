@@ -10,7 +10,7 @@ export default function CoachCircle() {
     >
       <ellipse
         cx="150" cy="28" rx="144" ry="24"
-        stroke="#D7263D"
+        stroke="#FF5A1F"
         strokeWidth="2.5"
         strokeLinecap="round"
         fill="none"

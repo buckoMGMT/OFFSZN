@@ -1,25 +1,26 @@
 import { Outlet } from "react-router-dom";
 import BottomNav from "@/components/layout/BottomNav";
-import { useTheme } from "@/lib/ThemeContext";
+import EnvironmentLayer from "@/components/environment/EnvironmentLayer";
 
 export default function AppLayout() {
-  const { darkMode } = useTheme();
-
+  /* iOS-native shell: full-bleed surface, content constrained to phone width,
+     safe-area-aware bottom padding so the nav never clips content.
+     Environment art is fixed behind content on --surface-0; the content
+     container stays transparent so the place reads through the gutters. */
   return (
-    <div className="min-h-screen" style={{ background: '#0D0D0F' }}>
+    <div className="min-h-screen" style={{ background: 'var(--surface-0)' }}>
+      <EnvironmentLayer />
       <div
-        className="mx-auto relative ring-holes"
+        className="mx-auto relative"
         style={{
-          background: 'var(--theme-bg)',
-          color: 'var(--theme-ink)',
-          minHeight: '100vh',
+          background: 'transparent',
+          color: 'var(--text-primary)',
+          minHeight: '100dvh',
           maxWidth: 480,
-          paddingBottom: 72,
-          paddingLeft: 28,
-          boxShadow: '-4px 0 18px rgba(0,0,0,0.5), 4px 0 18px rgba(0,0,0,0.5)',
+          paddingBottom: 'calc(72px + env(safe-area-inset-bottom))',
+          zIndex: 1,
         }}
       >
-        <div className="absolute left-7 top-0 bottom-0 w-px" style={{ background: '#9BA3AC44' }} />
         <Outlet />
       </div>
       <BottomNav />

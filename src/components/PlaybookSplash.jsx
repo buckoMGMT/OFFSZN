@@ -26,8 +26,8 @@ function PlayDiagram() {
         [90, 122], [130, 122]
       ].map(([cx, cy], i) => (
         <g key={i}>
-          <line x1={cx-5} y1={cy-5} x2={cx+5} y2={cy+5} stroke="#D7263D" strokeWidth="2" opacity="0.85" />
-          <line x1={cx+5} y1={cy-5} x2={cx-5} y2={cy+5} stroke="#D7263D" strokeWidth="2" opacity="0.85" />
+          <line x1={cx-5} y1={cy-5} x2={cx+5} y2={cy+5} stroke="var(--accent)" strokeWidth="2" opacity="0.85" />
+          <line x1={cx+5} y1={cy-5} x2={cx-5} y2={cy+5} stroke="var(--accent)" strokeWidth="2" opacity="0.85" />
         </g>
       ))}
 
@@ -38,11 +38,11 @@ function PlayDiagram() {
       <path d="M125 90 L140 65" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" strokeDasharray="3 3" />
 
       {/* Arrow QB to receiver */}
-      <path d="M105 70 L65 42" stroke="#D7263D" strokeWidth="2" fill="none" opacity="0.8" markerEnd="url(#garrow)" />
+      <path d="M105 70 L65 42" stroke="var(--accent)" strokeWidth="2" fill="none" opacity="0.8" markerEnd="url(#garrow)" />
 
       <defs>
         <marker id="garrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-          <path d="M0,0 L6,3 L0,6 Z" fill="#D7263D" opacity="0.8" />
+          <path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)" opacity="0.8" />
         </marker>
       </defs>
     </svg>
@@ -50,6 +50,8 @@ function PlayDiagram() {
 }
 
 // Scattered X's and O's background
+import BrandMark from "@/components/BrandMark";
+
 function PlaybookBackground() {
   const items = [
     { type: "O", x: 8, y: 12, size: 28, rot: -12, op: 0.07 },
@@ -106,14 +108,14 @@ function PlaybookCover({ onDone }) {
   return (
     <motion.div
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "#0a1520", transformOrigin: "left center", perspective: "1200px" }}
+      style={{ background: "var(--surface-0)", transformOrigin: "left center", perspective: "1200px" }}
     >
       <PlaybookBackground />
 
       {/* Binding spine */}
       <div
         className="absolute left-0 top-0 bottom-0 w-8 z-10 flex flex-col items-center justify-center gap-1"
-        style={{ background: "linear-gradient(to right, #060e18, #0d1f30)" }}
+        style={{ background: "linear-gradient(to right, var(--surface-0), var(--surface-2))" }}
       >
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="w-3 h-0.5 rounded-full bg-white/10" />
@@ -122,7 +124,7 @@ function PlaybookCover({ onDone }) {
           className="absolute text-white/20 font-barlow font-black tracking-widest text-xs whitespace-nowrap"
           style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}
         >
-          THE PLAYBOOK
+          OFFSZN
         </span>
       </div>
 
@@ -138,25 +140,25 @@ function PlaybookCover({ onDone }) {
 
         {/* Title */}
         <div className="text-center">
-          <p className="text-white/40 font-barlow text-xs uppercase tracking-[0.3em] mb-1">High Performance System</p>
-          <h1 className="font-display text-white text-5xl tracking-widest leading-none">THE</h1>
-          <h1 className="font-display text-primary text-5xl tracking-widest leading-none">PLAYBOOK</h1>
+          <p className="text-white/40 font-barlow text-xs uppercase tracking-[0.3em] mb-1">Made in the OFFSZN.</p>
+          <BrandMark size="lg" />
         </div>
 
         {/* Tap to open */}
         <motion.button
           onClick={onDone}
-          className="mt-2 px-8 py-3 border border-primary/60 rounded-xl font-barlow font-bold uppercase tracking-widest text-primary text-sm"
+          className="btn-primary mt-2"
+          style={{ borderRadius: 'var(--r-xl)', fontSize: 'var(--text-sm)', paddingLeft: '2rem', paddingRight: '2rem' }}
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          Open Playbook
+          Enter OFFSZN
         </motion.button>
       </div>
 
       {/* Page edge marks */}
       <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-around items-end px-1 py-8">
-        {["FIELD", "STATS", "PLAYS", "TEAMS", "PLAYER"].map((tab, i) => (
+        {["FIELD", "STATS", "DRILLS", "TEAMS", "LOCKER", "PLAYER"].map((tab, i) => (
           <div key={i} className="flex items-center gap-1">
             <span className="text-[8px] text-white/20 font-barlow uppercase tracking-widest">{tab}</span>
             <div className="w-1 h-4 rounded-l" style={{ background: "rgba(255,255,255,0.06)" }} />
@@ -197,14 +199,14 @@ export default function PlaybookSplash({ onDone }) {
         <motion.div
           key="flip"
           className="fixed inset-0 z-[100] overflow-hidden"
-          style={{ background: "#0a1520", transformOrigin: "right center" }}
+          style={{ background: "var(--surface-0)", transformOrigin: "right center" }}
           initial={{ rotateY: 0 }}
           animate={{ rotateY: -90 }}
           transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
         >
           <PlaybookBackground />
           <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="font-display text-4xl text-white/20 tracking-widest">THE PLAYBOOK</h1>
+            <h1 className="font-display text-4xl text-white/20 tracking-widest">OFFSZN</h1>
           </div>
           {/* Page curl shadow */}
           <div

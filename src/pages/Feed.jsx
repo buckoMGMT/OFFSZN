@@ -6,6 +6,7 @@ import ClanFeed from "@/components/feed/ClanFeed";
 import PageLabel from "@/components/ui/PageLabel";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import StampButton from "@/components/ui/StampButton";
+import { StaggerList } from "@/lib/motion.jsx";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
@@ -58,14 +59,16 @@ export default function Feed() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--theme-bg)', color: 'var(--theme-ink)' }}>
+    <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
+      <div className="sticky top-0 z-40 px-5 pt-12 pb-3 border-b" style={{ background: 'color-mix(in srgb, var(--surface-0) 82%, transparent)', borderColor: 'var(--border-strong)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
+        {/* Accent top stripe */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--accent)', opacity: 0.9 }} />
         <div className="flex items-center justify-between mb-1">
-          <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--theme-ink)' }}>The Field</h1>
+          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>The Field</h1>
           <PageLabel number={1} />
         </div>
-        <p className="font-elite text-xs mb-3" style={{ color: 'var(--theme-ink-soft)' }}>GAME FEED — LIVE REPORTS</p>
+        <p className="eyebrow mb-3">Game Feed — Live Reports</p>
 
         {/* Filter tabs */}
         <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
@@ -79,8 +82,8 @@ export default function Feed() {
               onClick={() => setFeedFilter(tab.id)}
               className="flex-1 py-2 font-elite text-xs uppercase tracking-widest transition-all"
               style={{
-                color: feedFilter === tab.id ? '#D7263D' : '#5A5D63',
-                borderBottom: feedFilter === tab.id ? '2px solid #D7263D' : '2px solid transparent',
+                color: feedFilter === tab.id ? 'var(--accent)' : 'var(--text-tertiary)',
+                borderBottom: feedFilter === tab.id ? '2px solid var(--accent)' : '2px solid transparent',
               }}
             >
               {tab.label}
@@ -89,18 +92,22 @@ export default function Feed() {
         </div>
       </div>
 
-      <div className="px-4 py-4">
+      <div className="px-5 py-4">
+        {/* Live-from-the-field rule */}
+        {feedFilter !== "clan" && (
+          <div className="live-rule mb-4">Live from the Field</div>
+        )}
         {/* Clan feed */}
         {feedFilter === "clan" && <ClanFeed athlete={athlete} />}
 
         {/* Compose */}
         {feedFilter !== "clan" && athlete && (
-          <div className="mb-4 border rounded p-3" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-surface)' }}>
+          <div className="mb-4 card-base p-3">
             {showCompose ? (
               <div className="space-y-3">
                 <textarea
-                  className="w-full rounded px-3 py-2.5 text-sm outline-none resize-none h-20 font-work"
-                  style={{ background: 'var(--theme-surface-alt)', color: 'var(--theme-ink)', border: '1px solid var(--theme-border)' }}
+                  className="input-base resize-none"
+                  style={{ height: 80, padding: '12px 16px', minHeight: 'auto', fontSize: 'var(--text-sm)' }}
                   placeholder="What's your win today?"
                   value={newPost}
                   onChange={e => setNewPost(e.target.value)}
@@ -126,14 +133,14 @@ export default function Feed() {
               </div>
             ) : (
               <button onClick={() => setShowCompose(true)} className="w-full flex items-center gap-3 text-left">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: '#9BA3AC' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--surface-3)', border: (athlete.current_streak_days || 0) > 0 ? '1.5px solid var(--accent)' : '1px solid var(--border-subtle)' }}>
                   {athlete.avatar_url
                     ? <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" />
-                    : <span className="text-xs font-elite text-white">{(athlete.display_name || "A")[0].toUpperCase()}</span>
+                    : <span className="text-xs font-elite" style={{ color: 'var(--accent)' }}>{(athlete.display_name || "A")[0].toUpperCase()}</span>
                   }
                 </div>
                 <span className="text-sm font-work flex-1" style={{ color: 'var(--theme-ink-soft)' }}>Log a win…</span>
-                <Plus size={15} style={{ color: '#D7263D' }} />
+                <Plus size={15} style={{ color: 'var(--accent)' }} />
               </button>
             )}
           </div>
@@ -141,24 +148,41 @@ export default function Feed() {
 
         {/* Loading state — play diagram instead of spinner */}
         {feedFilter !== "clan" && loading && (
-          <div className="flex flex-col items-center justify-center py-16">
-            <PlayDiagram size={160} />
-            <p className="font-elite text-xs mt-4" style={{ color: 'var(--theme-ink-soft)' }}>Loading the field…</p>
+          /* §5: Skeleton loaders replace spinners — content streams in */
+          <div className="space-y-4 pt-2">
+            {[1,2,3].map(i => (
+              <div key={i} className="card-base p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="skeleton" style={{ width: 36, height: 36, borderRadius: 'var(--r-full)', flexShrink: 0 }} />
+                  <div className="flex-1 space-y-2">
+                    <div className="skeleton" style={{ width: '55%', height: 13 }} />
+                    <div className="skeleton" style={{ width: '35%', height: 10 }} />
+                  </div>
+                </div>
+                <div className="skeleton" style={{ width: '100%', height: 12 }} />
+                <div className="skeleton" style={{ width: '75%', height: 12 }} />
+              </div>
+            ))}
           </div>
         )}
 
         {/* Empty */}
         {feedFilter !== "clan" && !loading && posts.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <PlayDiagram size={160} />
-            <h3 className="font-anton text-xl uppercase mt-4 mb-1" style={{ color: 'var(--theme-ink)' }}>The Feed Awaits</h3>
-            <p className="text-sm font-work max-w-xs" style={{ color: 'var(--theme-ink-soft)' }}>Join a team. Log your first win. Show up on the board.</p>
+          /* §5 EmptyState + §7 Hick's: one clear action */
+          <div className="flex flex-col items-center justify-center py-16 text-center px-5">
+            <PlayDiagram size={130} />
+            <p style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-xl)', color: 'var(--text-primary)', textTransform: 'uppercase', marginTop: 16, marginBottom: 8 }}>
+              The Field's Empty.
+            </p>
+            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', maxWidth: '32ch' }}>
+              Log your first win. The board doesn't fill itself.
+            </p>
           </div>
         )}
 
         {/* Posts */}
         {feedFilter !== "clan" && !loading && posts.length > 0 && (
-          <div>
+          <StaggerList>
             {posts
               .filter(post => {
                 if (feedFilter === "friends") {
@@ -170,7 +194,7 @@ export default function Feed() {
                 <PostCard key={post.id} post={post} currentAthleteId={athlete?.id} onUpdate={load} />
               ))
             }
-          </div>
+          </StaggerList>
         )}
       </div>
     </div>

@@ -16,6 +16,7 @@ import Rewards from '@/pages/Rewards';
 import PlaybookSplash from '@/components/PlaybookSplash';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import GeoBlocker from '@/components/GeoBlocker';
+import BrandMark from '@/components/BrandMark';
 import { MilestoneNotifierProvider } from '@/lib/MilestoneNotifier';
 
 const AuthenticatedApp = () => {
@@ -32,10 +33,14 @@ const AuthenticatedApp = () => {
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-4xl font-display text-primary tracking-widest">THE PLAYBOOK</div>
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--surface-0)' }}>
+        <div className="flex flex-col items-center" style={{ gap: 24 }}>
+          <BrandMark size="lg" />
+          {/* Skeleton pulse instead of spinner */}
+          <div
+            className="skeleton"
+            style={{ width: 120, height: 4, borderRadius: 'var(--r-full)', marginTop: 8 }}
+          />
         </div>
       </div>
     );

@@ -60,52 +60,49 @@ export default function AppleHealthBanner({ log, onSync }) {
   };
 
   const metrics = healthData ? [
-    { icon: Footprints, label: "Steps", value: healthData.steps.toLocaleString(), color: "text-blue-400" },
-    { icon: Moon, label: "Sleep", value: `${healthData.sleep_hours}h`, color: "text-purple-400" },
-    { icon: Zap, label: "Active Cal", value: healthData.active_calories.toLocaleString(), color: "text-primary" },
-    { icon: Activity, label: "HRV", value: healthData.hrv, color: "text-red-400" },
+    { icon: Footprints, label: "Steps", value: healthData.steps.toLocaleString(), color: "var(--text-secondary)" },
+    { icon: Moon, label: "Sleep", value: `${healthData.sleep_hours}h`, color: "var(--text-secondary)" },
+    { icon: Zap, label: "Active Cal", value: healthData.active_calories.toLocaleString(), color: "var(--accent)" },
+    { icon: Activity, label: "HRV", value: healthData.hrv, color: "var(--text-secondary)" },
   ] : [];
 
   return (
-    <div className="rounded border overflow-hidden" style={{ background: '#DCDEE1', borderColor: '#9BA3AC' }}>
+    <div className="rounded-lg border overflow-hidden" style={{ background: 'var(--surface-1)', borderColor: 'var(--border-subtle)' }}>
       {/* Header row */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <div className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#EDEEF0', border: '1px solid #9BA3AC' }}>
-          <Heart size={17} style={{ color: '#D7263D' }} fill="#D7263D" />
+        <div className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
+          <Heart size={17} style={{ color: 'var(--accent)' }} fill="var(--accent)" />
         </div>
         <div className="flex-1">
-          <p className="font-elite text-xs uppercase tracking-widest" style={{ color: '#15151A' }}>Apple Health</p>
-          <p className="font-work text-[10px]" style={{ color: '#5A5D63' }}>
+          <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>Apple Health</p>
+          <p className="font-work text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
             {status === "synced" ? "Synced — steps, sleep & active cals imported" : "Connect to auto-log steps, sleep & calories"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {status !== "synced" && (
-            <button onClick={handleSync} disabled={status === "connecting"}
-              className="btn-stamp flex items-center gap-1.5 disabled:opacity-60" style={{ transform: 'rotate(0deg)' }}>
-              {status === "connecting"
-                ? <><div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />Syncing</>
-                : <><Heart size={10} fill="currentColor" />Connect</>
-              }
-            </button>
-          )}
-          {status === "synced" && (
-            <div className="flex items-center gap-1 font-elite text-[9px] uppercase tracking-widest" style={{ color: '#D7263D' }}>
-              <CheckCircle size={11} /> Live
-            </div>
-          )}
-          <button onClick={() => setDismissed(true)} className="font-elite text-xs" style={{ color: '#9BA3AC' }}>✕</button>
-        </div>
+        <button onClick={() => setDismissed(true)} className="font-elite text-xs" style={{ color: 'var(--text-tertiary)' }}>✕</button>
       </div>
+
+      {/* Connect button — full-width, always visible */}
+      {status !== "synced" && (
+        <div className="px-4 pb-3">
+          <button onClick={handleSync} disabled={status === "connecting"}
+            className="btn-primary w-full flex items-center justify-center gap-1.5 disabled:opacity-60">
+            {status === "connecting"
+              ? <><div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />Syncing…</>
+              : <><Heart size={13} fill="currentColor" />Connect Apple Health</>
+            }
+          </button>
+        </div>
+      )}
 
       {/* Synced metric grid */}
       {status === "synced" && healthData && (
-        <div className="grid grid-cols-4" style={{ borderTop: '1px solid #9BA3AC' }}>
+        <div className="grid grid-cols-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
           {metrics.map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="flex flex-col items-center py-3 gap-1" style={{ borderRight: '1px solid #9BA3AC' }}>
+            <div key={label} className="flex flex-col items-center py-3 gap-1" style={{ borderRight: '1px solid var(--border-subtle)' }}>
               <Icon size={13} style={{ color }} />
-              <p className="font-elite text-sm leading-none" style={{ color: '#15151A' }}>{value}</p>
-              <p className="font-elite text-[7px] uppercase tracking-widest" style={{ color: '#5A5D63' }}>{label}</p>
+              <p className="font-elite text-sm leading-none" style={{ color: 'var(--text-primary)' }}>{value}</p>
+              <p className="font-elite text-[7px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>{label}</p>
             </div>
           ))}
         </div>
@@ -113,16 +110,16 @@ export default function AppleHealthBanner({ log, onSync }) {
 
       {status === "connecting" && (
         <div className="px-4 pb-3">
-          <div className="h-1 rounded-full overflow-hidden" style={{ background: '#9BA3AC44' }}>
-            <div className="h-full animate-pulse" style={{ width: '60%', background: '#D7263D' }} />
+          <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--surface-2)' }}>
+            <div className="h-full animate-pulse" style={{ width: '60%', background: 'var(--accent)' }} />
           </div>
-          <p className="font-elite text-[9px] uppercase tracking-widest mt-1.5" style={{ color: '#5A5D63' }}>Requesting HealthKit permissions…</p>
+          <p className="font-elite text-[9px] uppercase tracking-widest mt-1.5" style={{ color: 'var(--text-tertiary)' }}>Requesting HealthKit permissions…</p>
         </div>
       )}
 
       {status === "idle" && (
-        <div className="px-4 pb-3 pt-2 border-t" style={{ borderColor: '#9BA3AC' }}>
-          <p className="font-work text-[10px]" style={{ color: '#5A5D63' }}>
+        <div className="px-4 pb-3 pt-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+          <p className="font-work text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
             Full sync in the iOS app · HRV, sleep stages & active calories
           </p>
         </div>

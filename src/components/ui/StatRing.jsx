@@ -1,4 +1,4 @@
-export default function StatRing({ value, max, label, size = 100, color = "hsl(145,100%,39%)" }) {
+export default function StatRing({ value, max, label, size = 100, color = "var(--accent)" }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
   const strokeWidth = 7;
   const r = (size - strokeWidth * 2) / 2;
@@ -16,14 +16,14 @@ export default function StatRing({ value, max, label, size = 100, color = "hsl(1
     <div className="flex flex-col items-center gap-1.5">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90" viewBox={`0 0 ${size} ${size}`}>
-          {/* Track */}
+          {/* Track — surface-3 */}
           <circle
             cx={size / 2} cy={size / 2} r={r}
             fill="none"
-            stroke="hsla(211,38%,22%,1)"
+            stroke="var(--surface-3)"
             strokeWidth={strokeWidth}
           />
-          {/* Progress */}
+          {/* Progress arc — accent (or positive on completion via prop) */}
           <circle
             cx={size / 2} cy={size / 2} r={r}
             fill="none"
@@ -32,7 +32,6 @@ export default function StatRing({ value, max, label, size = 100, color = "hsl(1
             strokeDasharray={`${dash} ${circ}`}
             strokeLinecap="round"
             className="transition-all duration-700"
-            style={{ filter: `drop-shadow(0 0 6px ${color}60)` }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
