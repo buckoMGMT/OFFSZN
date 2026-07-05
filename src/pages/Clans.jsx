@@ -6,6 +6,7 @@ import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import CoachCircle from "@/components/ui/CoachCircle";
 import PlayDiagram from "@/components/ui/PlayDiagram";
+import TeamRoster from "@/components/clans/TeamRoster";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "other"];
 const TYPES = ["high_school", "club", "college", "other"];
@@ -189,6 +190,7 @@ export default function Clans() {
 
         {tab === "leaderboard" && (
           <div>
+            {myClan && <TeamRoster clan={myClan} athleteId={athlete?.id} />}
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-anton text-2xl uppercase" style={{ color: 'var(--theme-ink)' }}>Global Roster</h2>
               {/* Barbell graphic — visual clip */}

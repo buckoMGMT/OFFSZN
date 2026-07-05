@@ -7,6 +7,7 @@ import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import { StaggerList, motion } from "@/lib/motion.jsx";
+import CommunityDrills from "@/components/playbook/CommunityDrills";
 
 const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming", "Lacrosse"];
 
@@ -187,6 +188,7 @@ export default function Playbook() {
         <div className="flex border-b" style={{ borderColor: 'var(--border-subtle)' }}>
           {[
             { id: "programs", label: "Programs" },
+            { id: "community", label: "Community" },
             { id: "saved", label: `Saved${savedIds.length ? ` (${savedIds.length})` : ""}` },
             { id: "playlists", label: "Playlists" },
           ].map(t => (
@@ -279,6 +281,8 @@ export default function Playbook() {
             )}
           </StaggerList>
         )}
+
+        {tab === "community" && <CommunityDrills />}
 
         {tab === "saved" && (
           <div>
