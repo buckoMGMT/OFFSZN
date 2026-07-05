@@ -231,17 +231,18 @@ export default function Rewards() {
             {/* Filter pills */}
             <div className="flex gap-2 mb-4">
               {[
-                { id: "all", label: "All" },
-                { id: "merch", label: "🏷 Brand Merch" },
-                { id: "gift_card", label: "🎁 Gift Cards" },
+                { id: "all", label: "All", Icon: null },
+                { id: "merch", label: "Brand Merch", Icon: Shirt },
+                { id: "gift_card", label: "Gift Cards", Icon: Gift },
               ].map(f => (
                 <button key={f.id} onClick={() => setFilter(f.id)}
-                  className="px-3 py-1 rounded font-elite text-[10px] uppercase tracking-widest"
+                  className="px-3 py-1 rounded font-elite text-[10px] uppercase tracking-widest inline-flex items-center gap-1.5"
                   style={{
                     background: filter === f.id ? 'var(--accent)' : 'var(--surface-2)',
                         color: filter === f.id ? 'var(--on-accent)' : 'var(--text-secondary)',
                         border: '1px solid var(--theme-border)',
                   }}>
+                  {f.Icon && <f.Icon size={11} />}
                   {f.label}
                 </button>
               ))}

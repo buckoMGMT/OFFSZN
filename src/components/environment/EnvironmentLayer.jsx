@@ -55,19 +55,55 @@ export default function EnvironmentLayer() {
       {/* Stadium light wash — one warm light source, every tab */}
       <div className="stadium-light" style={{ position: "absolute", inset: 0 }} />
 
-      {/* THE FIELD — turf at night */}
+      {/* THE FIELD — real gridiron: yard lines, hash marks, yard numbers, sideline */}
       {env === "field" && (
-        <>
-          <div ref={fieldRef} className="env-field" style={{ position: "absolute", inset: 0 }} />
-          {/* 50-yard line: brighter line behind the header */}
-          <div style={{ position: "absolute", left: 0, right: 0, top: 152, height: 1, background: "rgba(245,245,240,0.05)" }} />
-          {/* hash marks row along the top */}
-          <svg width="100%" height="14" viewBox="0 0 480 14" preserveAspectRatio="none" style={{ position: "absolute", left: 0, right: 0, top: 0, opacity: 0.04 }}>
-            {Array.from({ length: 24 }).map((_, i) => (
-              <line key={i} x1={i * 20 + 8} y1="0" x2={i * 20 + 8} y2="8" stroke="rgb(245,245,240)" strokeWidth="1.5" />
-            ))}
+        <div ref={fieldRef} style={{ position: "absolute", inset: 0 }}>
+          <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.05 }}>
+            <g stroke="rgb(245,245,240)" fill="none">
+              {/* Sidelines */}
+              <line x1="14" y1="0" x2="14" y2="900" strokeWidth="3" />
+              <line x1="466" y1="0" x2="466" y2="900" strokeWidth="3" />
+              {/* Yard lines every 90px */}
+              {[90, 180, 270, 360, 450, 540, 630, 720, 810].map(y => (
+                <line key={y} x1="14" y1={y} x2="466" y2={y} strokeWidth={y === 450 ? 3 : 1.5} />
+              ))}
+              {/* Hash marks between yard lines — two inner columns */}
+              {Array.from({ length: 45 }).map((_, i) => {
+                const y = 18 + i * 20;
+                return (
+                  <g key={i}>
+                    <line x1="176" y1={y} x2="192" y2={y} strokeWidth="1.5" />
+                    <line x1="288" y1={y} x2="304" y2={y} strokeWidth="1.5" />
+                  </g>
+                );
+              })}
+              {/* Short ticks along both sidelines */}
+              {Array.from({ length: 45 }).map((_, i) => {
+                const y = 18 + i * 20;
+                return (
+                  <g key={`t${i}`}>
+                    <line x1="14" y1={y} x2="26" y2={y} strokeWidth="1" />
+                    <line x1="454" y1={y} x2="466" y2={y} strokeWidth="1" />
+                  </g>
+                );
+              })}
+            </g>
+            {/* Yard numbers — rotated like real field paint */}
+            <g fill="rgb(245,245,240)" fontFamily="'Archivo Black', sans-serif" fontSize="34">
+              {[[90, "1 0"], [180, "2 0"], [270, "3 0"], [360, "4 0"], [450, "5 0"], [540, "4 0"], [630, "3 0"], [720, "2 0"]].map(([y, n], i) => (
+                <g key={i}>
+                  <text x="52" y={y + 12} transform={`rotate(90 52 ${y})`} textAnchor="middle">{n}</text>
+                  <text x="428" y={y + 12} transform={`rotate(-90 428 ${y})`} textAnchor="middle">{n}</text>
+                </g>
+              ))}
+            </g>
+            {/* Directional arrows next to numbers */}
+            <g fill="rgb(245,245,240)">
+              {[90, 180, 270, 360].map(y => <polygon key={`a${y}`} points={`52,${y - 34} 46,${y - 24} 58,${y - 24}`} />)}
+              {[540, 630, 720].map(y => <polygon key={`b${y}`} points={`52,${y + 34} 46,${y + 24} 58,${y + 24}`} />)}
+            </g>
           </svg>
-        </>
+        </div>
       )}
 
       {/* FILM ROOM — combine sheet graph paper */}
@@ -100,8 +136,41 @@ export default function EnvironmentLayer() {
         </>
       )}
 
-      {/* LOCKER — vertical vents */}
-      {env === "locker" && <div className="env-locker" style={{ position: "absolute", inset: 0 }} />}
+      {/* LOCKER — a real bank of lockers: doors, vents, handles, name plates, bench */}
+      {env === "locker" && (
+        <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.05 }}>
+          <g stroke="rgb(245,245,240)" fill="none" strokeWidth="1.5">
+            {/* Locker bank — 4 doors */}
+            {[20, 135, 250, 365].map((x, i) => (
+              <g key={i}>
+                {/* Door frame */}
+                <rect x={x} y="40" width="95" height="440" rx="4" strokeWidth="2" />
+                {/* Name plate slot */}
+                <rect x={x + 22} y="58" width="51" height="16" rx="2" />
+                {/* Vent slats — top */}
+                {[92, 102, 112, 122].map(y => (
+                  <line key={y} x1={x + 18} y1={y} x2={x + 77} y2={y} />
+                ))}
+                {/* Handle + latch */}
+                <rect x={x + 68} y="240" width="10" height="34" rx="3" strokeWidth="2" />
+                <circle cx={x + 73} cy="292" r="4" />
+                {/* Vent slats — bottom */}
+                {[408, 418, 428, 438].map(y => (
+                  <line key={y} x1={x + 18} y1={y} x2={x + 77} y2={y} />
+                ))}
+              </g>
+            ))}
+            {/* Floor line */}
+            <line x1="0" y1="500" x2="480" y2="500" strokeWidth="2" />
+            {/* Bench in front of the lockers */}
+            <rect x="70" y="560" width="340" height="14" rx="4" strokeWidth="2" />
+            <line x1="100" y1="574" x2="100" y2="640" strokeWidth="2" />
+            <line x1="380" y1="574" x2="380" y2="640" strokeWidth="2" />
+            <line x1="84" y1="640" x2="116" y2="640" strokeWidth="2" />
+            <line x1="364" y1="640" x2="396" y2="640" strokeWidth="2" />
+          </g>
+        </svg>
+      )}
 
       {/* RAFTERS — retired-jersey banner shapes */}
       {env === "rafters" && (
