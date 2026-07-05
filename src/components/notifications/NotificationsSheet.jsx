@@ -1,4 +1,7 @@
 // Bottom sheet notification center — covers athlete + coach notification types.
+// Rendered via portal: the bell lives inside a backdrop-blurred header, which
+// would otherwise trap and clip this fixed overlay.
+import { createPortal } from "react-dom";
 import { X, UserPlus, Play, DollarSign, BadgeCheck, TrendingUp, Wallet, Flame, Trophy, Bell } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -15,7 +18,7 @@ const TYPE_META = {
 
 export default function NotificationsSheet({ open, onClose, notifications }) {
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[120] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
       <div className="w-full max-w-lg rounded-t-2xl border-t border-l border-r animate-slide-up max-h-[80vh] overflow-y-auto"
         style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
@@ -59,6 +62,7 @@ export default function NotificationsSheet({ open, onClose, notifications }) {
           })}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
