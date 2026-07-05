@@ -17,7 +17,7 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
             <span className="font-elite text-xs uppercase tracking-widest" style={{ color: '#5A5D63' }}>PG. 00</span>
           </div>
           <h1 className="font-anton text-4xl uppercase tracking-wide mb-1" style={{ color: '#EDEEF0' }}>
-            The Playbook
+            OFFSZN
           </h1>
           <div className="mx-auto my-2" style={{ width: 48, height: 2, background: '#D7263D' }} />
           {title && (
@@ -38,7 +38,7 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
         )}
 
         <p className="text-center font-elite text-xs uppercase tracking-widest mt-8" style={{ color: '#272729' }}>
-          Playbook Pro · Athletic Performance
+          OFFSZN · Athletic Performance
         </p>
       </div>
     </div>
