@@ -12,7 +12,7 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 
-const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "other"];
+const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
 
 // Chrome foil seal for premium

@@ -20,6 +20,8 @@
         "tennis",
         "softball",
         "cross_country",
+        "golf",
+        "athlete",
         "other"
       ]
     },
