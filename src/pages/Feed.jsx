@@ -6,6 +6,7 @@ import ClanFeed from "@/components/feed/ClanFeed";
 import PageLabel from "@/components/ui/PageLabel";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import StampButton from "@/components/ui/StampButton";
+import GameDayHero from "@/components/feed/GameDayHero";
 import { StaggerList } from "@/lib/motion.jsx";
 
 export default function Feed() {
@@ -65,10 +66,16 @@ export default function Feed() {
         {/* Accent top stripe */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--accent)', opacity: 0.9 }} />
         <div className="flex items-center justify-between mb-1">
-          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>The Field</h1>
+          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em', textShadow: '0 0 24px rgba(255,90,31,0.35)' }}>The Field</h1>
           <PageLabel number={1} />
         </div>
-        <p className="eyebrow mb-3">Game Feed — Live Reports</p>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: 'var(--accent)' }} />
+            <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: 'var(--accent)' }} />
+          </span>
+          <p className="eyebrow" style={{ color: 'var(--accent)' }}>Live — Game Feed</p>
+        </div>
 
         {/* Filter tabs */}
         <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
@@ -93,6 +100,8 @@ export default function Feed() {
       </div>
 
       <div className="px-5 py-4">
+        {/* Game-day hero — the screenshot moment */}
+        {feedFilter !== "clan" && <GameDayHero athlete={athlete} />}
         {/* Live-from-the-field rule */}
         {feedFilter !== "clan" && (
           <div className="live-rule mb-4">Live from the Field</div>

@@ -57,53 +57,60 @@ export default function EnvironmentLayer() {
 
       {/* THE FIELD — real gridiron: yard lines, hash marks, yard numbers, sideline */}
       {env === "field" && (
-        <div ref={fieldRef} style={{ position: "absolute", inset: 0 }}>
-          <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.05 }}>
-            <g stroke="rgb(245,245,240)" fill="none">
-              {/* Sidelines */}
-              <line x1="14" y1="0" x2="14" y2="900" strokeWidth="3" />
-              <line x1="466" y1="0" x2="466" y2="900" strokeWidth="3" />
-              {/* Yard lines every 90px */}
-              {[90, 180, 270, 360, 450, 540, 630, 720, 810].map(y => (
-                <line key={y} x1="14" y1={y} x2="466" y2={y} strokeWidth={y === 450 ? 3 : 1.5} />
-              ))}
-              {/* Hash marks between yard lines — two inner columns */}
-              {Array.from({ length: 45 }).map((_, i) => {
-                const y = 18 + i * 20;
-                return (
+        <>
+          {/* Friday-night floodlight beams — warm cones crossing from the top corners */}
+          <div style={{ position: "absolute", top: -120, left: "-30%", width: "85%", height: 520, background: "radial-gradient(ellipse 60% 100% at 30% 0%, rgba(255,140,80,0.14), transparent 68%)", transform: "rotate(14deg)", filter: "blur(6px)" }} />
+          <div style={{ position: "absolute", top: -120, right: "-30%", width: "85%", height: 520, background: "radial-gradient(ellipse 60% 100% at 70% 0%, rgba(255,140,80,0.14), transparent 68%)", transform: "rotate(-14deg)", filter: "blur(6px)" }} />
+          {/* Hot accent halo right behind the header */}
+          <div style={{ position: "absolute", top: -60, left: "10%", right: "10%", height: 260, background: "radial-gradient(ellipse at top, rgba(255,90,31,0.12), transparent 70%)" }} />
+          <div ref={fieldRef} style={{ position: "absolute", inset: 0 }}>
+            <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.05 }}>
+              <g stroke="rgb(245,245,240)" fill="none">
+                {/* Sidelines */}
+                <line x1="14" y1="0" x2="14" y2="900" strokeWidth="3" />
+                <line x1="466" y1="0" x2="466" y2="900" strokeWidth="3" />
+                {/* Yard lines every 90px */}
+                {[90, 180, 270, 360, 450, 540, 630, 720, 810].map(y => (
+                  <line key={y} x1="14" y1={y} x2="466" y2={y} strokeWidth={y === 450 ? 3 : 1.5} />
+                ))}
+                {/* Hash marks between yard lines — two inner columns */}
+                {Array.from({ length: 45 }).map((_, i) => {
+                  const y = 18 + i * 20;
+                  return (
+                    <g key={i}>
+                      <line x1="176" y1={y} x2="192" y2={y} strokeWidth="1.5" />
+                      <line x1="288" y1={y} x2="304" y2={y} strokeWidth="1.5" />
+                    </g>
+                  );
+                })}
+                {/* Short ticks along both sidelines */}
+                {Array.from({ length: 45 }).map((_, i) => {
+                  const y = 18 + i * 20;
+                  return (
+                    <g key={`t${i}`}>
+                      <line x1="14" y1={y} x2="26" y2={y} strokeWidth="1" />
+                      <line x1="454" y1={y} x2="466" y2={y} strokeWidth="1" />
+                    </g>
+                  );
+                })}
+              </g>
+              {/* Yard numbers — rotated like real field paint */}
+              <g fill="rgb(245,245,240)" fontFamily="'Archivo Black', sans-serif" fontSize="34">
+                {[[90, "1 0"], [180, "2 0"], [270, "3 0"], [360, "4 0"], [450, "5 0"], [540, "4 0"], [630, "3 0"], [720, "2 0"]].map(([y, n], i) => (
                   <g key={i}>
-                    <line x1="176" y1={y} x2="192" y2={y} strokeWidth="1.5" />
-                    <line x1="288" y1={y} x2="304" y2={y} strokeWidth="1.5" />
+                    <text x="52" y={y + 12} transform={`rotate(90 52 ${y})`} textAnchor="middle">{n}</text>
+                    <text x="428" y={y + 12} transform={`rotate(-90 428 ${y})`} textAnchor="middle">{n}</text>
                   </g>
-                );
-              })}
-              {/* Short ticks along both sidelines */}
-              {Array.from({ length: 45 }).map((_, i) => {
-                const y = 18 + i * 20;
-                return (
-                  <g key={`t${i}`}>
-                    <line x1="14" y1={y} x2="26" y2={y} strokeWidth="1" />
-                    <line x1="454" y1={y} x2="466" y2={y} strokeWidth="1" />
-                  </g>
-                );
-              })}
-            </g>
-            {/* Yard numbers — rotated like real field paint */}
-            <g fill="rgb(245,245,240)" fontFamily="'Archivo Black', sans-serif" fontSize="34">
-              {[[90, "1 0"], [180, "2 0"], [270, "3 0"], [360, "4 0"], [450, "5 0"], [540, "4 0"], [630, "3 0"], [720, "2 0"]].map(([y, n], i) => (
-                <g key={i}>
-                  <text x="52" y={y + 12} transform={`rotate(90 52 ${y})`} textAnchor="middle">{n}</text>
-                  <text x="428" y={y + 12} transform={`rotate(-90 428 ${y})`} textAnchor="middle">{n}</text>
-                </g>
-              ))}
-            </g>
-            {/* Directional arrows next to numbers */}
-            <g fill="rgb(245,245,240)">
-              {[90, 180, 270, 360].map(y => <polygon key={`a${y}`} points={`52,${y - 34} 46,${y - 24} 58,${y - 24}`} />)}
-              {[540, 630, 720].map(y => <polygon key={`b${y}`} points={`52,${y + 34} 46,${y + 24} 58,${y + 24}`} />)}
-            </g>
-          </svg>
-        </div>
+                ))}
+              </g>
+              {/* Directional arrows next to numbers */}
+              <g fill="rgb(245,245,240)">
+                {[90, 180, 270, 360].map(y => <polygon key={`a${y}`} points={`52,${y - 34} 46,${y - 24} 58,${y - 24}`} />)}
+                {[540, 630, 720].map(y => <polygon key={`b${y}`} points={`52,${y + 34} 46,${y + 24} 58,${y + 24}`} />)}
+              </g>
+            </svg>
+          </div>
+        </>
       )}
 
       {/* FILM ROOM — combine sheet graph paper */}
