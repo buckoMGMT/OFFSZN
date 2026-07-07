@@ -25,7 +25,7 @@ export default function CoachServiceSection({ coach }) {
   }, [coach?.id]);
 
   const price = coach?.coach_sub_price_usd;
-  if (!price || coach?.stripe_onboarding_status !== "complete" || !me || me.id === coach.id) return null;
+  if (!price || coach?.stripe_onboarding_status !== "complete" || coach?.identity_status !== "verified" || !me || me.id === coach.id) return null;
 
   const join = async () => {
     if (window.self !== window.top) {

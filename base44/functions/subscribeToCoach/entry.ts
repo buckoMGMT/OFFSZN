@@ -21,6 +21,9 @@ Deno.serve(async (req) => {
     if (coach.stripe_onboarding_status !== 'complete' || !coach.stripe_account_id) {
       return Response.json({ error: 'This coach has not finished setting up payouts yet.' }, { status: 400 });
     }
+    if (coach.identity_status !== 'verified') {
+      return Response.json({ error: 'This coach has not completed identity verification yet.' }, { status: 400 });
+    }
     const price = coach.coach_sub_price_usd;
     if (!price || price <= 0) return Response.json({ error: 'This coach has not set a subscription price yet.' }, { status: 400 });
 

@@ -41,6 +41,14 @@ Deno.serve(async (req) => {
           actor_avatar: subscriber?.avatar_url,
         });
       }
+    } else if (event.type === 'identity.verification_session.verified') {
+      const session = event.data.object;
+      const athleteId = session.metadata?.athlete_id;
+      if (athleteId) {
+        await base44.asServiceRole.entities.Athlete.update(athleteId, {
+          identity_status: 'verified', is_coach_verified: true,
+        });
+      }
     } else if (event.type === 'customer.subscription.deleted') {
       const sub = event.data.object;
       const matches = await base44.asServiceRole.entities.CoachSubscription.filter({

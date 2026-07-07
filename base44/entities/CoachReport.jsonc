@@ -1,0 +1,43 @@
+{
+  "name": "CoachReport",
+  "type": "object",
+  "description": "Safety report filed against a coach. Minor-safety reports are prioritized for human trust-and-safety review.",
+  "properties": {
+    "reporter_athlete_id": {
+      "type": "string"
+    },
+    "coach_athlete_id": {
+      "type": "string"
+    },
+    "coach_name": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "minor_safety",
+        "inappropriate_behavior",
+        "scam_or_fraud",
+        "impersonation",
+        "other"
+      ]
+    },
+    "details": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "under_review",
+        "resolved"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "reporter_athlete_id",
+    "coach_athlete_id",
+    "reason"
+  ]
+}

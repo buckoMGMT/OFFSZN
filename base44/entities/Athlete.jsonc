@@ -168,6 +168,21 @@
     "coach_sub_price_usd": {
       "type": "number",
       "description": "Monthly price the coach charges for their coaching subscription (messaging + personalized feedback)"
+    },
+    "identity_status": {
+      "type": "string",
+      "enum": [
+        "unverified",
+        "pending",
+        "verified",
+        "failed"
+      ],
+      "default": "unverified",
+      "description": "Stripe Identity (government ID + selfie) verification status for coaches"
+    },
+    "identity_verification_session_id": {
+      "type": "string",
+      "description": "Stripe Identity verification session id"
     }
   },
   "required": [

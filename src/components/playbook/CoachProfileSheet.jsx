@@ -1,7 +1,9 @@
 // Coach storefront sheet — verified coach identity, stats, and their video catalog.
-import { X, BadgeCheck, Eye, Play, BellRing, BellPlus } from "lucide-react";
+import { useState } from "react";
+import { X, BadgeCheck, Eye, Play, BellRing, BellPlus, Flag } from "lucide-react";
 import PricePill from "@/components/monetization/PricePill";
 import CoachServiceSection from "@/components/playbook/CoachServiceSection";
+import ReportCoachSheet from "@/components/playbook/ReportCoachSheet";
 
 function fmt(n) {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
@@ -10,6 +12,7 @@ function fmt(n) {
 }
 
 export default function CoachProfileSheet({ open, onClose, coach, videos = [], onSelectVideo, isSubscribed, onToggleSubscribe }) {
+  const [showReport, setShowReport] = useState(false);
   if (!open || !coach) return null;
   const totalViews = videos.reduce((s, v) => s + (v.views || 0), 0);
   return (
@@ -84,7 +87,14 @@ export default function CoachProfileSheet({ open, onClose, coach, videos = [], o
             ))}
             {videos.length === 0 && <p className="text-xs text-center py-4" style={{ color: 'var(--text-tertiary)' }}>No published drills yet.</p>}
           </div>
+
+          <button onClick={() => setShowReport(true)}
+            className="w-full flex items-center justify-center gap-1.5 mt-5 py-2 font-elite text-[9px] uppercase tracking-widest"
+            style={{ color: 'var(--text-tertiary)' }}>
+            <Flag size={10} /> Report this coach
+          </button>
         </div>
+        <ReportCoachSheet open={showReport} onClose={() => setShowReport(false)} coach={coach} />
       </div>
     </div>
   );
