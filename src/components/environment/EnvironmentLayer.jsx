@@ -58,11 +58,6 @@ export default function EnvironmentLayer() {
       {/* THE FIELD — real gridiron: yard lines, hash marks, yard numbers, sideline */}
       {env === "field" && (
         <>
-          {/* Friday-night floodlight beams — warm cones crossing from the top corners */}
-          <div style={{ position: "absolute", top: -120, left: "-30%", width: "85%", height: 520, background: "radial-gradient(ellipse 60% 100% at 30% 0%, rgba(255,140,80,0.14), transparent 68%)", transform: "rotate(14deg)", filter: "blur(6px)" }} />
-          <div style={{ position: "absolute", top: -120, right: "-30%", width: "85%", height: 520, background: "radial-gradient(ellipse 60% 100% at 70% 0%, rgba(255,140,80,0.14), transparent 68%)", transform: "rotate(-14deg)", filter: "blur(6px)" }} />
-          {/* Hot accent halo right behind the header */}
-          <div style={{ position: "absolute", top: -60, left: "10%", right: "10%", height: 260, background: "radial-gradient(ellipse at top, rgba(255,90,31,0.12), transparent 70%)" }} />
           <div ref={fieldRef} style={{ position: "absolute", inset: 0 }}>
             <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.05 }}>
               <g stroke="rgb(245,245,240)" fill="none">

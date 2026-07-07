@@ -5,12 +5,13 @@ export default function GameDayHero({ athlete }) {
   if (!athlete) return null;
   const streak = athlete.current_streak_days || 0;
   const points = athlete.total_points || 0;
+  const title = athlete.position || (athlete.role === "coach" ? "Coach" : "Player");
 
   return (
     <div className="relative overflow-hidden rounded-lg mb-4"
       style={{
-        background: 'linear-gradient(135deg, #FF6B35 0%, #FF5A1F 45%, #C93E0E 100%)',
-        boxShadow: '0 8px 32px rgba(255,90,31,0.35), inset 0 1px 0 rgba(255,255,255,0.25)',
+        background: 'linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 45%, var(--accent-pressed) 100%)',
+        boxShadow: '0 8px 32px color-mix(in srgb, var(--accent) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)',
       }}>
       {/* Yard-line texture over the gradient */}
       <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.14 }} preserveAspectRatio="none" viewBox="0 0 400 120">
@@ -26,7 +27,7 @@ export default function GameDayHero({ athlete }) {
           <span className="font-elite text-[9px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.85)' }}>Game Day — Every Day</span>
         </div>
         <p className="font-anton text-xl uppercase leading-tight mb-3" style={{ color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
-          Own the OFFSZN, {(athlete.display_name || "Athlete").split(" ")[0]}
+          Own the OFFSZN, {title}
         </p>
         <div className="flex gap-2">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.28)', backdropFilter: 'blur(8px)' }}>

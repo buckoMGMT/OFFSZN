@@ -66,7 +66,7 @@ export default function Feed() {
         {/* Accent top stripe */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--accent)', opacity: 0.9 }} />
         <div className="flex items-center justify-between mb-1">
-          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em', textShadow: '0 0 24px rgba(255,90,31,0.35)' }}>The Field</h1>
+          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>The Field</h1>
           <PageLabel number={1} />
         </div>
         <div className="flex items-center gap-2 mb-3">
