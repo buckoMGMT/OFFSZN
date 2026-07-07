@@ -1,0 +1,61 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import Stripe from 'npm:stripe@17';
+
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+    const signature = req.headers.get('stripe-signature');
+    const body = await req.text();
+    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+
+    const event = await stripe.webhooks.constructEventAsync(
+      body,
+      signature,
+      Deno.env.get('STRIPE_WEBHOOK_SECRET'),
+    );
+
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const { subscriber_athlete_id, coach_athlete_id } = session.metadata || {};
+      if (subscriber_athlete_id && coach_athlete_id) {
+        const existing = await base44.asServiceRole.entities.CoachSubscription.filter({
+          subscriber_athlete_id, coach_athlete_id,
+        });
+        if (existing[0]) {
+          await base44.asServiceRole.entities.CoachSubscription.update(existing[0].id, {
+            is_paid: true, status: 'active', stripe_subscription_id: session.subscription,
+          });
+        } else {
+          await base44.asServiceRole.entities.CoachSubscription.create({
+            subscriber_athlete_id, coach_athlete_id,
+            is_paid: true, status: 'active', stripe_subscription_id: session.subscription,
+          });
+        }
+        const subscriber = await base44.asServiceRole.entities.Athlete.get(subscriber_athlete_id);
+        await base44.asServiceRole.entities.Notification.create({
+          recipient_athlete_id: coach_athlete_id,
+          type: 'new_subscriber',
+          title: 'New Paid Subscriber',
+          body: `${subscriber?.display_name || 'An athlete'} joined your coaching subscription.`,
+          actor_name: subscriber?.display_name,
+          actor_avatar: subscriber?.avatar_url,
+        });
+      }
+    } else if (event.type === 'customer.subscription.deleted') {
+      const sub = event.data.object;
+      const matches = await base44.asServiceRole.entities.CoachSubscription.filter({
+        stripe_subscription_id: sub.id,
+      });
+      if (matches[0]) {
+        await base44.asServiceRole.entities.CoachSubscription.update(matches[0].id, {
+          status: 'canceled', is_paid: false,
+        });
+      }
+    }
+
+    return Response.json({ received: true });
+  } catch (error) {
+    console.error('stripeWebhook error:', error.message);
+    return Response.json({ error: error.message }, { status: 400 });
+  }
+});

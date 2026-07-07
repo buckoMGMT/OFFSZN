@@ -151,6 +151,23 @@
     "throttle_until": {
       "type": "string",
       "format": "date-time"
+    },
+    "stripe_account_id": {
+      "type": "string",
+      "description": "Stripe Connect Express account id for coach payouts"
+    },
+    "stripe_onboarding_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "pending",
+        "complete"
+      ],
+      "default": "none"
+    },
+    "coach_sub_price_usd": {
+      "type": "number",
+      "description": "Monthly price the coach charges for their coaching subscription (messaging + personalized feedback)"
     }
   },
   "required": [

@@ -1,6 +1,7 @@
 // Coach storefront sheet — verified coach identity, stats, and their video catalog.
 import { X, BadgeCheck, Eye, Play, BellRing, BellPlus } from "lucide-react";
 import PricePill from "@/components/monetization/PricePill";
+import CoachServiceSection from "@/components/playbook/CoachServiceSection";
 
 function fmt(n) {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
@@ -36,6 +37,8 @@ export default function CoachProfileSheet({ open, onClose, coach, videos = [], o
           </div>
 
           {coach.bio && <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{coach.bio}</p>}
+
+          <CoachServiceSection coach={coach} />
 
           {onToggleSubscribe && (
             <button onClick={() => onToggleSubscribe(coach)}

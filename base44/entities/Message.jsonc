@@ -1,0 +1,25 @@
+{
+  "name": "Message",
+  "type": "object",
+  "description": "Direct message between a subscribed athlete and their coach.",
+  "properties": {
+    "sender_athlete_id": {
+      "type": "string"
+    },
+    "recipient_athlete_id": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "sender_athlete_id",
+    "recipient_athlete_id",
+    "text"
+  ]
+}

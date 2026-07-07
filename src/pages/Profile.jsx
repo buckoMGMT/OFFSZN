@@ -8,6 +8,8 @@ import StrengthMaxes from "@/components/profile/StrengthMaxes";
 import HighlightReel from "@/components/profile/HighlightReel";
 import CoachTier from "@/components/profile/CoachTier";
 import CoachStudio from "@/components/profile/CoachStudio";
+import CoachPayoutSetup from "@/components/profile/CoachPayoutSetup";
+import CoachInbox from "@/components/messaging/CoachInbox";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
@@ -288,6 +290,8 @@ export default function Profile() {
 
         {activeSection === "coach" && (
           <div className="mt-3 space-y-4">
+            <CoachPayoutSetup athlete={athlete} onUpdate={a => setAthlete(a)} />
+            <CoachInbox athlete={athlete} />
             <CoachStudio athlete={athlete} />
             <CoachTier athlete={athlete} onUpdate={reload} />
           </div>

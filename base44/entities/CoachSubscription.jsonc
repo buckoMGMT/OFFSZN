@@ -1,7 +1,7 @@
 {
   "name": "CoachSubscription",
   "type": "object",
-  "description": "An athlete following/subscribing to a coach's account for content updates.",
+  "description": "An athlete following/subscribing to a coach's account for content updates. Paid subscriptions unlock messaging and exclusive service features.",
   "properties": {
     "subscriber_athlete_id": {
       "type": "string"
@@ -12,6 +12,21 @@
     "notify_new_content": {
       "type": "boolean",
       "default": true
+    },
+    "is_paid": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "canceled"
+      ],
+      "default": "active"
+    },
+    "stripe_subscription_id": {
+      "type": "string"
     }
   },
   "required": [
