@@ -1,0 +1,43 @@
+// base44/entities/Redemption.jsonc — UPDATED
+// Changes vs. deployed version:
+//  - "mystery_box" added to reward_type (box opens were failing validation)
+//  - reward_item_id no longer required (box opens have no shop item;
+//    still REQUIRED-BY-CODE for merch/gift_card — enforce in the redemption
+//    function since this schema can't do conditional requireds)
+//  - points_awarded, box_tier, reward_tier added for mystery-box records
+{
+  "name": "Redemption",
+  "type": "object",
+  "properties": {
+    "athlete_id": { "type": "string" },
+    "reward_item_id": { "type": "string" },
+    "reward_name": { "type": "string" },
+    "reward_type": {
+      "type": "string",
+      "enum": ["merch", "gift_card", "mystery_box"]
+    },
+    "points_spent": { "type": "number" },
+    "points_awarded": {
+      "type": "number",
+      "description": "Mystery-box opens only: points paid out by the box."
+    },
+    "box_tier": {
+      "type": "string",
+      "enum": ["bronze", "silver", "gold"],
+      "description": "Mystery-box opens only."
+    },
+    "reward_tier": {
+      "type": "string",
+      "enum": ["common", "uncommon", "rare", "epic", "legendary"],
+      "description": "Mystery-box opens only."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "processing", "shipped", "delivered", "cancelled"],
+      "default": "pending"
+    },
+    "shipping_address": { "type": "string" },
+    "notes": { "type": "string" }
+  },
+  "required": ["athlete_id", "points_spent", "reward_type"]
+}
