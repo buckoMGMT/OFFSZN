@@ -1,0 +1,4 @@
+Contact: mailto:security@offszn.app
+Preferred-Languages: en
+Canonical: https://offszn.app/.well-known/security.txt
+Expires: 2027-01-01T00:00:00.000Z
