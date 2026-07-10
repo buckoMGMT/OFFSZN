@@ -30,8 +30,8 @@ function ChromeSeal() {
       <text x="26" y="22" textAnchor="middle" fontFamily="Anton" fontSize="7" fill="var(--accent)" letterSpacing="1">ALL‑SZN</text>
       <text x="26" y="31" textAnchor="middle" fontFamily="Special Elite" fontSize="5" fill="#5E646B" letterSpacing="1">PASS</text>
       <text x="26" y="37" textAnchor="middle" fontFamily="Special Elite" fontSize="4" fill="#9BA3AC" letterSpacing="0.5">VERIFIED</text>
-    </svg>
-  );
+    </svg>);
+
 }
 
 export default function Profile() {
@@ -51,10 +51,10 @@ export default function Profile() {
 
 
   useEffect(() => {
-    base44.entities.Athlete.list("-created_date", 1).then(list => {
+    base44.entities.Athlete.list("-created_date", 1).then((list) => {
       const a = list[0] || null;
       setAthlete(a);
-      if (a) { setForm(a); checkMilestones(a); }
+      if (a) {setForm(a);checkMilestones(a);}
       setLoading(false);
     });
   }, []);
@@ -71,17 +71,17 @@ export default function Profile() {
   const createProfile = async () => {
     setSaving(true);
     const a = await base44.entities.Athlete.create({ display_name: "Athlete", subscription_tier: "free", current_streak_days: 0, total_points: 0, onboarding_complete: false });
-    setAthlete(a); setForm(a); setEditing(true); setSaving(false);
+    setAthlete(a);setForm(a);setEditing(true);setSaving(false);
   };
 
-  const reload = () => base44.entities.Athlete.list("-created_date", 1).then(list => { if (list[0]) { setAthlete(list[0]); setForm(list[0]); } });
+  const reload = () => base44.entities.Athlete.list("-created_date", 1).then((list) => {if (list[0]) {setAthlete(list[0]);setForm(list[0]);}});
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: 'var(--surface-0)' }}>
       <PlayDiagram size={150} />
       <p className="font-elite text-xs mt-4" style={{ color: 'var(--text-tertiary)' }}>Loading player card…</p>
-    </div>
-  );
+    </div>);
+
 
   if (!athlete) return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ background: 'var(--surface-0)' }}>
@@ -91,8 +91,8 @@ export default function Profile() {
       <StampButton onClick={createProfile} disabled={saving} className="text-base px-8 py-3 mt-2">
         {saving ? "Creating..." : "Build My Card"}
       </StampButton>
-    </div>
-  );
+    </div>);
+
 
   const isPremium = athlete.subscription_tier === "premium";
 
@@ -122,7 +122,7 @@ export default function Profile() {
           <div className="flex flex-col items-end gap-2">
             <PageLabel number={5} />
             <button onClick={() => setEditing(!editing)} className="flex items-center gap-1 px-2.5 py-1.5 rounded font-elite text-[9px] uppercase tracking-widest"
-              style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
+            style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
               <Edit2 size={10} /> Edit
             </button>
           </div>
@@ -135,18 +135,18 @@ export default function Profile() {
             <span className="font-elite text-sm" style={{ color: 'var(--theme-ink)' }}>{(athlete.total_points || 0).toLocaleString()}</span>
             <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>pts</span>
           </div>
-          {athlete.current_streak_days > 0 && (
-            <div className="flex items-center gap-1.5">
+          {athlete.current_streak_days > 0 &&
+          <div className="flex items-center gap-1.5">
               <span className="font-elite text-sm" style={{ color: 'var(--accent)' }}>{athlete.current_streak_days}</span>
                 <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>SZN Streak</span>
             </div>
-          )}
-          {isPremium
-            ? <div className="ml-auto flex items-center gap-2">
+          }
+          {isPremium ?
+          <div className="ml-auto flex items-center gap-2">
                 <button onClick={() => setShowPaywall(true)} className="font-elite text-[9px] uppercase tracking-widest underline" style={{ color: 'var(--text-tertiary)' }}>Compare Plans</button>
                 <ChromeSeal />
-              </div>
-            : <button onClick={() => setShowPaywall(true)} className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Get ALL-SZN Pass →</button>
+              </div> :
+          <button onClick={() => setShowPaywall(true)} className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Get ALL-SZN Pass →</button>
           }
         </div>
       </div>
@@ -154,151 +154,151 @@ export default function Profile() {
       {/* Section tabs */}
       <div className="flex border-b px-5" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-0)' }}>
         {[
-          { id: "stats", label: "Stats" },
-          { id: "badges", label: "Badges" },
-          { id: "goals", label: "Goals" },
-          { id: "coach", label: "Coach" },
-          { id: "settings", label: "Settings" },
-        ].map(s => (
-          <button key={s.id} onClick={() => setActiveSection(s.id)}
-            className="flex-1 py-3 font-elite text-[9px] uppercase tracking-widest"
-            style={{
-              color: activeSection === s.id ? 'var(--accent)' : 'var(--text-tertiary)',
-              borderBottom: activeSection === s.id ? '2px solid var(--accent)' : '2px solid transparent',
-            }}>
+        { id: "stats", label: "Stats" },
+        { id: "badges", label: "Badges" },
+        { id: "goals", label: "Goals" },
+        { id: "coach", label: "Coach" },
+        { id: "settings", label: "Settings" }].
+        map((s) =>
+        <button key={s.id} onClick={() => setActiveSection(s.id)}
+        className="flex-1 py-3 font-elite text-[9px] uppercase tracking-widest"
+        style={{
+          color: activeSection === s.id ? 'var(--accent)' : 'var(--text-tertiary)',
+          borderBottom: activeSection === s.id ? '2px solid var(--accent)' : '2px solid transparent'
+        }}>
             {s.label}
           </button>
-        ))}
+        )}
       </div>
 
       <div className="px-5 pb-6">
         {/* Edit form */}
-        {editing && (
-          <div className="rounded border p-4 my-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+        {editing &&
+        <div className="rounded border p-4 my-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
             <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Edit Player Card</p>
             {[
-              { placeholder: "Display name", field: "display_name" },
-              { placeholder: "Club name", field: "school" },
-              { placeholder: "Position", field: "position" },
-            ].map(({ placeholder, field }) => (
-              <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
-                style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-                placeholder={placeholder}
-                value={form[field] || ""}
-                onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))} />
-            ))}
+          { placeholder: "Display name", field: "display_name" },
+          { placeholder: "Club name", field: "school" },
+          { placeholder: "Position", field: "position" }].
+          map(({ placeholder, field }) =>
+          <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
+          style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
+          placeholder={placeholder}
+          value={form[field] || ""}
+          onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))} />
+          )}
             <div className="grid grid-cols-2 gap-3">
               <select className="rounded px-4 py-3 text-sm font-work outline-none" style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-                value={form.sport || ""} onChange={e => setForm(p => ({ ...p, sport: e.target.value }))}>
+            value={form.sport || ""} onChange={(e) => setForm((p) => ({ ...p, sport: e.target.value }))}>
                 <option value="">Sport</option>
-                {SPORTS.map(s => <option key={s} value={s}>{s}</option>)}
+                {SPORTS.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
               <select className="rounded px-4 py-3 text-sm font-work outline-none" style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-                value={form.grade || ""} onChange={e => setForm(p => ({ ...p, grade: e.target.value }))}>
+            value={form.grade || ""} onChange={(e) => setForm((p) => ({ ...p, grade: e.target.value }))}>
                 <option value="">Grade</option>
-                {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
+                {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
             <textarea className="w-full rounded px-4 py-3 text-sm font-work outline-none resize-none h-16"
-              style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-              placeholder="Bio" value={form.bio || ""} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} />
+          style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
+          placeholder="Bio" value={form.bio || ""} onChange={(e) => setForm((p) => ({ ...p, bio: e.target.value }))} />
             <div className="flex gap-2">
               <button onClick={() => setEditing(false)} className="flex-1 py-2.5 rounded font-elite text-xs uppercase"
-                style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>Cancel</button>
+            style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>Cancel</button>
               <StampButton onClick={save} disabled={saving} className="flex-1">
                 {saving ? "Saving…" : "Save"}
               </StampButton>
             </div>
           </div>
-        )}
+        }
 
-        {activeSection === "stats" && (
-          <div className="space-y-3 mt-3">
+        {activeSection === "stats" &&
+        <div className="space-y-3 mt-3">
             <HighlightReel athlete={athlete} onUpdate={reload} />
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: "Day Streak", value: athlete.current_streak_days || 0 },
-                { label: "OFFSZN Points", value: (athlete.total_points || 0).toLocaleString(), accent: true },
-                { label: "Current lbs", value: athlete.weight_lbs || "--" },
-                { label: "Goal lbs", value: athlete.goal_weight_lbs || "--" },
-              ].map(({ label, value, accent }) => (
-                <div key={label} className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: accent ? 'var(--accent)' : 'var(--theme-border)', borderLeftWidth: accent ? 3 : 1 }}>
+            { label: "Day Streak", value: athlete.current_streak_days || 0 },
+            { label: "OFFSZN Points", value: (athlete.total_points || 0).toLocaleString(), accent: true },
+            { label: "Current lbs", value: athlete.weight_lbs || "--" },
+            { label: "Goal lbs", value: athlete.goal_weight_lbs || "--" }].
+            map(({ label, value, accent }) =>
+            <div key={label} className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: accent ? 'var(--accent)' : 'var(--theme-border)', borderLeftWidth: accent ? 3 : 1 }}>
                   <p className="font-elite text-[8px] uppercase tracking-widest mb-1" style={{ color: 'var(--theme-ink-soft)' }}>{label}</p>
                   <p className="font-elite text-3xl leading-none" style={{ color: accent ? 'var(--accent)' : 'var(--theme-ink)' }}>{value}</p>
                 </div>
-              ))}
+            )}
             </div>
             <StrengthMaxes athlete={athlete} onUpdate={reload} />
             <AdvancedStats athlete={athlete} isPremium={isPremium} onUpgrade={() => setShowPaywall(true)} />
-            {athlete.bio && (
-              <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+            {athlete.bio &&
+          <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
                 <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Bio</p>
                 <p className="font-work text-sm leading-relaxed" style={{ color: 'var(--theme-ink)' }}>{athlete.bio}</p>
               </div>
-            )}
+          }
           </div>
-        )}
+        }
 
         {activeSection === "badges" && <BadgesSection athlete={athlete} />}
 
-        {activeSection === "goals" && (
-          <div className="space-y-3 mt-3">
+        {activeSection === "goals" &&
+        <div className="space-y-3 mt-3">
             <div className="rounded border p-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Macro Goals</p>
               {[
-                { label: "Daily Calories", field: "goal_calories", unit: "kcal" },
-                { label: "Protein", field: "goal_protein_g", unit: "g" },
-                { label: "Carbs", field: "goal_carbs_g", unit: "g" },
-                { label: "Fats", field: "goal_fats_g", unit: "g" },
-              ].map(({ label, field, unit }) => (
-                <div key={field} className="flex items-center justify-between">
+            { label: "Daily Calories", field: "goal_calories", unit: "kcal" },
+            { label: "Protein", field: "goal_protein_g", unit: "g" },
+            { label: "Carbs", field: "goal_carbs_g", unit: "g" },
+            { label: "Fats", field: "goal_fats_g", unit: "g" }].
+            map(({ label, field, unit }) =>
+            <div key={field} className="flex items-center justify-between">
                   <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{label}</span>
                   <div className="flex items-center gap-2">
                     <input type="number"
-                      className="w-24 rounded px-3 py-1.5 font-elite text-sm outline-none text-right"
-                      style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-                      value={form[field] || ""}
-                      onChange={e => setForm(p => ({ ...p, [field]: Number(e.target.value) }))}
-                      onBlur={save} />
+                className="w-24 rounded px-3 py-1.5 font-elite text-sm outline-none text-right"
+                style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
+                value={form[field] || ""}
+                onChange={(e) => setForm((p) => ({ ...p, [field]: Number(e.target.value) }))}
+                onBlur={save} />
                     <span className="font-elite text-xs" style={{ color: 'var(--theme-ink-soft)' }}>{unit}</span>
                   </div>
                 </div>
-              ))}
+            )}
             </div>
             <div className="rounded border p-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Body Goals</p>
               {[
-                { label: "Target Weight", field: "goal_weight_lbs", unit: "lbs" },
-                { label: "Weekly Budget", field: "weekly_budget_usd", unit: "$" },
-              ].map(({ label, field, unit }) => (
-                <div key={field} className="flex items-center justify-between">
+            { label: "Target Weight", field: "goal_weight_lbs", unit: "lbs" },
+            { label: "Weekly Budget", field: "weekly_budget_usd", unit: "$" }].
+            map(({ label, field, unit }) =>
+            <div key={field} className="flex items-center justify-between">
                   <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{label}</span>
                   <div className="flex items-center gap-2">
                     <span className="font-elite text-xs" style={{ color: 'var(--theme-ink-soft)' }}>{unit}</span>
                     <input type="number"
-                      className="w-24 rounded px-3 py-1.5 font-elite text-sm outline-none text-right"
-                      style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-                      value={form[field] || ""}
-                      onChange={e => setForm(p => ({ ...p, [field]: Number(e.target.value) }))}
-                      onBlur={save} />
+                className="w-24 rounded px-3 py-1.5 font-elite text-sm outline-none text-right"
+                style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
+                value={form[field] || ""}
+                onChange={(e) => setForm((p) => ({ ...p, [field]: Number(e.target.value) }))}
+                onBlur={save} />
                   </div>
                 </div>
-              ))}
+            )}
             </div>
           </div>
-        )}
+        }
 
-        {activeSection === "coach" && (
-          <div className="mt-3 space-y-4">
-            <CoachPayoutSetup athlete={athlete} onUpdate={a => setAthlete(a)} />
+        {activeSection === "coach" &&
+        <div className="mt-3 space-y-4">
+            <CoachPayoutSetup athlete={athlete} onUpdate={(a) => setAthlete(a)} />
             <CoachInbox athlete={athlete} />
             <CoachStudio athlete={athlete} />
             <CoachTier athlete={athlete} onUpdate={reload} />
           </div>
-        )}
+        }
 
-        {activeSection === "settings" && (
-          <div className="space-y-4 mt-3">
+        {activeSection === "settings" &&
+        <div className="space-y-4 mt-3">
 
             {/* Appearance */}
             <div className="rounded border overflow-hidden" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
@@ -311,11 +311,11 @@ export default function Profile() {
                   </span>
                 </div>
                 <button
-                  onClick={() => setDarkMode(d => !d)}
-                  className="w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0"
-                  style={{ background: darkMode ? 'var(--accent)' : '#9BA3AC' }}>
+                onClick={() => setDarkMode((d) => !d)}
+                className="w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0"
+                style={{ background: darkMode ? 'var(--accent)' : '#9BA3AC' }}>
                   <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all duration-300"
-                    style={{ left: darkMode ? '26px' : '2px' }} />
+                style={{ left: darkMode ? '26px' : '2px' }} />
                 </button>
               </div>
               <AccentColorPicker />
@@ -325,24 +325,24 @@ export default function Profile() {
             <div className="rounded border overflow-hidden" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: 'var(--theme-ink-soft)' }}>Notifications</p>
               {[
-                { label: "Daily Streak Reminders", key: "streak" },
-                { label: "Challenge Updates", key: "challenges" },
-                { label: "Clan Activity", key: "clan" },
-              ].map(({ label, key }) => (
-                <div key={key} className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+            { label: "Daily Streak Reminders", key: "streak" },
+            { label: "Challenge Updates", key: "challenges" },
+            { label: "Clan Activity", key: "clan" }].
+            map(({ label, key }) =>
+            <div key={key} className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                     <div className="flex items-center gap-3">
                       <Bell size={15} style={{ color: 'var(--accent)' }} />
                       <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>{label}</span>
                   </div>
                   <button
-                    onClick={() => { setNotifications(n => !n); localStorage.setItem('pb_notifs', notifications ? 'off' : 'on'); }}
-                    className="w-12 h-6 rounded-full relative transition-all duration-300"
-                    style={{ background: notifications ? 'var(--accent)' : '#9BA3AC' }}>
+                onClick={() => {setNotifications((n) => !n);localStorage.setItem('pb_notifs', notifications ? 'off' : 'on');}}
+                className="w-12 h-6 rounded-full relative transition-all duration-300"
+                style={{ background: notifications ? 'var(--accent)' : '#9BA3AC' }}>
                     <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all duration-300"
-                      style={{ left: notifications ? '26px' : '2px' }} />
+                style={{ left: notifications ? '26px' : '2px' }} />
                   </button>
                 </div>
-              ))}
+            )}
             </div>
 
             {/* Preferences */}
@@ -351,32 +351,32 @@ export default function Profile() {
               <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                 <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>Units</span>
                 <div className="flex rounded overflow-hidden" style={{ border: '1px solid var(--theme-border)' }}>
-                  {["imperial", "metric"].map(u => (
-                    <button key={u} onClick={() => { setUnits(u); localStorage.setItem('pb_units', u); }}
-                      className="px-3 py-1 font-elite text-[9px] uppercase tracking-widest transition-all"
-                      style={{                       background: units === u ? 'var(--accent)' : 'transparent', color: units === u ? '#0A0B0D' : 'var(--theme-ink-soft)' }}>
+                  {["imperial", "metric"].map((u) =>
+                <button key={u} onClick={() => {setUnits(u);localStorage.setItem('pb_units', u);}}
+                className="px-3 py-1 font-elite text-[9px] uppercase tracking-widest transition-all"
+                style={{ background: units === u ? 'var(--accent)' : 'transparent', color: units === u ? '#0A0B0D' : 'var(--theme-ink-soft)' }}>
                       {u}
                     </button>
-                  ))}
+                )}
                 </div>
               </div>
               <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                 <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>Profile Privacy</span>
                 <div className="flex rounded overflow-hidden" style={{ border: '1px solid var(--theme-border)' }}>
-                  {["public", "private"].map(p => (
-                    <button key={p} onClick={() => { setPrivacy(p); localStorage.setItem('pb_privacy', p); }}
-                      className="px-3 py-1 font-elite text-[9px] uppercase tracking-widest transition-all"
-                      style={{                       background: privacy === p ? 'var(--accent)' : 'transparent', color: privacy === p ? '#0A0B0D' : 'var(--theme-ink-soft)' }}>
+                  {["public", "private"].map((p) =>
+                <button key={p} onClick={() => {setPrivacy(p);localStorage.setItem('pb_privacy', p);}}
+                className="px-3 py-1 font-elite text-[9px] uppercase tracking-widest transition-all"
+                style={{ background: privacy === p ? 'var(--accent)' : 'transparent', color: privacy === p ? '#0A0B0D' : 'var(--theme-ink-soft)' }}>
                       {p}
                     </button>
-                  ))}
+                )}
                 </div>
               </div>
             </div>
 
             {/* Subscription */}
-            {!isPremium && (
-              <div className="rounded border-2 p-5 flex items-center justify-between" style={{ borderColor: 'var(--accent)', background: 'var(--theme-surface)' }}>
+            {!isPremium &&
+          <div className="rounded border-2 p-5 flex items-center justify-between" style={{ borderColor: 'var(--accent)', background: 'var(--theme-surface)' }}>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Crown size={14} style={{ color: 'var(--accent)' }} />
@@ -389,7 +389,7 @@ export default function Profile() {
                   <StampButton onClick={() => setShowPaywall(true)} className="text-[10px] px-3 py-1 mt-1">Upgrade</StampButton>
                 </div>
               </div>
-            )}
+          }
 
             {/* Points balance */}
             <div className="rounded border p-4 flex items-center justify-between" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
@@ -402,7 +402,7 @@ export default function Profile() {
 
             {/* Coach's sticky note */}
             <div className="flex justify-center">
-              <div className="sticky-note">
+              <div className="sticky-note hidden">
                 "It's not the off-season. It's OFFSZN."
               </div>
             </div>
@@ -420,7 +420,7 @@ export default function Profile() {
             <div className="rounded border overflow-hidden" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: 'var(--theme-ink-soft)' }}>Account</p>
               <button className="w-full flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}
-                onClick={() => base44.auth.logout('/')}>
+            onClick={() => base44.auth.logout('/')}>
                 <div className="flex items-center gap-3">
                   <LogOut size={15} style={{ color: 'var(--accent)' }} />
                   <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Sign Out</span>
@@ -430,10 +430,10 @@ export default function Profile() {
             </div>
 
           </div>
-        )}
+        }
       </div>
 
       <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
-    </div>
-  );
+    </div>);
+
 }
