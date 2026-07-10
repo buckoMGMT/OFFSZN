@@ -402,9 +402,9 @@ export default function Profile() {
 
             {/* Coach's sticky note */}
             <div className="flex justify-center">
-              <div className="sticky-note hidden">
-                "It's not the off-season. It's OFFSZN."
-              </div>
+              
+
+            
             </div>
 
             {/* Scripture */}
