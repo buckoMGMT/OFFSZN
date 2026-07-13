@@ -1,0 +1,46 @@
+# Free uptime monitoring using the repo you already have.
+# Pings the site + app every 15 min; opens ONE GitHub issue on downtime
+# (deduped by label) and you get GitHub's email notification automatically.
+name: Uptime
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Check endpoints
+        id: ping
+        run: |
+          FAILED=""
+          for URL in "https://offsznapp.com" "https://offsznapp.com/privacy"; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$URL" || echo "000")
+            echo "$URL -> $CODE"
+            if [ "$CODE" -ge 400 ] || [ "$CODE" = "000" ]; then FAILED="$FAILED $URL($CODE)"; fi
+          done
+          # TODO: add your Base44 app URL above once it's on a stable domain.
+          if [ -n "$FAILED" ]; then
+            echo "failed=$FAILED" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+      - name: Open downtime issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const failed = `${{ steps.ping.outputs.failed }}`;
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              labels: "downtime", state: "open"
+            });
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: `🔴 DOWNTIME: ${failed}`,
+                body: `Uptime check failed at ${new Date().toISOString()}\nEndpoints: ${failed}\nThis issue auto-closes is manual — close it once resolved.`,
+                labels: ["downtime"]
+              });
+            }

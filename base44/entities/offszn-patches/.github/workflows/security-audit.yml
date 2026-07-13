@@ -1,0 +1,17 @@
+# npm audit on every PR + weekly. Fails on high/critical vulnerabilities
+# so a bad dependency can't silently ship.
+name: Security Audit
+on:
+  pull_request:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=high

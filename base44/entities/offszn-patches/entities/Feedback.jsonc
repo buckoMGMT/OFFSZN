@@ -1,0 +1,11 @@
+{
+  "name": "Feedback",
+  "type": "object",
+  "properties": {
+    "category": { "type": "string", "enum": ["bug", "idea", "confusing", "other"], "default": "other" },
+    "message": { "type": "string" },
+    "page": { "type": "string" },
+    "status": { "type": "string", "enum": ["new", "reviewed", "done"], "default": "new" }
+  },
+  "required": ["message"]
+}
