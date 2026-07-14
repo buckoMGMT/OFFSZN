@@ -6,7 +6,8 @@
       "type": "string"
     },
     "reward_item_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Optional in schema; enforced in code for merch/gift_card redemptions."
     },
     "reward_name": {
       "type": "string"
@@ -41,7 +42,7 @@
   },
   "required": [
     "athlete_id",
-    "reward_item_id",
-    "points_spent"
+    "points_spent",
+    "reward_type"
   ]
 }

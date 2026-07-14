@@ -1,17 +1,20 @@
 {
-  "properties": {
-    "role": {
-      "type": "string",
-      "description": "The role of the user in the app",
-      "enum": [
-        "admin",
-        "user"
-      ]
-    }
-  },
-  "required": [
-    "role"
-  ],
   "name": "User",
-  "type": "object"
+  "type": "object",
+  "properties": {
+    "date_of_birth": {
+      "type": "string",
+      "format": "date",
+      "description": "Written by the ageGate backend function. Age is always computed live from this \u2014 never trust a stored minor flag alone."
+    },
+    "age_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_minor": {
+      "type": "boolean",
+      "default": false,
+      "description": "Snapshot at verification time. Guards recompute from date_of_birth (sunset at 18)."
+    }
+  }
 }

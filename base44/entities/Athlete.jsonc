@@ -65,6 +65,29 @@
     "weekly_budget_usd": {
       "type": "number"
     },
+    "training_goals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "starting_spot",
+          "gain_muscle",
+          "cut_weight",
+          "get_faster",
+          "recruiting",
+          "stay_ready"
+        ]
+      },
+      "default": []
+    },
+    "water_goal_oz": {
+      "type": "number",
+      "default": 128
+    },
+    "sleep_goal_hours": {
+      "type": "number",
+      "default": 8
+    },
     "subscription_tier": {
       "type": "string",
       "enum": [

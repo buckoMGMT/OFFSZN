@@ -6,8 +6,6 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import RedeemModal from "@/components/rewards/RedeemModal";
 import ReferralPanel from "@/components/rewards/ReferralPanel";
-import MysteryBoxCard from "@/components/rewards/MysteryBoxCard";
-import MysteryWinTicker from "@/components/rewards/MysteryWinTicker";
 
 const DAILY_BREAKDOWN = [
   { action: "Hit your water goal (80oz)", pts: 10 },
@@ -152,6 +150,18 @@ export default function Rewards() {
   useEffect(() => { load(); }, [load]);
 
   const onRedeemed = async (item, address) => {
+    // economyGuard: real-world rewards need 90 days + 60 logged days + clean standing
+    try {
+      await base44.functions.invoke("economyGuard", { athleteId: athlete.id });
+    } catch (e) {
+      const d = e.response?.data;
+      const progress = d?.accountAgeDays != null
+        ? ` (${d.accountAgeDays}/${d.requiredDays || 90} days on OFFSZN · ${d.loggedDays ?? 0}/${d.requiredLoggedDays || 60} logged days)`
+        : "";
+      alert((d?.message || "Real-world rewards aren't unlocked yet.") + progress);
+      setRedeemTarget(null);
+      return;
+    }
     await base44.entities.Redemption.create({
       athlete_id: athlete.id,
       reward_item_id: item.id,
@@ -232,9 +242,6 @@ export default function Rewards() {
         </div>
       </div>
 
-      {/* Live mystery box wins ticker */}
-      <MysteryWinTicker />
-
       <div className="px-4 py-4">
 
         {/* STORE TAB */}
@@ -261,7 +268,6 @@ export default function Rewards() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {filter !== "gift_card" && <MysteryBoxCard />}
               {sorted.map(item => (
                 <RewardCard key={item.id} item={item} athletePoints={points} onRedeem={setRedeemTarget} />
               ))}

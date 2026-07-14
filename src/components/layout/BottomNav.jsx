@@ -5,7 +5,7 @@ import { Rss, BarChart2, BookOpen, Shield, User, Gift } from "lucide-react";
 const tabs = [
   { icon: Rss,       label: "Field",   path: "/" },
   { icon: BarChart2, label: "Stats",   path: "/track" },
-  { icon: BookOpen,  label: "Drills",  path: "/playbook" },
+  { icon: BookOpen,  label: "Drills",  path: "/drills" },
   { icon: Shield,    label: "Teams",   path: "/clans" },
   { icon: Gift,      label: "Locker",  path: "/rewards" },
   { icon: User,      label: "Player",  path: "/profile" },
