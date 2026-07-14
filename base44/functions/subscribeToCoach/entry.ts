@@ -33,8 +33,8 @@ Deno.serve(async (req) => {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: `${coach.display_name} — Coaching Subscription`,
-            description: '1-on-1 messaging, personalized feedback, and exclusive subscriber features',
+            name: `${coach.display_name} — 1-on-1 Coaching Service`,
+            description: 'Personal coaching service: direct messaging and personalized feedback from your coach',
           },
           unit_amount: Math.round(price * 100),
           recurring: { interval: 'month' },
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
         },
       },
       customer_email: user.email,
-      success_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}coach_sub=success`,
+      success_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}coach_sub=success&coach_name=${encodeURIComponent(coach.display_name)}&coach_sla=${coach.coach_response_sla_hours || 48}`,
       cancel_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}coach_sub=cancel`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),

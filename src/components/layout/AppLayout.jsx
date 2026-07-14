@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import BottomNav from "@/components/layout/BottomNav";
 import EnvironmentLayer from "@/components/environment/EnvironmentLayer";
+import CoachSubSuccessToast from "@/components/monetization/CoachSubSuccessToast";
 
 export default function AppLayout() {
   /* iOS-native shell: full-bleed surface, content constrained to phone width,
@@ -10,6 +11,7 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--surface-0)' }}>
       <EnvironmentLayer />
+      <CoachSubSuccessToast />
       <div
         className="mx-auto relative"
         style={{

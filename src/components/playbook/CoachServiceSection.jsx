@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { MessageCircle, Star } from "lucide-react";
 import CoachChatSheet from "@/components/messaging/CoachChatSheet";
+import ServicesIncludedList from "@/components/playbook/ServicesIncludedList";
 
 export default function CoachServiceSection({ coach }) {
   const [me, setMe] = useState(null);
@@ -47,11 +48,13 @@ export default function CoachServiceSection({ coach }) {
     <div className="rounded-xl border p-4 mb-4" style={{ background: 'var(--accent-subtle)', borderColor: 'var(--accent)' }}>
       <div className="flex items-center gap-1.5 mb-1">
         <Star size={12} fill="currentColor" style={{ color: 'var(--accent)' }} />
-        <p className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Coaching Subscription</p>
+        <p className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>1-on-1 Coaching Service</p>
       </div>
       {paidSub ? (
         <>
-          <p className="text-sm mb-3" style={{ color: 'var(--text-primary)' }}>You're a member — message your coach anytime.</p>
+          <p className="text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
+            You're a member — message your coach anytime, replies within {coach.coach_response_sla_hours || 48}h.
+          </p>
           <button onClick={() => setShowChat(true)}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded font-elite text-[10px] uppercase tracking-widest"
             style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
@@ -60,9 +63,7 @@ export default function CoachServiceSection({ coach }) {
         </>
       ) : (
         <>
-          <p className="text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
-            1-on-1 messaging, personalized feedback, and exclusive member perks.
-          </p>
+          <ServicesIncludedList services={coach.coach_services} slaHours={coach.coach_response_sla_hours} />
           <button onClick={join} disabled={busy}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded font-elite text-[10px] uppercase tracking-widest"
             style={{ background: 'var(--accent)', color: 'var(--on-accent)', opacity: busy ? 0.6 : 1 }}>

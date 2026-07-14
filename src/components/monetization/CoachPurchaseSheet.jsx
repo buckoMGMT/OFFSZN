@@ -1,6 +1,7 @@
 // Coach content purchase sheet — Lane 3. One-time purchase, coach sets the price.
 // Under-18 without a verified guardian: plain guardian step, never an error state.
 import { X, BadgeCheck } from "lucide-react";
+import { SERVICE_META, normalizeServices } from "@/components/playbook/ServicesIncludedList";
 
 export default function CoachPurchaseSheet({ open, onClose, item, needsGuardian = false, onBuy, onSendGuardianLink }) {
   if (!open || !item) return null;
@@ -40,6 +41,9 @@ export default function CoachPurchaseSheet({ open, onClose, item, needsGuardian 
         )}
 
         <p className="text-[10px] text-center mt-3" style={{ color: 'var(--text-tertiary)' }}>
+          {item.coachName} also offers 1-on-1 coaching: {normalizeServices(item.coachServices).slice(0, 2).map(k => SERVICE_META[k].label).join(" · ")}
+        </p>
+        <p className="text-[10px] text-center mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
           Watermarked, protected playback · Coach programs are priced by each coach and sold separately from the All-SZN Pass.
         </p>
       </div>

@@ -167,7 +167,7 @@
     },
     "coach_sub_price_usd": {
       "type": "number",
-      "description": "Monthly price the coach charges for their coaching subscription (messaging + personalized feedback)"
+      "description": "Monthly price the coach charges for their 1-on-1 coaching service subscription"
     },
     "identity_status": {
       "type": "string",
@@ -183,6 +183,27 @@
     "identity_verification_session_id": {
       "type": "string",
       "description": "Stripe Identity verification session id"
+    },
+    "coach_services": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "messaging",
+          "form_checks",
+          "weekly_programming",
+          "progress_checkins"
+        ]
+      },
+      "default": [
+        "messaging"
+      ],
+      "description": "Services included in this coach's subscription. Messaging is always on; the rest are optional but encouraged."
+    },
+    "coach_response_sla_hours": {
+      "type": "number",
+      "default": 48,
+      "description": "Coach's committed reply time for subscriber messages."
     }
   },
   "required": [

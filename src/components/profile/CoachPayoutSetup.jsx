@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Landmark, CheckCircle2, DollarSign, ShieldCheck } from "lucide-react";
+import CoachServiceEditor from "@/components/profile/CoachServiceEditor";
 
 const STATUS_LABEL = { none: "Not set up", pending: "In progress", complete: "Payouts active" };
 const ID_LABEL = { unverified: "Not verified", pending: "In review", verified: "ID verified", failed: "Failed — retry" };
@@ -134,9 +135,11 @@ export default function CoachPayoutSetup({ athlete, onUpdate }) {
           </button>
         </div>
         <p className="text-[10px] mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
-          Includes 1-on-1 messaging and personalized feedback for your subscribers.
+          Your rate for the 1-on-1 coaching service you offer subscribers.
         </p>
       </div>
+
+      <CoachServiceEditor athlete={athlete} onUpdate={onUpdate} />
     </div>
   );
 }
