@@ -18,6 +18,9 @@ import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import AdvancedStats from "@/components/analytics/AdvancedStats";
 import AccentColorPicker from "@/components/profile/AccentColorPicker";
 import MacroRecompute from "@/components/profile/MacroRecompute";
+import ManageSubscription from "@/components/profile/ManageSubscription";
+import DeleteAccountSection from "@/components/profile/DeleteAccountSection";
+import { Link } from "react-router-dom";
 import { ageFromDob } from "@/lib/macroEngine";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
@@ -384,6 +387,9 @@ export default function Profile() {
               </div>
             </div>
 
+            {/* Manage active subscription — plan, portal, cancel */}
+            <ManageSubscription />
+
             {/* Subscription */}
             {!isPremium &&
           <div className="rounded border-2 p-5 flex items-center justify-between" style={{ borderColor: 'var(--accent)', background: 'var(--theme-surface)' }}>
@@ -438,6 +444,13 @@ export default function Profile() {
                 <ChevronRight size={14} style={{ color: 'var(--theme-ink-soft)' }} />
               </button>
             </div>
+
+            {/* Delete account — two-step confirm */}
+            <DeleteAccountSection />
+
+            <p className="text-center text-xs pb-2">
+              <Link to="/aup" className="underline" style={{ color: 'var(--text-tertiary)' }}>Acceptable Use Policy</Link>
+            </p>
 
           </div>
         }

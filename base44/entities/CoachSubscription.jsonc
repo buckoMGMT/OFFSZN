@@ -21,6 +21,7 @@
       "type": "string",
       "enum": [
         "active",
+        "past_due",
         "canceled"
       ],
       "default": "active"

@@ -8,6 +8,11 @@ import PlayDiagram from "@/components/ui/PlayDiagram";
 import StampButton from "@/components/ui/StampButton";
 import GameDayHero from "@/components/feed/GameDayHero";
 import { StaggerList } from "@/lib/motion.jsx";
+import { track } from "@/lib/analytics";
+
+// Moderation decision (§3): media posts are held for review before public
+// visibility; text-only posts publish immediately with moderator post-review.
+const PRE_MODERATE_MEDIA = true;
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
@@ -54,7 +59,9 @@ export default function Feed() {
       likes: 0,
       liked_by: [],
       comments: [],
+      status: postImageUrl && PRE_MODERATE_MEDIA ? "pending" : "approved",
     });
+    track.postCreated({ type: "achievement" });
     setNewPost(""); setPostImageUrl(""); setShowCompose(false); setPosting(false);
     load();
   };
@@ -194,13 +201,24 @@ export default function Feed() {
           <StaggerList>
             {posts
               .filter(post => {
+                // Pending/rejected posts are visible only to their author — never a scary error.
+                const mine = post.athlete_id === athlete?.id;
+                if ((post.status || "approved") !== "approved" && !mine) return false;
                 if (feedFilter === "friends") {
-                  return (athlete?.friends || []).includes(post.athlete_id) || post.athlete_id === athlete?.id;
+                  return (athlete?.friends || []).includes(post.athlete_id) || mine;
                 }
                 return true;
               })
               .map(post => (
-                <PostCard key={post.id} post={post} currentAthleteId={athlete?.id} onUpdate={load} />
+                <div key={post.id} className="relative">
+                  {(post.status || "approved") === "pending" && post.athlete_id === athlete?.id && (
+                    <span className="absolute top-2 right-2 z-10 font-elite text-[8px] uppercase tracking-widest px-2 py-0.5 rounded"
+                      style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', color: 'var(--text-secondary)' }}>
+                      In review
+                    </span>
+                  )}
+                  <PostCard post={post} currentAthleteId={athlete?.id} onUpdate={load} />
+                </div>
               ))
             }
           </StaggerList>

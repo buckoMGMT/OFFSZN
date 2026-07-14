@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { base44 } from "@/api/base44Client";
+import { track } from "@/lib/analytics";
 import { PrimaryButton, SkipButton, Field } from "@/components/onboarding/OnboardingUI";
 
 export default function FirstAction({ athlete }) {
@@ -23,6 +24,8 @@ export default function FirstAction({ athlete }) {
       current_streak_days: 1,
       ...(parseFloat(weight) ? { weight_lbs: parseFloat(weight) } : {}),
     });
+    track.firstDailyLog(); // activation event — this IS their first-ever log
+    track.dailyLogCompleted({ streak_day: true });
     confetti({ particleCount: 120, spread: 75, origin: { y: 0.7 } });
     setDone(true);
     setSaving(false);

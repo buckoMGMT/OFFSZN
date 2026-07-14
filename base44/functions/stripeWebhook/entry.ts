@@ -49,6 +49,26 @@ Deno.serve(async (req) => {
           identity_status: 'verified', is_coach_verified: true,
         });
       }
+    } else if (event.type === 'invoice.payment_failed') {
+      const invoice = event.data.object;
+      if (invoice.subscription) {
+        const matches = await base44.asServiceRole.entities.CoachSubscription.filter({
+          stripe_subscription_id: invoice.subscription,
+        });
+        if (matches[0]) {
+          await base44.asServiceRole.entities.CoachSubscription.update(matches[0].id, { status: 'past_due' });
+        }
+      }
+    } else if (event.type === 'invoice.paid') {
+      const invoice = event.data.object;
+      if (invoice.subscription) {
+        const matches = await base44.asServiceRole.entities.CoachSubscription.filter({
+          stripe_subscription_id: invoice.subscription,
+        });
+        if (matches[0] && matches[0].status === 'past_due') {
+          await base44.asServiceRole.entities.CoachSubscription.update(matches[0].id, { status: 'active' });
+        }
+      }
     } else if (event.type === 'customer.subscription.deleted') {
       const sub = event.data.object;
       const matches = await base44.asServiceRole.entities.CoachSubscription.filter({

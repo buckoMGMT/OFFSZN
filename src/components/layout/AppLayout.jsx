@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import BottomNav from "@/components/layout/BottomNav";
 import EnvironmentLayer from "@/components/environment/EnvironmentLayer";
 import CoachSubSuccessToast from "@/components/monetization/CoachSubSuccessToast";
+import PastDueBanner from "@/components/monetization/PastDueBanner";
 
 export default function AppLayout() {
   /* iOS-native shell: full-bleed surface, content constrained to phone width,
@@ -23,6 +24,7 @@ export default function AppLayout() {
           zIndex: 1,
         }}
       >
+        <PastDueBanner />
         <Outlet />
       </div>
       <BottomNav />

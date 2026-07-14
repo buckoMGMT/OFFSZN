@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -7,21 +8,34 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AppLayout from '@/components/layout/AppLayout';
 import OnboardingGate from '@/components/OnboardingGate';
-import Feed from '@/pages/Feed';
-import Track from '@/pages/Track';
-import Playbook from '@/pages/Playbook';
-import Clans from '@/pages/Clans';
-import Profile from '@/pages/Profile';
-import Rewards from '@/pages/Rewards';
-import Onboarding from '@/pages/Onboarding';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import GeoBlocker from '@/components/GeoBlocker';
 import BrandMark from '@/components/BrandMark';
 import { MilestoneNotifierProvider } from '@/lib/MilestoneNotifier';
 import { initAccent } from '@/lib/accentColor';
 
+// Lazy page routes — nothing heavy loads on first paint (Lighthouse §6)
+const Feed = lazy(() => import('@/pages/Feed'));
+const Track = lazy(() => import('@/pages/Track'));
+const Playbook = lazy(() => import('@/pages/Playbook'));
+const Clans = lazy(() => import('@/pages/Clans'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const Rewards = lazy(() => import('@/pages/Rewards'));
+const Onboarding = lazy(() => import('@/pages/Onboarding'));
+const AUP = lazy(() => import('@/pages/AUP'));
+
 // Apply any saved custom accent before first paint
 initAccent();
+
+// Skeleton fallback — never a spinner
+const PageSkeleton = () => (
+  <div className="min-h-screen px-5 pt-14 space-y-4" style={{ background: 'var(--surface-0)', maxWidth: 480, margin: '0 auto' }}>
+    <div className="skeleton" style={{ width: '45%', height: 28 }} />
+    <div className="skeleton" style={{ width: '100%', height: 120, borderRadius: 'var(--r-lg)' }} />
+    <div className="skeleton" style={{ width: '100%', height: 80, borderRadius: 'var(--r-lg)' }} />
+    <div className="skeleton" style={{ width: '70%', height: 14 }} />
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -50,19 +64,22 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <Routes>
-      {/* Onboarding lives OUTSIDE AppLayout — no tab bar */}
-      <Route path="/onboarding" element={<Onboarding />} />
-      <Route element={<OnboardingGate><AppLayout /></OnboardingGate>}>
-        <Route path="/" element={<Feed />} />
-        <Route path="/track" element={<Track />} />
-        <Route path="/drills" element={<Playbook />} />
-        <Route path="/clans" element={<Clans />} />
-        <Route path="/rewards" element={<Rewards />} />
-        <Route path="/profile" element={<Profile />} />
-      </Route>
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <Suspense fallback={<PageSkeleton />}>
+      <Routes>
+        {/* Onboarding lives OUTSIDE AppLayout — no tab bar */}
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/aup" element={<AUP />} />
+        <Route element={<OnboardingGate><AppLayout /></OnboardingGate>}>
+          <Route path="/" element={<Feed />} />
+          <Route path="/track" element={<Track />} />
+          <Route path="/drills" element={<Playbook />} />
+          <Route path="/clans" element={<Clans />} />
+          <Route path="/rewards" element={<Rewards />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </Suspense>
   );
 };
 
