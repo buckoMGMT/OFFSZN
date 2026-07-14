@@ -73,12 +73,59 @@
           "starting_spot",
           "gain_muscle",
           "cut_weight",
+          "make_weight",
           "get_faster",
           "recruiting",
           "stay_ready"
         ]
       },
       "default": []
+    },
+    "biological_sex": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female",
+        "unspecified"
+      ],
+      "description": "Required input for the Mifflin-St Jeor BMR equation. Asked once, never displayed on profile."
+    },
+    "training_days_per_week": {
+      "type": "number",
+      "default": 4
+    },
+    "season_status": {
+      "type": "string",
+      "enum": [
+        "in_season",
+        "pre_season",
+        "off_season"
+      ],
+      "default": "off_season"
+    },
+    "equipment_access": {
+      "type": "string",
+      "enum": [
+        "full_gym",
+        "home_gym",
+        "bodyweight_only"
+      ],
+      "default": "full_gym"
+    },
+    "has_limitations": {
+      "type": "boolean",
+      "default": false
+    },
+    "limitations_note": {
+      "type": "string"
+    },
+    "bmr_calories": {
+      "type": "number",
+      "description": "Computed. Stored so targets can be recomputed on weight change."
+    },
+    "tdee_calories": {
+      "type": "number",
+      "description": "Computed BMR \u00d7 activity factor."
     },
     "water_goal_oz": {
       "type": "number",
@@ -227,6 +274,47 @@
       "type": "number",
       "default": 48,
       "description": "Coach's committed reply time for subscriber messages."
+    },
+    "coach_bio": {
+      "type": "string",
+      "description": "Their storefront. 300 char cap."
+    },
+    "coach_specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "coach_years_experience": {
+      "type": "number"
+    },
+    "coach_levels_coached": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "youth",
+          "middle_school",
+          "high_school",
+          "college",
+          "semi_pro",
+          "pro",
+          "private"
+        ]
+      },
+      "default": []
+    },
+    "coach_certifications": {
+      "type": "string"
+    },
+    "coach_profile_complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "minor_conduct_agreed_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [

@@ -8,6 +8,7 @@ import CoachProfileSheet from "@/components/playbook/CoachProfileSheet";
 import CoachPurchaseSheet from "@/components/monetization/CoachPurchaseSheet";
 import ExploreVideoSheet from "@/components/playbook/ExploreVideoSheet";
 import useSubscriptions from "@/lib/useSubscriptions";
+import isCoachDiscoverable from "@/lib/coachGate";
 
 const SPORT_THUMBS = {
   football: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&q=80",
@@ -89,6 +90,8 @@ export default function ExploreGrid({ programs, sportFilter, isPremium, athlete,
   }, []);
 
   let filteredVideos = videos.filter(v =>
+    // Coach gate: undiscoverable coaches (unverified / <3 drills / incomplete storefront) stay private
+    (!authors[v.athlete_id] || isCoachDiscoverable(authors[v.athlete_id])) &&
     (sportFilter === "All" || (v.sport || "").toLowerCase() === sportFilter.toLowerCase()) &&
     (priceFilter === "all" || (priceFilter === "paid" ? v.price_usd > 0 : !(v.price_usd > 0))) &&
     (difficultyFilter === "all" || (v.difficulty || "").toLowerCase() === difficultyFilter)

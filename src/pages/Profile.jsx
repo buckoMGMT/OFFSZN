@@ -17,6 +17,8 @@ import AvatarUpload from "@/components/profile/AvatarUpload";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import AdvancedStats from "@/components/analytics/AdvancedStats";
 import AccentColorPicker from "@/components/profile/AccentColorPicker";
+import MacroRecompute from "@/components/profile/MacroRecompute";
+import { ageFromDob } from "@/lib/macroEngine";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -47,8 +49,14 @@ export default function Profile() {
   const [units, setUnits] = useState(() => localStorage.getItem('pb_units') || 'imperial');
   const [privacy, setPrivacy] = useState(() => localStorage.getItem('pb_privacy') || 'public');
   const [showPaywall, setShowPaywall] = useState(false);
+  const [isMinorUser, setIsMinorUser] = useState(false);
 
-
+  useEffect(() => {
+    base44.auth.me().then((me) => {
+      const age = ageFromDob(me?.date_of_birth);
+      setIsMinorUser(age !== null && age < 18);
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     base44.entities.Athlete.list("-created_date", 1).then((list) => {
@@ -243,6 +251,7 @@ export default function Profile() {
 
         {activeSection === "goals" &&
         <div className="space-y-3 mt-3">
+            <MacroRecompute athlete={athlete} onUpdate={(a) => {setAthlete(a);setForm(a);}} />
             <div className="rounded border p-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Macro Goals</p>
               {[
@@ -268,7 +277,8 @@ export default function Profile() {
             <div className="rounded border p-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Body Goals</p>
               {[
-            { label: "Target Weight", field: "goal_weight_lbs", unit: "lbs" },
+            // No goal-weight field for minors — performance framing only.
+            ...(isMinorUser ? [] : [{ label: "Target Weight", field: "goal_weight_lbs", unit: "lbs" }]),
             { label: "Weekly Budget", field: "weekly_budget_usd", unit: "$" }].
             map(({ label, field, unit }) =>
             <div key={field} className="flex items-center justify-between">
