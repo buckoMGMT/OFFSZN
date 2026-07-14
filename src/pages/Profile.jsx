@@ -22,6 +22,7 @@ import ManageSubscription from "@/components/profile/ManageSubscription";
 import DeleteAccountSection from "@/components/profile/DeleteAccountSection";
 import { Link } from "react-router-dom";
 import { ageFromDob } from "@/lib/macroEngine";
+import { validate, goalsSchema } from "@/lib/validators";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -70,8 +71,14 @@ export default function Profile() {
     });
   }, []);
 
+  const [goalsError, setGoalsError] = useState(null);
+
   const save = async () => {
     if (!athlete) return;
+    // §5 zod: goal fields bounded before any write
+    const g = validate(goalsSchema, form);
+    if (g.error) { setGoalsError(g.error); return; }
+    setGoalsError(null);
     setSaving(true);
     const updated = await base44.entities.Athlete.update(athlete.id, form);
     setAthlete(updated);
@@ -257,6 +264,7 @@ export default function Profile() {
             <MacroRecompute athlete={athlete} onUpdate={(a) => {setAthlete(a);setForm(a);}} />
             <div className="rounded border p-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Macro Goals</p>
+              {goalsError && <p className="text-xs" style={{ color: 'var(--negative)' }}>{goalsError}</p>}
               {[
             { label: "Daily Calories", field: "goal_calories", unit: "kcal" },
             { label: "Protein", field: "goal_protein_g", unit: "g" },

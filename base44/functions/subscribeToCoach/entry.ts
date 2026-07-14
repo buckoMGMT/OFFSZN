@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
         },
       },
       customer_email: user.email,
-      success_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}coach_sub=success&coach_name=${encodeURIComponent(coach.display_name)}&coach_sla=${coach.coach_response_sla_hours || 48}`,
+      success_url: `${new URL(returnUrl).origin}/coach/${coach.id}/subscribed?price=${price}&coach_name=${encodeURIComponent(coach.display_name)}&sid={CHECKOUT_SESSION_ID}`,
       cancel_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}coach_sub=cancel`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),

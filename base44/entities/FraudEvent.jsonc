@@ -1,19 +1,63 @@
-// base44/entities/FraudEvent.jsonc
 {
   "name": "FraudEvent",
   "type": "object",
   "title": "Fraud Event",
-  "description": "Audit log written by the Fraud & Security Guard agent. Read by the human trust-and-safety review queue.",
+  "description": "Audit log written by the Fraud & Security Guard agent and the user-report intake. Read by the human trust-and-safety review queue.",
   "properties": {
-    "athlete_id": { "type": "string" },
+    "athlete_id": {
+      "type": "string"
+    },
     "event_type": {
       "type": "string",
-      "enum": ["velocity_anomaly", "impossible_geo", "duplicate_device", "scrape_pattern", "point_exploit"]
+      "enum": [
+        "velocity_anomaly",
+        "impossible_geo",
+        "duplicate_device",
+        "scrape_pattern",
+        "point_exploit",
+        "user_report"
+      ]
     },
-    "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
-    "evidence": { "type": "object" },
-    "action_taken": { "type": "string", "enum": ["logged", "flagged", "throttled", "suspended"] },
-    "reviewed_by_human": { "type": "boolean", "default": false }
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "action_taken": {
+      "type": "string",
+      "enum": [
+        "logged",
+        "flagged",
+        "throttled",
+        "suspended",
+        "dismissed",
+        "content_removed",
+        "escalated"
+      ]
+    },
+    "reviewed_by_human": {
+      "type": "boolean",
+      "default": false
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Email of the reviewer who actioned this event."
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
   },
-  "required": ["athlete_id", "event_type", "severity"]
+  "required": [
+    "athlete_id",
+    "event_type",
+    "severity"
+  ]
 }

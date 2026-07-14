@@ -33,6 +33,14 @@
         "resolved"
       ],
       "default": "pending"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Email of the reviewer who actioned this report."
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [

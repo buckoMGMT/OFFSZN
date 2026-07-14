@@ -9,6 +9,7 @@ import StampButton from "@/components/ui/StampButton";
 import GameDayHero from "@/components/feed/GameDayHero";
 import { StaggerList } from "@/lib/motion.jsx";
 import { track } from "@/lib/analytics";
+import { validate, postSchema } from "@/lib/validators";
 
 // Moderation decision (§3): media posts are held for review before public
 // visibility; text-only posts publish immediately with moderator post-review.
@@ -23,6 +24,7 @@ export default function Feed() {
   const [postImageUrl, setPostImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [composeError, setComposeError] = useState(null);
   const [feedFilter, setFeedFilter] = useState("all");
 
   const load = useCallback(async () => {
@@ -47,14 +49,18 @@ export default function Feed() {
   };
 
   const submitPost = async () => {
-    if (!newPost.trim() || !athlete) return;
+    if (!athlete) return;
+    // §5 zod: ≤2000 chars, at least text or media, trimmed + control chars stripped
+    const r = validate(postSchema, { content: newPost, image_url: postImageUrl || undefined });
+    if (r.error) { setComposeError(r.error); return; }
+    setComposeError(null);
     setPosting(true);
     await base44.entities.SocialPost.create({
       athlete_id: athlete.id,
       athlete_name: athlete.display_name,
       athlete_avatar: athlete.avatar_url,
       type: "achievement",
-      content: newPost.trim(),
+      content: r.value.content,
       image_url: postImageUrl || undefined,
       likes: 0,
       liked_by: [],
@@ -125,8 +131,9 @@ export default function Feed() {
                   className="input-base resize-none"
                   style={{ height: 80, padding: '12px 16px', minHeight: 'auto', fontSize: 'var(--text-sm)' }}
                   placeholder="What's your win today?"
+                  maxLength={2000}
                   value={newPost}
-                  onChange={e => setNewPost(e.target.value)}
+                  onChange={e => { setNewPost(e.target.value); setComposeError(null); }}
                   autoFocus
                 />
                 <div className="flex gap-2">
@@ -137,6 +144,7 @@ export default function Feed() {
                   </label>
                 </div>
                 {postImageUrl && <img src={postImageUrl} alt="preview" className="w-full rounded object-cover max-h-40" />}
+                {composeError && <p className="text-xs" style={{ color: 'var(--negative)' }}>{composeError}</p>}
                 <div className="flex gap-2">
                   <button onClick={() => { setShowCompose(false); setPostImageUrl(""); }}
                     className="flex-1 py-2 rounded font-elite text-xs uppercase" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>

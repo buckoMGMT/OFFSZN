@@ -3,7 +3,7 @@ import { useState } from "react";
 import { X, BadgeCheck, Eye, Play, BellRing, BellPlus, Flag } from "lucide-react";
 import PricePill from "@/components/monetization/PricePill";
 import CoachServiceSection from "@/components/playbook/CoachServiceSection";
-import ReportCoachSheet from "@/components/playbook/ReportCoachSheet";
+import ReportSheet from "@/components/safety/ReportSheet";
 
 function fmt(n) {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
@@ -94,7 +94,7 @@ export default function CoachProfileSheet({ open, onClose, coach, videos = [], o
             <Flag size={10} /> Report this coach
           </button>
         </div>
-        <ReportCoachSheet open={showReport} onClose={() => setShowReport(false)} coach={coach} />
+        <ReportSheet open={showReport} onClose={() => setShowReport(false)} targetType="coach" targetId={coach.id} targetName={coach.display_name} />
       </div>
     </div>
   );

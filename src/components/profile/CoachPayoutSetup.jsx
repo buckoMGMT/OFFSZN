@@ -3,6 +3,7 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Landmark, CheckCircle2, DollarSign, ShieldCheck } from "lucide-react";
 import CoachServiceEditor from "@/components/profile/CoachServiceEditor";
+import { validate, coachPriceSchema } from "@/lib/validators";
 
 const STATUS_LABEL = { none: "Not set up", pending: "In progress", complete: "Payouts active" };
 const ID_LABEL = { unverified: "Not verified", pending: "In review", verified: "ID verified", failed: "Failed — retry" };
@@ -50,11 +51,16 @@ export default function CoachPayoutSetup({ athlete, onUpdate }) {
     setIdBusy(false);
   };
 
+  const [priceError, setPriceError] = useState(null);
+
   const savePrice = async () => {
-    const p = parseFloat(price);
-    if (!p || p <= 0) return;
-    await base44.entities.Athlete.update(athlete.id, { coach_sub_price_usd: p });
-    onUpdate?.({ ...athlete, coach_sub_price_usd: p });
+    // §5 zod: $0–500, max 2 decimals — inline error, never a browser alert
+    const r = validate(coachPriceSchema, price);
+    if (r.error) { setPriceError(r.error); return; }
+    if (!r.value || r.value <= 0) { setPriceError("Enter a price above $0"); return; }
+    setPriceError(null);
+    await base44.entities.Athlete.update(athlete.id, { coach_sub_price_usd: r.value });
+    onUpdate?.({ ...athlete, coach_sub_price_usd: r.value });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -128,12 +134,13 @@ export default function CoachPayoutSetup({ athlete, onUpdate }) {
           <div className="relative flex-1">
             <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-tertiary)' }} />
             <input type="number" min="1" step="1" className="input-base" style={{ minHeight: 44, paddingLeft: 32 }}
-              placeholder="e.g. 20" value={price} onChange={e => setPrice(e.target.value)} />
+              placeholder="e.g. 20" value={price} onChange={e => { setPrice(e.target.value); setPriceError(null); }} />
           </div>
           <button onClick={savePrice} className="btn-secondary" style={{ minHeight: 44 }}>
             {saved ? "Saved ✓" : "Save"}
           </button>
         </div>
+        {priceError && <p className="text-xs mt-1.5" style={{ color: 'var(--negative)' }}>{priceError}</p>}
         <p className="text-[10px] mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
           Your rate for the 1-on-1 coaching service you offer subscribers.
         </p>

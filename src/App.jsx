@@ -23,6 +23,9 @@ const Profile = lazy(() => import('@/pages/Profile'));
 const Rewards = lazy(() => import('@/pages/Rewards'));
 const Onboarding = lazy(() => import('@/pages/Onboarding'));
 const AUP = lazy(() => import('@/pages/AUP'));
+const Review = lazy(() => import('@/pages/Review'));
+const SubscriptionSuccess = lazy(() => import('@/pages/SubscriptionSuccess'));
+const CoachSubscribed = lazy(() => import('@/pages/CoachSubscribed'));
 
 // Apply any saved custom accent before first paint
 initAccent();
@@ -69,6 +72,10 @@ const AuthenticatedApp = () => {
         {/* Onboarding lives OUTSIDE AppLayout — no tab bar */}
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/aup" element={<AUP />} />
+        {/* /review is gated SERVER-SIDE in the reviewQueue function — non-admins get 403 */}
+        <Route path="/review" element={<Review />} />
+        <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+        <Route path="/coach/:id/subscribed" element={<CoachSubscribed />} />
         <Route element={<OnboardingGate><AppLayout /></OnboardingGate>}>
           <Route path="/" element={<Feed />} />
           <Route path="/track" element={<Track />} />

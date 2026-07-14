@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { computeTargets, ageFromDob } from "@/lib/macroEngine";
+import { validate, onboardingSchema } from "@/lib/validators";
 import { ProgressBar, StepShell, PrimaryButton, SkipButton, Chip, Field } from "@/components/onboarding/OnboardingUI";
 import BuildMoment from "@/components/onboarding/BuildMoment";
 import FirstAction from "@/components/onboarding/FirstAction";
@@ -185,8 +186,18 @@ export default function AthletePath({ dob, isMinor }) {
           <div className="flex flex-wrap gap-2 mb-6">
             {DAYS.map(([l, v]) => <Chip key={l} selected={f.training_days === v} onClick={() => set("training_days", v)}>{l}</Chip>)}
           </div>
+          {error && <p className="text-sm mb-3" style={{ color: "var(--negative)" }}>{error}</p>}
           <div className="mt-auto">
-            <PrimaryButton onClick={next} disabled={!f.biological_sex || !f.weight_lbs || !f.height_ft}>Continue</PrimaryButton>
+            <PrimaryButton onClick={() => {
+              // §5 zod: weight 50–500, height 36–96 in, goal weight bounded
+              const heightIn = (parseInt(f.height_ft || 0, 10) * 12) + parseInt(f.height_in || 0, 10);
+              const r = validate(onboardingSchema, {
+                display_name: f.display_name, weight_lbs: f.weight_lbs,
+                height_inches: heightIn, goal_weight_lbs: f.goal_weight_lbs,
+              });
+              if (r.error) { setError(r.error); return; }
+              next();
+            }} disabled={!f.biological_sex || !f.weight_lbs || !f.height_ft}>Continue</PrimaryButton>
           </div>
         </StepShell>
       )}

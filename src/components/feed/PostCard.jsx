@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Trophy, Flame, Dumbbell, Zap } from "lucide-react";
+import { Heart, MessageCircle, Trophy, Flame, Dumbbell, Zap, MoreHorizontal, Flag } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { formatDistanceToNow } from "date-fns";
 import VideoPlayer from "@/components/feed/VideoPlayer";
+import ReportSheet from "@/components/safety/ReportSheet";
+import { validate, commentSchema } from "@/lib/validators";
 import { motion, useReducedMotion } from "framer-motion";
 
 // Typed post cards — every post no longer has the same visual weight.
@@ -34,7 +36,10 @@ function MacroChips({ content }) {
 export default function PostCard({ post, currentAthleteId, onUpdate }) {
   const [commenting, setCommenting] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [commentError, setCommentError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [report, setReport] = useState(null); // { type, commentIndex? }
 
   const reduceMotion = useReducedMotion();
   const config = typeConfig[post.type] || typeConfig.achievement;
@@ -59,13 +64,16 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
   };
 
   const handleComment = async () => {
-    if (!commentText.trim()) return;
+    // §5 zod: trim, strip control chars, ≤500, reject empty-after-trim
+    const r = validate(commentSchema, commentText);
+    if (r.error) { setCommentError(r.error); return; }
+    setCommentError(null);
     setLoading(true);
     await base44.entities.SocialPost.update(post.id, {
       comments: [...(post.comments || []), {
         author_id: currentAthleteId,
         author_name: "You",
-        text: commentText.trim(),
+        text: r.value,
         created_at: new Date().toISOString(),
       }],
     });
@@ -112,6 +120,22 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
         {isWin && (
           <span className="eyebrow">{config.label}</span>
         )}
+        {/* ⋯ menu — report intake on every post */}
+        <div className="relative">
+          <button onClick={() => setMenuOpen(!menuOpen)} className="p-1" style={{ color: 'var(--text-tertiary)' }}>
+            <MoreHorizontal size={16} />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-7 z-20 rounded overflow-hidden overlay-shadow"
+              style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', minWidth: 130 }}>
+              <button onClick={() => { setMenuOpen(false); setReport({ type: "post" }); }}
+                className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left"
+                style={{ color: 'var(--negative)' }}>
+                <Flag size={11} /> Report post
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Image */}
@@ -182,31 +206,54 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
       {/* Comments */}
       {commentCount > 0 && (
         <div className="px-4 pb-3 space-y-1.5 border-t pt-3" style={{ borderColor: 'var(--border-subtle)' }}>
-          {post.comments.slice(-2).map((c, i) => (
-            <p key={i} className="text-xs font-work" style={{ color: 'var(--text-secondary)' }}>
-              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{c.author_name} </span>
-              {c.text}
-            </p>
-          ))}
+          {post.comments.slice(-2).map((c, i) => {
+            const realIndex = post.comments.length - Math.min(2, post.comments.length) + i;
+            return (
+              <div key={i} className="flex items-start gap-2 group">
+                <p className="text-xs font-work flex-1" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{c.author_name} </span>
+                  {c.text}
+                </p>
+                {c.author_id !== currentAthleteId && (
+                  <button onClick={() => setReport({ type: "comment", commentIndex: realIndex })}
+                    className="flex-shrink-0 p-0.5" style={{ color: 'var(--text-tertiary)', opacity: 0.6 }} aria-label="Report comment">
+                    <Flag size={10} />
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {commenting && (
-        <div className="px-4 pb-4 flex gap-2">
-          <input
-            className="input-base flex-1"
-            style={{ minHeight: 40, fontSize: 'var(--text-sm)' }}
-            placeholder="Add a comment…"
-            value={commentText}
-            onChange={e => setCommentText(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleComment()}
-            autoFocus
-          />
-          <button onClick={handleComment} disabled={loading} className="btn-stamp">
-            Post
-          </button>
+        <div className="px-4 pb-4">
+          <div className="flex gap-2">
+            <input
+              className="input-base flex-1"
+              style={{ minHeight: 40, fontSize: 'var(--text-sm)' }}
+              placeholder="Add a comment…"
+              maxLength={500}
+              value={commentText}
+              onChange={e => { setCommentText(e.target.value); setCommentError(null); }}
+              onKeyDown={e => e.key === "Enter" && handleComment()}
+              autoFocus
+            />
+            <button onClick={handleComment} disabled={loading} className="btn-stamp">
+              Post
+            </button>
+          </div>
+          {commentError && <p className="text-xs mt-1.5" style={{ color: 'var(--negative)' }}>{commentError}</p>}
         </div>
       )}
+
+      <ReportSheet
+        open={!!report}
+        onClose={() => setReport(null)}
+        targetType={report?.type}
+        targetId={post.id}
+        commentIndex={report?.commentIndex}
+      />
     </motion.div>
   );
 }

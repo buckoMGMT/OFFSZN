@@ -16,7 +16,8 @@
         "milestone_views",
         "payout",
         "streak_risk",
-        "clan_challenge"
+        "clan_challenge",
+        "moderation"
       ]
     },
     "title": {

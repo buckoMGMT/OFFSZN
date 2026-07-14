@@ -1,8 +1,11 @@
 // Bottom sheet video player for explore-grid drills.
-import { X, BadgeCheck } from "lucide-react";
+import { useState } from "react";
+import { X, BadgeCheck, Flag } from "lucide-react";
 import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
+import ReportSheet from "@/components/safety/ReportSheet";
 
 export default function ExploreVideoSheet({ open, onClose, video, author }) {
+  const [showReport, setShowReport] = useState(false);
   if (!open || !video) return null;
   return (
     <div className="fixed inset-0 z-[110] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
@@ -26,6 +29,12 @@ export default function ExploreVideoSheet({ open, onClose, video, author }) {
         </div>
         {video.description && <p className="font-work text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>{video.description}</p>}
         <ProtectedVideoPlayer url={video.video_url} />
+        <button onClick={() => setShowReport(true)}
+          className="w-full flex items-center justify-center gap-1.5 mt-4 py-2 font-elite text-[9px] uppercase tracking-widest"
+          style={{ color: 'var(--text-tertiary)' }}>
+          <Flag size={10} /> Report this video
+        </button>
+        <ReportSheet open={showReport} onClose={() => setShowReport(false)} targetType="video" targetId={video.id} />
       </div>
     </div>
   );
