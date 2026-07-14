@@ -217,10 +217,17 @@ export default function Rewards() {
           </div>
         </div>
 
-        {/* Progress to next gift card */}
-        <div className="mb-3">
-          <PointsBar current={points} target={10000} label="Progress to $5 Gift Card" />
-        </div>
+        {/* Progress to next gift card — target pulled from live store data, never hardcoded */}
+        {(() => {
+          const cheapestCard = items
+            .filter(i => i.type === "gift_card")
+            .sort((a, b) => a.points_required - b.points_required)[0];
+          return cheapestCard ? (
+            <div className="mb-3">
+              <PointsBar current={points} target={cheapestCard.points_required} label={`Progress to ${cheapestCard.name.match(/\$\d+/)?.[0] || "$5"} Gift Card`} />
+            </div>
+          ) : null;
+        })()}
 
         {/* Tabs */}
         <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
@@ -320,7 +327,7 @@ export default function Rewards() {
           <div className="space-y-4">
             <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <h2 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>The Point Economy</h2>
-              <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Consistent daily effort adds up. A $5 gift card takes ~90 days of active use.</p>
+              <p className="font-work text-xs mb-4" style={{ color: 'var(--theme-ink-soft)' }}>Consistent daily effort adds up. A $5 gift card takes ~4 months of consistent daily effort.</p>
               <div className="space-y-3">
                 {DAILY_BREAKDOWN.map((d, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b" style={{ borderColor: 'var(--theme-border)' }}>
