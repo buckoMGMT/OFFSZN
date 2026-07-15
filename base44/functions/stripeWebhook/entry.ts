@@ -16,7 +16,14 @@ Deno.serve(async (req) => {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
-      const { subscriber_athlete_id, coach_athlete_id } = session.metadata || {};
+      const { subscriber_athlete_id, coach_athlete_id, pass, athlete_id } = session.metadata || {};
+      // ── ALL-SZN Pass: grant premium tier instantly ──
+      if (pass === 'all_szn' && athlete_id) {
+        await base44.asServiceRole.entities.Athlete.update(athlete_id, {
+          subscription_tier: 'premium',
+          pass_subscription_id: session.subscription,
+        });
+      }
       if (subscriber_athlete_id && coach_athlete_id) {
         const existing = await base44.asServiceRole.entities.CoachSubscription.filter({
           subscriber_athlete_id, coach_athlete_id,
@@ -71,6 +78,12 @@ Deno.serve(async (req) => {
       }
     } else if (event.type === 'customer.subscription.deleted') {
       const sub = event.data.object;
+      // ── ALL-SZN Pass canceled: downgrade to free ──
+      if (sub.metadata?.pass === 'all_szn' && sub.metadata?.athlete_id) {
+        await base44.asServiceRole.entities.Athlete.update(sub.metadata.athlete_id, {
+          subscription_tier: 'free', pass_subscription_id: null,
+        });
+      }
       const matches = await base44.asServiceRole.entities.CoachSubscription.filter({
         stripe_subscription_id: sub.id,
       });

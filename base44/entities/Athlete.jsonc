@@ -143,6 +143,10 @@
       ],
       "default": "free"
     },
+    "pass_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription id for the ALL-SZN Pass. Set by stripeWebhook on purchase, cleared on cancellation."
+    },
     "role": {
       "type": "string",
       "enum": [

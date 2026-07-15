@@ -1,8 +1,10 @@
 // All-SZN Pass paywall sheet — the canonical Pass surface.
 // Golden Rule: the Pass unlocks the platform, never coach-priced content.
 // Confirmed benefits only — do not add rows without owner sign-off.
+import { useState } from "react";
 import { X, Check } from "lucide-react";
 import PricingFAQ from "@/components/monetization/PricingFAQ";
+import { base44 } from "@/api/base44Client";
 
 const ROWS = [
   { label: "Daily tracker — macros, calories, weight", free: true },
@@ -27,6 +29,27 @@ const Mark = ({ yes }) => yes
   : <span style={{ color: 'var(--text-tertiary)' }}>—</span>;
 
 export default function PassPaywallSheet({ open, onClose }) {
+  const [buying, setBuying] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleBuy = async () => {
+    if (window.self !== window.top) {
+      setError("Checkout only works from the published app — open your app in its own tab.");
+      return;
+    }
+    setBuying(true);
+    setError("");
+    try {
+      const res = await base44.functions.invoke("subscribeToPass", { returnUrl: window.location.href });
+      if (res.data?.url) window.location.href = res.data.url;
+      else setError(res.data?.error || "Couldn't start checkout. Try again.");
+    } catch (e) {
+      setError(e?.response?.data?.error || "Couldn't start checkout. Try again.");
+    } finally {
+      setBuying(false);
+    }
+  };
+
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
@@ -79,7 +102,10 @@ export default function PassPaywallSheet({ open, onClose }) {
             Auto-renews monthly · Cancel anytime in Settings ·{' '}
             <button className="underline" style={{ color: 'var(--text-tertiary)' }}>Restore purchases</button>
           </p>
-          <button className="btn-primary w-full mb-6">Get the All-SZN Pass</button>
+          {error && <p className="text-xs text-center mb-2" style={{ color: 'var(--negative)' }}>{error}</p>}
+          <button className="btn-primary w-full mb-6" onClick={handleBuy} disabled={buying}>
+            {buying ? "Opening checkout…" : "Get the All-SZN Pass"}
+          </button>
 
           <p className="eyebrow mb-2">Questions</p>
           <PricingFAQ />
