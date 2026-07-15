@@ -22,6 +22,7 @@
         "cross_country",
         "golf",
         "athlete",
+        "general_fitness",
         "other"
       ]
     },
@@ -76,10 +77,22 @@
           "make_weight",
           "get_faster",
           "recruiting",
-          "stay_ready"
+          "stay_ready",
+          "get_stronger",
+          "general_health",
+          "conditioning"
         ]
       },
       "default": []
+    },
+    "experience_level": {
+      "type": "string",
+      "enum": [
+        "new",
+        "some",
+        "experienced"
+      ],
+      "description": "General-fitness path only: training experience self-report."
     },
     "biological_sex": {
       "type": "string",

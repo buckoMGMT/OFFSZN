@@ -25,6 +25,7 @@ const Onboarding = lazy(() => import('@/pages/Onboarding'));
 const AUP = lazy(() => import('@/pages/AUP'));
 const Review = lazy(() => import('@/pages/Review'));
 const SubscriptionSuccess = lazy(() => import('@/pages/SubscriptionSuccess'));
+const Studio = lazy(() => import('@/pages/Studio'));
 const CoachSubscribed = lazy(() => import('@/pages/CoachSubscribed'));
 
 // Apply any saved custom accent before first paint
@@ -82,6 +83,7 @@ const AuthenticatedApp = () => {
           <Route path="/drills" element={<Playbook />} />
           <Route path="/clans" element={<Clans />} />
           <Route path="/rewards" element={<Rewards />} />
+          <Route path="/studio" element={<Studio />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
         <Route path="*" element={<PageNotFound />} />

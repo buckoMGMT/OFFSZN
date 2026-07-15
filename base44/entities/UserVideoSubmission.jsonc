@@ -11,12 +11,16 @@
     "description": {
       "type": "string"
     },
+    "caption": {
+      "type": "string",
+      "description": "Coach-authored, 500 char cap"
+    },
     "video_url": {
       "type": "string"
     },
     "thumbnail_url": {
       "type": "string",
-      "description": "Custom thumbnail image for the video"
+      "description": "Custom thumbnail image for the video. Runs through moderation before public."
     },
     "sport": {
       "type": "string",
@@ -33,6 +37,7 @@
         "tennis",
         "softball",
         "cross_country",
+        "general_fitness",
         "other"
       ]
     },
@@ -55,7 +60,21 @@
         "beginner",
         "intermediate",
         "advanced"
-      ]
+      ],
+      "default": "intermediate"
+    },
+    "equipment_needed": {
+      "type": "string",
+      "enum": [
+        "full_gym",
+        "home_gym",
+        "bodyweight_only"
+      ],
+      "default": "full_gym"
+    },
+    "is_free": {
+      "type": "boolean",
+      "default": false
     },
     "muscle_groups": {
       "type": "array",
@@ -89,6 +108,18 @@
       "default": 0
     },
     "views": {
+      "type": "number",
+      "default": 0
+    },
+    "view_count": {
+      "type": "number",
+      "default": 0
+    },
+    "save_count": {
+      "type": "number",
+      "default": 0
+    },
+    "completion_count": {
       "type": "number",
       "default": 0
     },

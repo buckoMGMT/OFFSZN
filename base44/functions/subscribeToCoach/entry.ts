@@ -27,6 +27,15 @@ Deno.serve(async (req) => {
     const price = coach.coach_sub_price_usd;
     if (!price || price <= 0) return Response.json({ error: 'This coach has not set a subscription price yet.' }, { status: 400 });
 
+    // Empty-library block (server-side): a coach with < 3 published drills
+    // cannot be subscribed to — matches the discoverability gate.
+    const publishedDrills = await base44.asServiceRole.entities.UserVideoSubmission.filter(
+      { athlete_id: coach.id, status: 'approved' }, '-created_date', 3,
+    );
+    if (publishedDrills.length < 3) {
+      return Response.json({ error: 'This coach is still building their drill library. Check back soon.' }, { status: 400 });
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{

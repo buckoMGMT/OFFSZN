@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Rss, BarChart2, BookOpen, Shield, User, Gift } from "lucide-react";
+import { Rss, BarChart2, BookOpen, Shield, User, Gift, Clapperboard } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 /* Floating dock: detached rounded pill, translucent blur, safe-area aware. */
-const tabs = [
+const baseTabs = [
   { icon: Rss,       label: "Field",   path: "/" },
   { icon: BarChart2, label: "Stats",   path: "/track" },
   { icon: BookOpen,  label: "Drills",  path: "/drills" },
@@ -13,6 +15,18 @@ const tabs = [
 
 export default function BottomNav() {
   const location = useLocation();
+  const [isCoach, setIsCoach] = useState(false);
+
+  useEffect(() => {
+    base44.entities.Athlete.list("-created_date", 1)
+      .then(l => setIsCoach(l[0]?.role === "coach"))
+      .catch(() => {});
+  }, []);
+
+  // Coaches get the Studio tab; Teams steps aside to keep the dock 6-wide.
+  const tabs = isCoach
+    ? [...baseTabs.slice(0, 3), { icon: Clapperboard, label: "Studio", path: "/studio" }, ...baseTabs.slice(4)]
+    : baseTabs;
 
   return (
     <nav

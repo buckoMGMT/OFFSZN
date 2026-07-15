@@ -1,11 +1,16 @@
 // Bottom sheet video player for explore-grid drills.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, BadgeCheck, Flag } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
 import ReportSheet from "@/components/safety/ReportSheet";
 
 export default function ExploreVideoSheet({ open, onClose, video, author }) {
   const [showReport, setShowReport] = useState(false);
+  // Server-side view counting, throttled to one per user per drill per day.
+  useEffect(() => {
+    if (open && video?.id) base44.functions.invoke("drillEngagement", { drillId: video.id, kind: "view" }).catch(() => {});
+  }, [open, video?.id]);
   if (!open || !video) return null;
   return (
     <div className="fixed inset-0 z-[110] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>

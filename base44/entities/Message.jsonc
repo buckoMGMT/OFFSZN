@@ -1,7 +1,7 @@
 {
   "name": "Message",
   "type": "object",
-  "description": "Direct message between a subscribed athlete and their coach.",
+  "description": "Direct message between a subscribed athlete and their coach. Created ONLY server-side via the dmGuard function (assertDmAllowed). Client writes are blocked by RLS.",
   "properties": {
     "sender_athlete_id": {
       "type": "string"
@@ -15,11 +15,56 @@
     "is_read": {
       "type": "boolean",
       "default": false
+    },
+    "sender_user_email": {
+      "type": "string",
+      "description": "Set server-side by dmGuard for RLS read scoping."
+    },
+    "recipient_user_email": {
+      "type": "string",
+      "description": "Set server-side by dmGuard for RLS read scoping."
+    },
+    "guardian_user_email": {
+      "type": "string",
+      "description": "Set when a minor is in the thread \u2014 gives the verified guardian read visibility via RLS."
+    },
+    "flagged_for_review": {
+      "type": "boolean",
+      "default": false,
+      "description": "Auto-set by dmGuard when off-platform contact patterns are detected. Flag + moderate, never auto-block."
+    },
+    "flag_reason": {
+      "type": "string"
     }
   },
   "required": [
     "sender_athlete_id",
     "recipient_athlete_id",
     "text"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.sender_user_email": "{{user.email}}"
+        },
+        {
+          "data.recipient_user_email": "{{user.email}}"
+        },
+        {
+          "data.guardian_user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

@@ -1,16 +1,29 @@
 // 1-on-1 chat between an athlete and their coach — the "human service" layer.
+// EVERY open runs a dmGuard check; EVERY send goes through dmGuard server-side
+// (assertDmAllowed). There is no direct Message write path from the client.
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { X, Send, BadgeCheck } from "lucide-react";
+import DmGate, { GuardianVisibilityBanner } from "@/components/messaging/DmGate";
 
 export default function CoachChatSheet({ open, onClose, me, other }) {
+  const [gate, setGate] = useState(null); // null = checking
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
   const endRef = useRef(null);
 
   useEffect(() => {
     if (!open || !me?.id || !other?.id) return;
+    setGate(null); setMessages([]); setSendError("");
+    base44.functions.invoke("dmGuard", { action: "check", otherAthleteId: other.id })
+      .then(r => setGate(r.data))
+      .catch(() => setGate({ allowed: false, reason: "error" }));
+  }, [open, me?.id, other?.id]);
+
+  useEffect(() => {
+    if (!open || !gate?.allowed || !me?.id || !other?.id) return;
     Promise.all([
       base44.entities.Message.filter({ sender_athlete_id: me.id, recipient_athlete_id: other.id }),
       base44.entities.Message.filter({ sender_athlete_id: other.id, recipient_athlete_id: me.id }),
@@ -26,7 +39,7 @@ export default function CoachChatSheet({ open, onClose, me, other }) {
       if (relevant) setMessages(prev => (prev.some(x => x.id === m.id) ? prev : [...prev, m]));
     });
     return unsubscribe;
-  }, [open, me?.id, other?.id]);
+  }, [open, gate?.allowed, me?.id, other?.id]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
@@ -35,11 +48,17 @@ export default function CoachChatSheet({ open, onClose, me, other }) {
   const send = async () => {
     const t = text.trim();
     if (!t || sending) return;
-    setSending(true);
-    const m = await base44.entities.Message.create({ sender_athlete_id: me.id, recipient_athlete_id: other.id, text: t });
-    setMessages(prev => (prev.some(x => x.id === m.id) ? prev : [...prev, m]));
-    setText("");
-    setSending(false);
+    setSending(true); setSendError("");
+    try {
+      const res = await base44.functions.invoke("dmGuard", { action: "send", otherAthleteId: other.id, text: t });
+      const m = res.data?.message;
+      if (m) setMessages(prev => (prev.some(x => x.id === m.id) ? prev : [...prev, m]));
+      setText("");
+    } catch (e) {
+      const reason = e?.response?.data?.reason;
+      if (reason) setGate({ allowed: false, reason }); // guard state changed mid-thread
+      else setSendError("Message didn't send. Try again.");
+    } finally { setSending(false); }
   };
 
   return (
@@ -64,45 +83,60 @@ export default function CoachChatSheet({ open, onClose, me, other }) {
           </button>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-          {messages.length === 0 && (
-            <p className="text-xs text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
-              Start the conversation — ask about form, programming, or goals.
-            </p>
-          )}
-          {messages.map(m => {
-            const mine = m.sender_athlete_id === me.id;
-            return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className="max-w-[80%] px-3 py-2 rounded-lg text-sm"
-                  style={mine
-                    ? { background: 'var(--accent)', color: 'var(--on-accent)', borderBottomRightRadius: 4 }
-                    : { background: 'var(--surface-2)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderBottomLeftRadius: 4 }}>
-                  {m.text}
-                </div>
-              </div>
-            );
-          })}
-          <div ref={endRef} />
-        </div>
+        {gate === null ? (
+          <div className="flex-1 p-4 space-y-2">
+            {[0, 1, 2].map(i => <div key={i} className="skeleton" style={{ height: 44 }} />)}
+          </div>
+        ) : !gate.allowed ? (
+          <DmGate reason={gate.reason} />
+        ) : (
+          <>
+            {/* §0/§5 — persistent, visible guardian-visibility banner on minor threads */}
+            {gate.minor_involved && <GuardianVisibilityBanner name={me.role === "coach" ? other.display_name : me.display_name} />}
 
-        {/* Composer */}
-        <div className="flex items-center gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
-          <input
-            className="input-base"
-            style={{ minHeight: 44, flex: 1 }}
-            placeholder="Message..."
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter") send(); }}
-          />
-          <button onClick={send} disabled={!text.trim() || sending}
-            className="flex-shrink-0 flex items-center justify-center rounded-full"
-            style={{ width: 44, height: 44, background: 'var(--accent)', color: 'var(--on-accent)', opacity: !text.trim() || sending ? 0.45 : 1 }}>
-            <Send size={16} />
-          </button>
-        </div>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+              {messages.length === 0 && (
+                <p className="text-xs text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
+                  Start the conversation — ask about form, programming, or goals.
+                </p>
+              )}
+              {messages.map(m => {
+                const mine = m.sender_athlete_id === me.id;
+                return (
+                  <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                    <div className="max-w-[80%] px-3 py-2 rounded-lg text-sm"
+                      style={mine
+                        ? { background: 'var(--accent)', color: 'var(--on-accent)', borderBottomRightRadius: 4 }
+                        : { background: 'var(--surface-2)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderBottomLeftRadius: 4 }}>
+                      {m.text}
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={endRef} />
+            </div>
+
+            {/* Composer */}
+            {sendError && <p className="text-xs px-4 pb-1" style={{ color: 'var(--negative)' }}>{sendError}</p>}
+            <div className="flex items-center gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+              <input
+                className="input-base"
+                style={{ minHeight: 44, flex: 1 }}
+                placeholder="Message..."
+                value={text}
+                maxLength={2000}
+                onChange={e => setText(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") send(); }}
+              />
+              <button onClick={send} disabled={!text.trim() || sending}
+                className="flex-shrink-0 flex items-center justify-center rounded-full"
+                style={{ width: 44, height: 44, background: 'var(--accent)', color: 'var(--on-accent)', opacity: !text.trim() || sending ? 0.45 : 1 }}>
+                <Send size={16} />
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -15,7 +15,8 @@
         "duplicate_device",
         "scrape_pattern",
         "point_exploit",
-        "user_report"
+        "user_report",
+        "off_platform_contact"
       ]
     },
     "severity": {

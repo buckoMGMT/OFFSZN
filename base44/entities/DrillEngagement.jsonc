@@ -1,0 +1,38 @@
+{
+  "name": "DrillEngagement",
+  "type": "object",
+  "description": "Per-user drill engagement record used to throttle view counting (one view per user per drill per day) and dedupe saves/completions. Written server-side by drillEngagement.",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "drill_id": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "view",
+        "save",
+        "complete"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "athlete_id",
+    "drill_id",
+    "kind"
+  ],
+  "rls": {
+    "read": true,
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

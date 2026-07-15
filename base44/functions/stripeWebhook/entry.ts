@@ -56,6 +56,13 @@ Deno.serve(async (req) => {
           identity_status: 'verified', is_coach_verified: true,
         });
       }
+    } else if (event.type === 'identity.verification_session.requires_input') {
+      // Identity check failed or needs retry — mark failed so the UI shows a retry path.
+      const session = event.data.object;
+      const athleteId = session.metadata?.athlete_id;
+      if (athleteId && session.last_error) {
+        await base44.asServiceRole.entities.Athlete.update(athleteId, { identity_status: 'failed' });
+      }
     } else if (event.type === 'invoice.payment_failed') {
       const invoice = event.data.object;
       if (invoice.subscription) {

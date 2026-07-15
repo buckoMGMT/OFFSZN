@@ -17,6 +17,9 @@ const SPORTS = [
 ];
 const GRADES = [["freshman", "Freshman"], ["sophomore", "Sophomore"], ["junior", "Junior"], ["senior", "Senior"], ["college", "College"]];
 const SEASONS = [["in_season", "In season"], ["pre_season", "Preseason"], ["off_season", "Off season — this is the OFFSZN. Let's build."]];
+// §1d — softened copy for general-fitness users; same field, same defaults.
+const SEASONS_SELF = [["in_season", "Training hard right now"], ["pre_season", "Ramping back up"], ["off_season", "Building a new routine"]];
+const EXPERIENCE = [["new", "New to training"], ["some", "Some experience"], ["experienced", "Experienced"]];
 const EQUIPMENT = [["full_gym", "Full weight room"], ["home_gym", "Home setup"], ["bodyweight_only", "Bodyweight only"]];
 const DAYS = [["1–2", 2], ["3", 3], ["4–5", 5], ["6", 6], ["7+", 7]];
 const SEXES = [["male", "Male"], ["female", "Female"], ["unspecified", "Prefer not to say"]];
@@ -29,9 +32,13 @@ export default function AthletePath({ dob, isMinor }) {
   const [error, setError] = useState(null);
   const [athlete, setAthlete] = useState(null);
   const [targets, setTargets] = useState(null);
+  // §1b — "sport" = existing athlete flow · "self" = general-fitness flow.
+  // SAFETY (§1c): mode changes content and copy ONLY — age gate, minor macro
+  // floors, and guardian gates apply identically on both paths.
+  const [mode, setMode] = useState("sport");
   const [f, setF] = useState({
     display_name: "", sport: "", position: "", grade: "",
-    season_status: "", goals: [],
+    season_status: "", goals: [], experience_level: "",
     biological_sex: "", weight_lbs: "", height_ft: "", height_in: "", goal_weight_lbs: "",
     training_days: 5, equipment_access: "", has_limitations: null, limitations_note: "",
   });
@@ -46,11 +53,22 @@ export default function AthletePath({ dob, isMinor }) {
     ["stay_ready", "Stay ready in the offseason"],
   ];
 
+  // General-fitness focus — minors never see a fat-loss option (§1c).
+  const FOCUS = [
+    ["gain_muscle", "Build muscle"],
+    ...(!isMinor ? [["cut_weight", "Lose fat"]] : []),
+    ["get_stronger", "Get stronger"],
+    ["general_health", "General health"],
+    ["conditioning", "Athletic conditioning"],
+  ];
+
   const next = () => {
-    base44.analytics.track({ eventName: "onboarding_step_completed", properties: { path: "athlete", step } });
-    setError(null); setStep((s) => s + 1);
+    base44.analytics.track({ eventName: "onboarding_step_completed", properties: { path: mode === "self" ? "general_fitness" : "athlete", step } });
+    setError(null);
+    // General-fitness: focus is captured at step 1 — skip the sport-goals step.
+    setStep((s) => (mode === "self" && s === 2 ? 4 : s + 1));
   };
-  const back = () => { setError(null); setStep((s) => Math.max(0, s - 1)); };
+  const back = () => { setError(null); setStep((s) => (mode === "self" && s === 4 ? 2 : Math.max(0, s - 1))); };
 
   async function saveAndBuild() {
     setSaving(true); setError(null);
@@ -74,6 +92,7 @@ export default function AthletePath({ dob, isMinor }) {
         // No goal-weight field for minors — never asked, never stored.
         goal_weight_lbs: !isMinor ? (parseFloat(f.goal_weight_lbs) || undefined) : undefined,
         training_days_per_week: f.training_days,
+        experience_level: mode === "self" ? (f.experience_level || undefined) : undefined,
         equipment_access: f.equipment_access || "full_gym",
         has_limitations: !!f.has_limitations,
         limitations_note: f.has_limitations ? f.limitations_note.trim() || undefined : undefined,
@@ -121,25 +140,54 @@ export default function AthletePath({ dob, isMinor }) {
       )}
 
       {step === 1 && (
-        <StepShell eyebrow="Step 4" title="YOUR SPORT." onBack={back} canBack>
-          <div className="grid grid-cols-2 gap-2 mb-5">
-            {SPORTS.map(([v, l]) => <Chip key={v} selected={f.sport === v} onClick={() => set("sport", v)}>{l}</Chip>)}
+        <StepShell eyebrow="Step 4" title={mode === "self" ? "WHAT ARE YOU TRAINING FOR?" : "YOUR SPORT."} onBack={back} canBack>
+          <div className="flex gap-2 mb-5">
+            <Chip selected={mode === "sport"} onClick={() => { setMode("sport"); if (f.sport === "general_fitness") setF((p) => ({ ...p, sport: "", goals: [] })); }}>
+              I play a sport
+            </Chip>
+            <Chip selected={mode === "self"} onClick={() => { setMode("self"); setF((p) => ({ ...p, sport: "general_fitness", position: "", grade: "", goals: [] })); }}>
+              I train for myself
+            </Chip>
           </div>
-          <Field label="Position (optional)" type="text" value={f.position} placeholder="e.g. WR, Point Guard, Setter"
-                 onChange={(e) => set("position", e.target.value)} />
-          <span className="block text-sm font-medium text-tx-secondary mb-2">Grade</span>
-          <div className="flex flex-wrap gap-2 mb-6">
-            {GRADES.map(([v, l]) => <Chip key={v} selected={f.grade === v} onClick={() => set("grade", v)}>{l}</Chip>)}
-          </div>
-          <div className="mt-auto"><PrimaryButton onClick={next} disabled={!f.sport}>Continue</PrimaryButton></div>
+          {mode === "sport" ? (
+            <>
+              <div className="grid grid-cols-2 gap-2 mb-5">
+                {SPORTS.map(([v, l]) => <Chip key={v} selected={f.sport === v} onClick={() => set("sport", v)}>{l}</Chip>)}
+              </div>
+              <Field label="Position (optional)" type="text" value={f.position} placeholder="e.g. WR, Point Guard, Setter"
+                     onChange={(e) => set("position", e.target.value)} />
+              <span className="block text-sm font-medium text-tx-secondary mb-2">Grade (optional)</span>
+              <div className="flex flex-wrap gap-2 mb-6">
+                {GRADES.map(([v, l]) => <Chip key={v} selected={f.grade === v} onClick={() => set("grade", f.grade === v ? "" : v)}>{l}</Chip>)}
+              </div>
+              <div className="mt-auto"><PrimaryButton onClick={next} disabled={!f.sport}>Continue</PrimaryButton></div>
+            </>
+          ) : (
+            <>
+              <span className="block text-sm font-medium text-tx-secondary mb-2">Primary focus — pick all that apply</span>
+              <div className="grid grid-cols-1 gap-2 mb-5">
+                {FOCUS.map(([v, l]) => (
+                  <Chip key={v} selected={f.goals.includes(v)}
+                        onClick={() => set("goals", f.goals.includes(v) ? f.goals.filter((g) => g !== v) : [...f.goals, v])}>
+                    {l}
+                  </Chip>
+                ))}
+              </div>
+              <span className="block text-sm font-medium text-tx-secondary mb-2">Experience</span>
+              <div className="flex flex-wrap gap-2 mb-6">
+                {EXPERIENCE.map(([v, l]) => <Chip key={v} selected={f.experience_level === v} onClick={() => set("experience_level", v)}>{l}</Chip>)}
+              </div>
+              <div className="mt-auto"><PrimaryButton onClick={next} disabled={f.goals.length === 0 || !f.experience_level}>Continue</PrimaryButton></div>
+            </>
+          )}
         </StepShell>
       )}
 
       {step === 2 && (
-        <StepShell eyebrow="Step 5" title="WHERE ARE YOU IN YOUR SZN?" onBack={back} canBack>
+        <StepShell eyebrow="Step 5" title={mode === "self" ? "WHERE'S YOUR ROUTINE AT?" : "WHERE ARE YOU IN YOUR SZN?"} onBack={back} canBack>
           <p className="text-tx-secondary text-sm mb-4">This changes your drill mix and training volume.</p>
           <div className="flex flex-col gap-2 mb-6">
-            {SEASONS.map(([v, l]) => <Chip key={v} selected={f.season_status === v} onClick={() => set("season_status", v)}>{l}</Chip>)}
+            {(mode === "self" ? SEASONS_SELF : SEASONS).map(([v, l]) => <Chip key={v} selected={f.season_status === v} onClick={() => set("season_status", v)}>{l}</Chip>)}
           </div>
           <div className="mt-auto"><PrimaryButton onClick={next} disabled={!f.season_status}>Continue</PrimaryButton></div>
         </StepShell>

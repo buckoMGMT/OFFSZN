@@ -11,6 +11,7 @@
       "enum": [
         "new_subscriber",
         "new_video",
+        "new_message",
         "video_purchased",
         "video_approved",
         "milestone_views",
