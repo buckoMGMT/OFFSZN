@@ -712,3 +712,29 @@ button::after {
 }
 .overflow-x-auto::-webkit-scrollbar,
 .overflow-x-scroll::-webkit-scrollbar { display: none; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STORE-READINESS §3 (final pass) — NATIVE-LIKE LAYOUTS
+───────────────────────────────────────────────────────────────────────────── */
+/* Momentum scrolling on every scroll container, not just .app-scroll */
+.overflow-y-auto, .overflow-y-scroll, .overflow-auto,
+.overflow-x-auto, .overflow-x-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* iOS zooms the viewport when a focused input's text is < 16px — never allow it.
+   max() keeps larger explicit sizes intact. */
+input, select, textarea {
+  font-size: max(16px, 1em);
+}
+
+/* Touch press states — hover doesn't exist on touch, so every interactive
+   element gets a visible pressed response instead. */
+@media (hover: none) {
+  button:active,
+  a:active,
+  [role="button"]:active {
+    opacity: 0.75;
+    transition: opacity 80ms var(--ease-out);
+  }
+}

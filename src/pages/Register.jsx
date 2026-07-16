@@ -24,7 +24,7 @@ const inputStyle = {
   height: 48,
   width: '100%',
   fontFamily: 'Work Sans, sans-serif',
-  fontSize: 14,
+  fontSize: 16, /* §3 — inputs < 16px trigger iOS focus zoom */
   outline: 'none',
 };
 

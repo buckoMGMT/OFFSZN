@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import KeepAliveOutlet from "@/components/layout/KeepAliveOutlet";
 import BottomNav from "@/components/layout/BottomNav";
 import TopBar from "@/components/layout/TopBar";
 import EnvironmentLayer from "@/components/environment/EnvironmentLayer";
@@ -27,7 +27,7 @@ export default function AppLayout() {
         }}
       >
         <PastDueBanner />
-        <Outlet />
+        <KeepAliveOutlet />
       </div>
       <BottomNav />
     </div>
