@@ -4,6 +4,7 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { X, Flag, ShieldCheck } from "lucide-react";
 import { validate, reportNoteSchema } from "@/lib/validators";
+import useSheetBack from "@/lib/useSheetBack";
 
 const REASONS = [
   ["inappropriate_sexual", "Inappropriate or sexual content"],
@@ -21,6 +22,9 @@ export default function ReportSheet({ open, onClose, targetType, targetId, targe
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+
+  // §4 — back gesture / hardware back dismisses this sheet first
+  useSheetBack(open, () => { setReason(null); setNote(""); setError(null); setDone(false); onClose?.(); });
 
   if (!open) return null;
 

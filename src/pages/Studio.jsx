@@ -8,6 +8,7 @@ import StudioOverview from "@/components/studio/StudioOverview";
 import StudioContent from "@/components/studio/StudioContent";
 import StudioSubscribersTab from "@/components/studio/StudioSubscribersTab";
 import StudioPayouts from "@/components/studio/StudioPayouts";
+import PullToRefresh from "@/components/layout/PullToRefresh";
 
 const TABS = [
   ["overview", "Overview"],
@@ -60,6 +61,7 @@ export default function Studio() {
 
   return (
     <div className="px-5 pt-14 pb-32" style={{ maxWidth: 480, margin: "0 auto" }}>
+      <PullToRefresh onRefresh={reload}>
       <h1 className="font-anton text-2xl uppercase mb-4" style={{ color: "var(--text-primary)" }}>Coach Studio</h1>
 
       <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-5 -mx-5 px-5">
@@ -86,6 +88,7 @@ export default function Studio() {
         </div>
       )}
       {tab === "payouts" && <StudioPayouts athlete={athlete} />}
+      </PullToRefresh>
     </div>
   );
 }

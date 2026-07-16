@@ -4,6 +4,7 @@ import { X, BadgeCheck, Eye, Play, BellRing, BellPlus, Flag } from "lucide-react
 import PricePill from "@/components/monetization/PricePill";
 import CoachServiceSection from "@/components/playbook/CoachServiceSection";
 import ReportSheet from "@/components/safety/ReportSheet";
+import useSheetBack from "@/lib/useSheetBack";
 
 function fmt(n) {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
@@ -13,6 +14,8 @@ function fmt(n) {
 
 export default function CoachProfileSheet({ open, onClose, coach, videos = [], onSelectVideo, isSubscribed, onToggleSubscribe }) {
   const [showReport, setShowReport] = useState(false);
+  // §4 — back gesture / hardware back dismisses this sheet first
+  useSheetBack(open, onClose);
   if (!open || !coach) return null;
   const totalViews = videos.reduce((s, v) => s + (v.views || 0), 0);
   return (

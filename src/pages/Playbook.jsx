@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Lock, Play, Clock, Target, Bookmark, BookmarkCheck, Plus, X, ListVideo } from "lucide-react";
 import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
@@ -12,6 +12,7 @@ import SubscriptionsTab from "@/components/playbook/SubscriptionsTab";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import PassRibbon from "@/components/monetization/PassRibbon";
+import PullToRefresh from "@/components/layout/PullToRefresh";
 
 const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming", "Lacrosse"];
 
@@ -67,29 +68,40 @@ export default function Playbook() {
   const [priceFilter, setPriceFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
 
-  useEffect(() => {
-    base44.entities.Athlete.list("-created_date", 1).then(list => {
-      const a = list[0] || null;
-      setAthlete(a);
-      if (a) {
-        base44.entities.SavedWorkout.filter({ athlete_id: a.id }).then(saved => setSavedIds(saved.map(s => s.program_id)));
-        base44.entities.Playlist.filter({ athlete_id: a.id }).then(setPlaylists);
-      }
-    });
+  const load = useCallback(async () => {
+    const list = await base44.entities.Athlete.list("-created_date", 1);
+    const a = list[0] || null;
+    setAthlete(a);
+    if (a) {
+      const [saved, pls] = await Promise.all([
+        base44.entities.SavedWorkout.filter({ athlete_id: a.id }),
+        base44.entities.Playlist.filter({ athlete_id: a.id }),
+      ]);
+      setSavedIds(saved.map(s => s.program_id));
+      setPlaylists(pls);
+    }
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const isPremium = athlete?.subscription_tier === "premium";
 
+  // §5 — optimistic save: UI flips immediately, server reconciles, rollback on failure
   const toggleSave = async (program, e) => {
     e.stopPropagation();
     if (!isPremium || !athlete) return;
-    if (savedIds.includes(program.id)) {
-      const saved = await base44.entities.SavedWorkout.filter({ athlete_id: athlete.id, program_id: program.id });
-      if (saved[0]) await base44.entities.SavedWorkout.delete(saved[0].id);
-      setSavedIds(prev => prev.filter(id => id !== program.id));
-    } else {
-      await base44.entities.SavedWorkout.create({ athlete_id: athlete.id, program_id: program.id });
-      setSavedIds(prev => [...prev, program.id]);
+    const wasSaved = savedIds.includes(program.id);
+    setSavedIds(prev => wasSaved ? prev.filter(id => id !== program.id) : [...prev, program.id]);
+    try {
+      if (wasSaved) {
+        const saved = await base44.entities.SavedWorkout.filter({ athlete_id: athlete.id, program_id: program.id });
+        if (saved[0]) await base44.entities.SavedWorkout.delete(saved[0].id);
+      } else {
+        await base44.entities.SavedWorkout.create({ athlete_id: athlete.id, program_id: program.id });
+      }
+    } catch {
+      // Roll back visibly on failure
+      setSavedIds(prev => wasSaved ? [...prev, program.id] : prev.filter(id => id !== program.id));
     }
   };
 
@@ -240,6 +252,7 @@ export default function Playbook() {
         )}
       </div>
 
+      <PullToRefresh onRefresh={load}>
       <div className="px-4 py-4">
         {tab === "explore" && (
           <>
@@ -334,6 +347,7 @@ export default function Playbook() {
           </div>
         )}
       </div>
+      </PullToRefresh>
 
       {/* Create Playlist Modal */}
       {showCreatePlaylist && (

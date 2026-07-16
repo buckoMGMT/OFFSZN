@@ -12,6 +12,7 @@ import { ThemeProvider } from '@/lib/ThemeContext';
 import GeoBlocker from '@/components/GeoBlocker';
 import BrandMark from '@/components/BrandMark';
 import { MilestoneNotifierProvider } from '@/lib/MilestoneNotifier';
+import AppScroll from '@/components/layout/AppScroll';
 import { initAccent } from '@/lib/accentColor';
 
 // Lazy page routes — nothing heavy loads on first paint (Lighthouse §6)
@@ -100,7 +101,9 @@ function App() {
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
-            <AuthenticatedApp />
+            <AppScroll>
+              <AuthenticatedApp />
+            </AppScroll>
           </Router>
           <Toaster />
         </QueryClientProvider>

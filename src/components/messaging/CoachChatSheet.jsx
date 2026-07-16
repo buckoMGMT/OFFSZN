@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { X, Send, BadgeCheck } from "lucide-react";
 import DmGate, { GuardianVisibilityBanner } from "@/components/messaging/DmGate";
+import useSheetBack from "@/lib/useSheetBack";
 
 export default function CoachChatSheet({ open, onClose, me, other }) {
   const [gate, setGate] = useState(null); // null = checking
@@ -13,6 +14,9 @@ export default function CoachChatSheet({ open, onClose, me, other }) {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
   const endRef = useRef(null);
+
+  // §4 — back gesture / hardware back dismisses this sheet first
+  useSheetBack(open, onClose);
 
   useEffect(() => {
     if (!open || !me?.id || !other?.id) return;

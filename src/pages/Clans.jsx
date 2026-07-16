@@ -8,6 +8,7 @@ import CoachCircle from "@/components/ui/CoachCircle";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import TeamRoster from "@/components/clans/TeamRoster";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
+import PullToRefresh from "@/components/layout/PullToRefresh";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "other"];
 const TYPES = ["high_school", "club", "college", "other"];
@@ -133,6 +134,7 @@ export default function Clans() {
         </div>
       </div>
 
+      <PullToRefresh onRefresh={load}>
       <div className="px-4 py-4">
         {/* My Clan Banner */}
         {myClan && (
@@ -265,6 +267,7 @@ export default function Clans() {
           </div>
         )}
       </div>
+      </PullToRefresh>
 
       {/* Create Modal */}
       {showCreate && (
@@ -288,16 +291,35 @@ export default function Clans() {
                   value={createForm[field]}
                   onChange={e => setCreateForm(p => ({ ...p, [field]: e.target.value }))} />
               ))}
-              <select className="w-full rounded px-4 py-3 text-sm font-work outline-none"
-                style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-                value={createForm.type} onChange={e => setCreateForm(p => ({ ...p, type: e.target.value }))}>
-                {TYPES.map(t => <option key={t} value={t}>{t.replace("_", " ").toUpperCase()}</option>)}
-              </select>
-              <select className="w-full rounded px-4 py-3 text-sm font-work outline-none"
-                style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-                value={createForm.sport} onChange={e => setCreateForm(p => ({ ...p, sport: e.target.value }))}>
-                {SPORTS.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
-              </select>
+              {/* §5 — app-styled pickers, never native <select> */}
+              <div>
+                <p className="eyebrow mb-2">Team Type</p>
+                <div className="flex flex-wrap gap-2">
+                  {TYPES.map(t => (
+                    <button key={t} onClick={() => setCreateForm(p => ({ ...p, type: t }))}
+                      className="px-3 py-2 rounded font-elite text-[10px] uppercase tracking-widest"
+                      style={createForm.type === t
+                        ? { background: 'var(--accent-subtle)', border: '1px solid var(--accent)', color: 'var(--text-primary)' }
+                        : { background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
+                      {t.replace("_", " ")}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="eyebrow mb-2">Sport</p>
+                <div className="flex flex-wrap gap-2">
+                  {SPORTS.map(s => (
+                    <button key={s} onClick={() => setCreateForm(p => ({ ...p, sport: s }))}
+                      className="px-3 py-2 rounded font-elite text-[10px] uppercase tracking-widest"
+                      style={createForm.sport === s
+                        ? { background: 'var(--accent-subtle)', border: '1px solid var(--accent)', color: 'var(--text-primary)' }
+                        : { background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <textarea className="w-full rounded px-4 py-3 text-sm font-work outline-none resize-none h-20"
                 style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
                 placeholder="Description (optional)"

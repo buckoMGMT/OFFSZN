@@ -644,3 +644,42 @@ html {
   60%  { transform: scale(0.97); }
   100% { transform: scale(1); opacity: 1; }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STORE-READINESS §1 — OVERSCROLL & SCROLL CONTAINMENT
+   Body NEVER scrolls. Scrolling happens only inside .app-scroll containers,
+   which contain their own bounce/pull so the browser chrome never leaks.
+───────────────────────────────────────────────────────────────────────────── */
+html, body {
+  overscroll-behavior: none;
+  height: 100%;
+  overflow: hidden;
+}
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+.app-scroll {
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STORE-READINESS §2 — SYSTEM GESTURES / SELECTION
+   No long-press callout, tap highlight, text selection, or image drag —
+   RE-ENABLED for genuine text inputs and anything marked .selectable.
+───────────────────────────────────────────────────────────────────────────── */
+* {
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+input, textarea, [contenteditable="true"], .selectable {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+img, a { -webkit-user-drag: none; user-drag: none; }

@@ -7,6 +7,7 @@ import PageLabel from "@/components/ui/PageLabel";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import StampButton from "@/components/ui/StampButton";
 import GameDayHero from "@/components/feed/GameDayHero";
+import PullToRefresh from "@/components/layout/PullToRefresh";
 import { StaggerList } from "@/lib/motion.jsx";
 import { track } from "@/lib/analytics";
 import { validate, postSchema } from "@/lib/validators";
@@ -112,6 +113,7 @@ export default function Feed() {
         </div>
       </div>
 
+      <PullToRefresh onRefresh={load}>
       <div className="px-5 py-4">
         {/* Game-day hero — the screenshot moment */}
         {feedFilter !== "clan" && <GameDayHero athlete={athlete} />}
@@ -232,6 +234,7 @@ export default function Feed() {
           </StaggerList>
         )}
       </div>
+      </PullToRefresh>
     </div>
   );
 }

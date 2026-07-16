@@ -41,11 +41,13 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [report, setReport] = useState(null); // { type, commentIndex? }
 
+  // §5 — optimistic like state: UI flips immediately, server reconciles
+  const [optimisticLike, setOptimisticLike] = useState(null); // { liked, count }
   const reduceMotion = useReducedMotion();
   const config = typeConfig[post.type] || typeConfig.achievement;
   const Icon = config.icon;
-  const liked = (post.liked_by || []).includes(currentAthleteId);
-  const likeCount = post.likes || 0;
+  const liked = optimisticLike ? optimisticLike.liked : (post.liked_by || []).includes(currentAthleteId);
+  const likeCount = optimisticLike ? optimisticLike.count : (post.likes || 0);
   const commentCount = (post.comments || []).length;
   const timeAgo = post.created_date
     ? formatDistanceToNow(new Date(post.created_date), { addSuffix: true })
@@ -57,10 +59,17 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
   const hasVideo = post.metric_value && post.metric_value.includes("http");
 
   const handleLike = async () => {
+    const wasLiked = liked;
     const likedBy = post.liked_by || [];
-    const newLikedBy = liked ? likedBy.filter(id => id !== currentAthleteId) : [...likedBy, currentAthleteId];
-    await base44.entities.SocialPost.update(post.id, { likes: newLikedBy.length, liked_by: newLikedBy });
-    onUpdate?.();
+    const newLikedBy = wasLiked ? likedBy.filter(id => id !== currentAthleteId) : [...likedBy, currentAthleteId];
+    // Optimistic: flip instantly, reconcile with server, roll back visibly on failure
+    setOptimisticLike({ liked: !wasLiked, count: newLikedBy.length });
+    try {
+      await base44.entities.SocialPost.update(post.id, { likes: newLikedBy.length, liked_by: newLikedBy });
+      onUpdate?.();
+    } catch {
+      setOptimisticLike({ liked: wasLiked, count: likedBy.length });
+    }
   };
 
   const handleComment = async () => {

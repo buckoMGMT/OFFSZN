@@ -5,6 +5,7 @@ import { useState } from "react";
 import { X, Check } from "lucide-react";
 import PricingFAQ from "@/components/monetization/PricingFAQ";
 import { base44 } from "@/api/base44Client";
+import useSheetBack from "@/lib/useSheetBack";
 
 const ROWS = [
   { label: "Daily tracker — macros, calories, weight", free: true },
@@ -31,6 +32,8 @@ const Mark = ({ yes }) => yes
 export default function PassPaywallSheet({ open, onClose }) {
   const [buying, setBuying] = useState(false);
   const [error, setError] = useState("");
+  // §4 — back gesture / hardware back dismisses this sheet first
+  useSheetBack(open, onClose);
 
   const handleBuy = async () => {
     if (window.self !== window.top) {

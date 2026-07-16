@@ -4,9 +4,12 @@ import { X, BadgeCheck, Flag } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
 import ReportSheet from "@/components/safety/ReportSheet";
+import useSheetBack from "@/lib/useSheetBack";
 
 export default function ExploreVideoSheet({ open, onClose, video, author }) {
   const [showReport, setShowReport] = useState(false);
+  // §4 — back gesture / hardware back dismisses this sheet first
+  useSheetBack(open, onClose);
   // Server-side view counting, throttled to one per user per drill per day.
   useEffect(() => {
     if (open && video?.id) base44.functions.invoke("drillEngagement", { drillId: video.id, kind: "view" }).catch(() => {});
