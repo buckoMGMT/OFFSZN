@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { MessageCircle, Star } from "lucide-react";
 import CoachChatSheet from "@/components/messaging/CoachChatSheet";
 import ServicesIncludedList from "@/components/playbook/ServicesIncludedList";
+import { toast } from "@/components/ui/use-toast";
 
 export default function CoachServiceSection({ coach }) {
   const [me, setMe] = useState(null);
@@ -30,16 +31,16 @@ export default function CoachServiceSection({ coach }) {
 
   const join = async () => {
     if (window.self !== window.top) {
-      alert("Checkout only works from the published app — open your app in its own tab to subscribe.");
+      toast({ variant: "destructive", title: "Checkout unavailable here", description: "Checkout only works from the published app — open your app in its own tab to subscribe." });
       return;
     }
     setBusy(true);
     try {
       const res = await base44.functions.invoke("subscribeToCoach", { coachAthleteId: coach.id, returnUrl: window.location.href });
       if (res.data?.url) { window.location.href = res.data.url; return; }
-      alert(res.data?.error || "Could not start checkout.");
+      toast({ variant: "destructive", title: "Checkout failed", description: res.data?.error || "Could not start checkout. Try again." });
     } catch (e) {
-      alert(e.response?.data?.error || "Could not start checkout.");
+      toast({ variant: "destructive", title: "Checkout failed", description: e.response?.data?.error || "Could not start checkout. Try again." });
     }
     setBusy(false);
   };

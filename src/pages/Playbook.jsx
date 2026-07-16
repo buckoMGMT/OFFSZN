@@ -56,8 +56,11 @@ function difficultyNum(d) {
 
 export default function Playbook() {
   const [athlete, setAthlete] = useState(null);
-  const [sportFilter, setSportFilter] = useState("All");
-  const [selected, setSelected] = useState(null);
+  const [sportFilter, setSportFilter] = useTabState("playbook.sport", "All");
+  // §4 — the open drill detail survives tab swaps: persist the id, resolve the object
+  const [selectedId, setSelectedId] = useTabState("playbook.selected", "");
+  const selected = selectedId ? PROGRAMS.find(p => String(p.id) === selectedId) || null : null;
+  const setSelected = (p) => setSelectedId(p ? String(p.id) : "");
   const [savedIds, setSavedIds] = useState([]);
   const [playlists, setPlaylists] = useState([]);
   const [tab, setTab] = useTabState("playbook.tab", "explore");
