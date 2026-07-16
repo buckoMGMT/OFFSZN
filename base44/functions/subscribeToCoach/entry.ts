@@ -27,6 +27,23 @@ Deno.serve(async (req) => {
     const price = coach.coach_sub_price_usd;
     if (!price || price <= 0) return Response.json({ error: 'This coach has not set a subscription price yet.' }, { status: 400 });
 
+    // §0 — minors need a verified guardian BEFORE any coach purchase.
+    // Live age from DOB, fail-safe: missing/bad DOB = treated as minor.
+    const dob = user.date_of_birth ? new Date(user.date_of_birth) : null;
+    let age = null;
+    if (dob && !Number.isNaN(dob.getTime())) {
+      const now = new Date();
+      age = now.getFullYear() - dob.getFullYear();
+      const m = now.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+    }
+    if (age === null || age < 18) {
+      const links = await base44.asServiceRole.entities.GuardianLink.filter({ minor_user_id: user.id, status: 'verified' });
+      if (!links[0]) {
+        return Response.json({ error: 'A verified parent or guardian must be linked to your account before subscribing to a coach.', reason: 'needs_guardian' }, { status: 403 });
+      }
+    }
+
     // Empty-library block (server-side): a coach with < 3 published drills
     // cannot be subscribed to — matches the discoverability gate.
     const publishedDrills = await base44.asServiceRole.entities.UserVideoSubmission.filter(
