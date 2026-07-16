@@ -23,9 +23,9 @@ export default function BottomNav() {
       .catch(() => {});
   }, []);
 
-  // Coaches get the Studio tab; Teams steps aside to keep the dock 6-wide.
+  // Coaches are creators AND can be on a team — they get Studio added, Teams stays.
   const tabs = isCoach
-    ? [...baseTabs.slice(0, 3), { icon: Clapperboard, label: "Studio", path: "/studio" }, ...baseTabs.slice(4)]
+    ? [...baseTabs.slice(0, 4), { icon: Clapperboard, label: "Studio", path: "/studio" }, ...baseTabs.slice(4)]
     : baseTabs;
 
   return (
