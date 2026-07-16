@@ -687,6 +687,23 @@ input, textarea, [contenteditable="true"], .selectable {
 }
 img, a { -webkit-user-drag: none; user-drag: none; }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   STORE-READINESS §3 — MINIMUM 44×44 TAP TARGETS (Apple HIG)
+   Every button gets an invisible, centered hit-area pad via ::after —
+   small icon buttons (close X, three-dot menus, chips, toggles) become
+   comfortably tappable with ZERO change to their visual layout.
+───────────────────────────────────────────────────────────────────────────── */
+button { position: relative; }
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+}
+
 /* Horizontal scroll lists (chip rows, tab strips) never show a browser
    scrollbar — native apps don't. Vertical .app-scroll keeps its own. */
 .overflow-x-auto, .overflow-x-scroll {
