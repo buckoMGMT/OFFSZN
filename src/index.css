@@ -686,3 +686,12 @@ input, textarea, [contenteditable="true"], .selectable {
   -webkit-touch-callout: default;
 }
 img, a { -webkit-user-drag: none; user-drag: none; }
+
+/* Horizontal scroll lists (chip rows, tab strips) never show a browser
+   scrollbar — native apps don't. Vertical .app-scroll keeps its own. */
+.overflow-x-auto, .overflow-x-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.overflow-x-auto::-webkit-scrollbar,
+.overflow-x-scroll::-webkit-scrollbar { display: none; }

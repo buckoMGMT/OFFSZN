@@ -9,6 +9,7 @@ import PlayDiagram from "@/components/ui/PlayDiagram";
 import TeamRoster from "@/components/clans/TeamRoster";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import PullToRefresh from "@/components/layout/PullToRefresh";
+import useTabState from "@/lib/useTabState";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "other"];
 const TYPES = ["high_school", "club", "college", "other"];
@@ -42,7 +43,7 @@ export default function Clans() {
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({ name: "", type: "high_school", sport: "football", school_name: "", description: "" });
   const [creating, setCreating] = useState(false);
-  const [tab, setTab] = useState("discover");
+  const [tab, setTab] = useTabState("clans.tab", "discover");
   const [showPaywall, setShowPaywall] = useState(false);
   const circledRow = useCircledRow(clans.length);
   const isPremiumUser = athlete?.subscription_tier === "premium";

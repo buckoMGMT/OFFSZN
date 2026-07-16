@@ -13,6 +13,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import PassRibbon from "@/components/monetization/PassRibbon";
 import PullToRefresh from "@/components/layout/PullToRefresh";
+import useTabState from "@/lib/useTabState";
 
 const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming", "Lacrosse"];
 
@@ -59,7 +60,7 @@ export default function Playbook() {
   const [selected, setSelected] = useState(null);
   const [savedIds, setSavedIds] = useState([]);
   const [playlists, setPlaylists] = useState([]);
-  const [tab, setTab] = useState("explore");
+  const [tab, setTab] = useTabState("playbook.tab", "explore");
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [playlistName, setPlaylistName] = useState("");
   const [playlistPrograms, setPlaylistPrograms] = useState([]);

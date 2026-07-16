@@ -23,6 +23,8 @@ import DeleteAccountSection from "@/components/profile/DeleteAccountSection";
 import { Link } from "react-router-dom";
 import { ageFromDob } from "@/lib/macroEngine";
 import { validate, goalsSchema } from "@/lib/validators";
+import ChipSelect from "@/components/ui/ChipSelect";
+import useTabState from "@/lib/useTabState";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
@@ -46,7 +48,7 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
-  const [activeSection, setActiveSection] = useState("stats");
+  const [activeSection, setActiveSection] = useTabState("profile.section", "stats");
   const { darkMode, setDarkMode } = useTheme();
   const { checkMilestones } = useMilestoneNotifier();
   const [notifications, setNotifications] = useState(() => localStorage.getItem('pb_notifs') !== 'off');
@@ -205,18 +207,11 @@ export default function Profile() {
           value={form[field] || ""}
           onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))} />
           )}
-            <div className="grid grid-cols-2 gap-3">
-              <select className="rounded px-4 py-3 text-sm font-work outline-none" style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-            value={form.sport || ""} onChange={(e) => setForm((p) => ({ ...p, sport: e.target.value }))}>
-                <option value="">Sport</option>
-                {SPORTS.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <select className="rounded px-4 py-3 text-sm font-work outline-none" style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
-            value={form.grade || ""} onChange={(e) => setForm((p) => ({ ...p, grade: e.target.value }))}>
-                <option value="">Grade</option>
-                {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
-            </div>
+            {/* App-styled pickers — never native <select> */}
+            <ChipSelect label="Sport" options={SPORTS} value={form.sport || ""}
+            onChange={(v) => setForm((p) => ({ ...p, sport: v }))} />
+            <ChipSelect label="Grade" options={GRADES} value={form.grade || ""}
+            onChange={(v) => setForm((p) => ({ ...p, grade: v }))} />
             <textarea className="w-full rounded px-4 py-3 text-sm font-work outline-none resize-none h-16"
           style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
           placeholder="Bio" value={form.bio || ""} onChange={(e) => setForm((p) => ({ ...p, bio: e.target.value }))} />

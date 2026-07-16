@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { X, Upload, ImagePlus } from "lucide-react";
+import ChipSelect from "@/components/ui/ChipSelect";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "general_fitness", "other"];
 const DIFFICULTY = ["beginner", "intermediate", "advanced"];
@@ -106,12 +107,8 @@ export default function DrillEditSheet({ open, onClose, drill, athlete, onSaved 
             <input className="input-base" value={f.tags} placeholder="footwork, agility, cone drill" onChange={e => set("tags", e.target.value)} />
           </div>
 
-          <div>
-            <span className="block text-sm font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Sport</span>
-            <select className="input-base" value={f.sport} onChange={e => set("sport", e.target.value)}>
-              {SPORTS.map(s => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
-            </select>
-          </div>
+          {/* App-styled picker — never a native <select> */}
+          <ChipSelect label="Sport" options={SPORTS} value={f.sport} onChange={v => set("sport", v)} />
 
           <div>
             <span className="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>Difficulty</span>

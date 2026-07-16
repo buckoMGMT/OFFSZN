@@ -11,6 +11,7 @@ import PullToRefresh from "@/components/layout/PullToRefresh";
 import { StaggerList } from "@/lib/motion.jsx";
 import { track } from "@/lib/analytics";
 import { validate, postSchema } from "@/lib/validators";
+import useTabState from "@/lib/useTabState";
 
 // Moderation decision (§3): media posts are held for review before public
 // visibility; text-only posts publish immediately with moderator post-review.
@@ -26,7 +27,7 @@ export default function Feed() {
   const [uploading, setUploading] = useState(false);
   const [posting, setPosting] = useState(false);
   const [composeError, setComposeError] = useState(null);
-  const [feedFilter, setFeedFilter] = useState("all");
+  const [feedFilter, setFeedFilter] = useTabState("feed.filter", "all");
 
   const load = useCallback(async () => {
     const [athleteList, postList] = await Promise.all([

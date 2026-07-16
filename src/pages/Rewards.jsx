@@ -6,6 +6,7 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import RedeemModal from "@/components/rewards/RedeemModal";
 import ReferralPanel from "@/components/rewards/ReferralPanel";
+import useTabState from "@/lib/useTabState";
 
 const DAILY_BREAKDOWN = [
   { action: "Hit your water goal (80oz)", pts: 10 },
@@ -124,7 +125,7 @@ export default function Rewards() {
   const [redemptions, setRedemptions] = useState([]);
   const [referrals, setReferrals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("store");
+  const [tab, setTab] = useTabState("rewards.tab", "store");
   const [filter, setFilter] = useState("all");
   const [redeemTarget, setRedeemTarget] = useState(null);
 

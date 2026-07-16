@@ -9,6 +9,7 @@ import StudioContent from "@/components/studio/StudioContent";
 import StudioSubscribersTab from "@/components/studio/StudioSubscribersTab";
 import StudioPayouts from "@/components/studio/StudioPayouts";
 import PullToRefresh from "@/components/layout/PullToRefresh";
+import useTabState from "@/lib/useTabState";
 
 const TABS = [
   ["overview", "Overview"],
@@ -22,7 +23,7 @@ export default function Studio() {
   const [athlete, setAthlete] = useState(null);
   const [drills, setDrills] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useTabState("studio.tab", "overview");
 
   const reload = useCallback(async () => {
     const list = await base44.entities.Athlete.list("-created_date", 1);
