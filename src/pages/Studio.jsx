@@ -60,7 +60,7 @@ export default function Studio() {
   }
 
   return (
-    <div className="px-5 pt-14 pb-32" style={{ maxWidth: 480, margin: "0 auto" }}>
+    <div className="px-5 pt-4 pb-32" style={{ maxWidth: 480, margin: "0 auto" }}>
       <PullToRefresh onRefresh={reload}>
       <h1 className="font-anton text-2xl uppercase mb-4" style={{ color: "var(--text-primary)" }}>Coach Studio</h1>
 

@@ -124,7 +124,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Player ID card header */}
-      <div className="px-5 pt-14 pb-5 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-1)' }}>
+      <div className="px-5 pt-5 pb-5 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-1)' }}>
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-3">
             {/* Avatar — tap to change photo */}

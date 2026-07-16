@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AppLayout from '@/components/layout/AppLayout';
 import OnboardingGate from '@/components/OnboardingGate';
+import SubPageLayout from '@/components/layout/SubPageLayout';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import GeoBlocker from '@/components/GeoBlocker';
 import BrandMark from '@/components/BrandMark';
@@ -73,11 +74,14 @@ const AuthenticatedApp = () => {
       <Routes>
         {/* Onboarding lives OUTSIDE AppLayout — no tab bar */}
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/aup" element={<AUP />} />
-        {/* /review is gated SERVER-SIDE in the reviewQueue function — non-admins get 403 */}
-        <Route path="/review" element={<Review />} />
-        <Route path="/subscription/success" element={<SubscriptionSuccess />} />
-        <Route path="/coach/:id/subscribed" element={<CoachSubscribed />} />
+        {/* Nested views get the TopBar in back-button mode */}
+        <Route element={<SubPageLayout />}>
+          <Route path="/aup" element={<AUP />} />
+          {/* /review is gated SERVER-SIDE in the reviewQueue function — non-admins get 403 */}
+          <Route path="/review" element={<Review />} />
+          <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+          <Route path="/coach/:id/subscribed" element={<CoachSubscribed />} />
+        </Route>
         <Route element={<OnboardingGate><AppLayout /></OnboardingGate>}>
           <Route path="/" element={<Feed />} />
           <Route path="/track" element={<Track />} />

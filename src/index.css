@@ -52,6 +52,9 @@ html {
     --warning:  #F5B841;   /* streak at risk */
     --negative: #E5484D;   /* errors, flags */
 
+    /* Sticky app header height (48px bar + notch safe area) */
+    --topbar-h: calc(48px + env(safe-area-inset-top));
+
     /* Radius scale */
     --r-sm:   8px;
     --r-md:   12px;

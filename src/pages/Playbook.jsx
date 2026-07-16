@@ -132,13 +132,13 @@ export default function Playbook() {
           <img src={selected.cover} alt={selected.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, var(--theme-bg) 10%, transparent 80%)' }} />
           <button onClick={() => setSelected(null)}
-            className="absolute top-14 left-4 font-elite text-xs uppercase tracking-widest px-3 py-1.5 rounded"
+            className="absolute top-4 left-4 font-elite text-xs uppercase tracking-widest px-3 py-1.5 rounded"
             style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}>
             ← Back
           </button>
           {isPremium && (
             <button onClick={(e) => toggleSave(selected, e)}
-              className="absolute top-14 right-4 p-2 rounded"
+              className="absolute top-4 right-4 p-2 rounded"
               style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)' }}>
               {isSaved ?               <BookmarkCheck size={16} style={{ color: 'var(--accent)' }} /> : <Bookmark size={16} style={{ color: '#5A5D63' }} />}
             </button>
@@ -206,7 +206,7 @@ export default function Playbook() {
   return (
     <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-3 border-b" style={{ background: 'rgba(10,11,13,0.72)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
+      <div className="sticky z-40 px-4 pt-3 pb-3 border-b" style={{ top: 'var(--topbar-h)', background: 'rgba(10,11,13,0.72)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
         <div className="flex items-center justify-between mb-1">
           <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--text-primary)' }}>Drills</h1>
           <div className="flex items-center gap-2">

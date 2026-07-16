@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import BottomNav from "@/components/layout/BottomNav";
+import TopBar from "@/components/layout/TopBar";
 import EnvironmentLayer from "@/components/environment/EnvironmentLayer";
 import CoachSubSuccessToast from "@/components/monetization/CoachSubSuccessToast";
 import PastDueBanner from "@/components/monetization/PastDueBanner";
@@ -12,6 +13,7 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--surface-0)' }}>
       <EnvironmentLayer />
+      <TopBar />
       <CoachSubSuccessToast />
       <div
         className="mx-auto relative"

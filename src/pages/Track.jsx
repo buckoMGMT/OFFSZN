@@ -190,7 +190,7 @@ export default function Track() {
   return (
     <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 px-5 pt-12 pb-4 border-b" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
+      <div className="sticky z-40 px-5 pt-3 pb-4 border-b" style={{ top: 'var(--topbar-h)', background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
         <div className="flex items-center justify-between">
           <div>
             <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Stats</h1>
