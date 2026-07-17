@@ -12,6 +12,7 @@ export default function CoachServiceSection({ coach }) {
   const [paidSub, setPaidSub] = useState(null);
   const [showChat, setShowChat] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [needsGuardian, setNeedsGuardian] = useState(false);
 
   useEffect(() => {
     if (!coach?.id) return;
@@ -38,8 +39,10 @@ export default function CoachServiceSection({ coach }) {
     try {
       const res = await base44.functions.invoke("subscribeToCoach", { coachAthleteId: coach.id, returnUrl: window.location.href });
       if (res.data?.url) { window.location.href = res.data.url; return; }
+      if (res.data?.reason === "needs_guardian") { setNeedsGuardian(true); setBusy(false); return; }
       toast({ variant: "destructive", title: "Checkout failed", description: res.data?.error || "Could not start checkout. Try again." });
     } catch (e) {
+      if (e.response?.data?.reason === "needs_guardian") { setNeedsGuardian(true); setBusy(false); return; }
       toast({ variant: "destructive", title: "Checkout failed", description: e.response?.data?.error || "Could not start checkout. Try again." });
     }
     setBusy(false);
@@ -62,6 +65,14 @@ export default function CoachServiceSection({ coach }) {
             <MessageCircle size={13} /> Message {coach.display_name.split(" ")[0]}
           </button>
         </>
+      ) : needsGuardian ? (
+        <div className="rounded p-3" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)' }}>
+          <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>One more step — guardian approval</p>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            Because you're under 18, a verified parent or guardian must be linked to your account before you can join a coach's service.
+            Ask your parent or guardian to complete the guardian link from your Player page, then come back here.
+          </p>
+        </div>
       ) : (
         <>
           <ServicesIncludedList services={coach.coach_services} slaHours={coach.coach_response_sla_hours} />

@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- OFFSZN mark: Archivo-Black-weight "O" ring, Cone Orange on dark rounded square -->
   <rect width="64" height="64" rx="14" fill="#0A0B0D"/>
-  <ellipse cx="32" cy="32" rx="17" ry="18.5" fill="none" stroke="#FF5A1F" stroke-width="10"/>
+  <text x="32" y="44" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="34" fill="#FF5A1F">OZ</text>
 </svg>
