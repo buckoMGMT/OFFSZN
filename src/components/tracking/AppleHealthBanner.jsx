@@ -6,6 +6,11 @@ import { base44 } from "@/api/base44Client";
 
 const INTEREST_KEY = "pb_health_interest";
 
+// Android users get Health Connect; everyone else gets Apple Health.
+const IS_ANDROID = typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
+const SERVICE_NAME = IS_ANDROID ? "Health Connect" : "Apple Health";
+const APP_LABEL = IS_ANDROID ? "Android" : "iOS";
+
 export default function AppleHealthBanner() {
   const [dismissed, setDismissed] = useState(false);
   const [interested, setInterested] = useState(() => localStorage.getItem(INTEREST_KEY) === "yes");
@@ -15,7 +20,7 @@ export default function AppleHealthBanner() {
 
   const notifyMe = async () => {
     setSaving(true);
-    await base44.entities.Feedback.create({ category: "idea", message: "wants: apple_health", page: "Track" });
+    await base44.entities.Feedback.create({ category: "idea", message: IS_ANDROID ? "wants: android_health_connect" : "wants: apple_health", page: "Track" });
     localStorage.setItem(INTEREST_KEY, "yes");
     setInterested(true);
     setSaving(false);
@@ -28,9 +33,9 @@ export default function AppleHealthBanner() {
           <Heart size={17} style={{ color: 'var(--accent)' }} fill="var(--accent)" />
         </div>
         <div className="flex-1">
-          <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>Apple Health</p>
+          <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>{SERVICE_NAME}</p>
           <p className="font-work text-[10px]" style={{ color: 'var(--text-secondary)' }}>
-            Sync is coming with the OFFSZN iOS app. Log manually for now — it all counts.
+            Sync is coming with the OFFSZN {APP_LABEL} app. Log manually for now — it all counts.
           </p>
         </div>
         <button onClick={() => setDismissed(true)} className="font-elite text-xs" style={{ color: 'var(--text-tertiary)' }}>✕</button>
