@@ -4,7 +4,6 @@ import { Plus, Search, Shield, Trophy, Users, X, Swords } from "lucide-react";
 import ClanCard from "@/components/clans/ClanCard";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
-import CoachCircle from "@/components/ui/CoachCircle";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import TeamRoster from "@/components/clans/TeamRoster";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
@@ -13,26 +12,6 @@ import useTabState from "@/lib/useTabState";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "other"];
 const TYPES = ["high_school", "club", "college", "other"];
-
-// Formats "Marcus Coleman" → "Marcus C."
-function formatName(name = "") {
-  const parts = name.trim().split(" ");
-  if (parts.length < 2) return name;
-  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
-}
-
-// Cycles which leaderboard row gets the coach circle
-function useCircledRow(count) {
-  const [circled, setCircled] = useState(0);
-  useEffect(() => {
-    if (count === 0) return;
-    const interval = setInterval(() => {
-      setCircled(prev => (prev + 1) % Math.min(count, 5));
-    }, 3200);
-    return () => clearInterval(interval);
-  }, [count]);
-  return circled;
-}
 
 export default function Clans() {
   const [athlete, setAthlete] = useState(null);
@@ -45,7 +24,6 @@ export default function Clans() {
   const [creating, setCreating] = useState(false);
   const [tab, setTab] = useTabState("clans.tab", "discover");
   const [showPaywall, setShowPaywall] = useState(false);
-  const circledRow = useCircledRow(clans.length);
   const isPremiumUser = athlete?.subscription_tier === "premium";
 
   const load = useCallback(async () => {
@@ -196,61 +174,15 @@ export default function Clans() {
 
         {tab === "leaderboard" && (
           <div>
-            {myClan && <TeamRoster clan={myClan} athleteId={athlete?.id} />}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-anton text-2xl uppercase" style={{ color: 'var(--theme-ink)' }}>Global Roster</h2>
-              {/* Barbell graphic — visual clip */}
-              <svg width="48" height="18" viewBox="0 0 48 18" fill="none">
-                <rect x="4" y="7" width="40" height="4" rx="2" fill="#9BA3AC" />
-                <rect x="0" y="3" width="6" height="12" rx="2" fill="#5E646B" />
-                <rect x="8" y="5" width="4" height="8" rx="1" fill="#5E646B" />
-                <rect x="36" y="5" width="4" height="8" rx="1" fill="#5E646B" />
-                <rect x="42" y="3" width="6" height="12" rx="2" fill="#5E646B" />
-              </svg>
-            </div>
-            <div className="space-y-2">
-              {clans.map((clan, i) => {
-                const isMe = myClan?.id === clan.id;
-                const isCircled = i === circledRow;
-                const isTop3 = i < 3;
-                return (
-                  <div key={clan.id} className="relative card-base p-4 flex items-center gap-4 animate-slide-up"
-                    style={{
-                      borderColor: isMe ? 'var(--accent)' : 'var(--border-subtle)',
-                      borderWidth: isMe ? 2 : 1,
-                    }}>
-                    {isCircled && <CoachCircle />}
-
-                    {/* Rank — cone orange for top 3 */}
-                    <div className="w-10 h-10 rounded flex items-center justify-center flex-shrink-0 stat-number text-base"
-                      style={{
-                        background: isTop3 ? 'var(--accent-subtle)' : 'var(--surface-2)',
-                        color: isTop3 ? 'var(--accent)' : 'var(--text-secondary)',
-                        border: isTop3 ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
-                      }}>
-                      {i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-work font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                        {formatName(clan.name)}
-                        {isMe && <span className="ink-stamp ml-2" style={{ fontSize: 8 }}>You</span>}
-                      </p>
-                      <p className="font-elite text-[9px] uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{(clan.member_ids || []).length} members</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="stat-number text-xl" style={{ color: isTop3 ? 'var(--accent)' : 'var(--text-primary)' }}>{(clan.total_points || 0).toLocaleString()}</p>
-                      <p className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>pts</p>
-                    </div>
-                  </div>
-                );
-              })}
-              {clans.length === 0 && (
-                <div className="text-center py-12">
-                  <PlayDiagram size={130} />
-                  <p className="font-work text-sm mt-4" style={{ color: 'var(--theme-ink-soft)' }}>No teams on the board. Create the first one.</p>
-                </div>
-              )}
-            </div>
+            {myClan ? (
+              <TeamRoster clan={myClan} athleteId={athlete?.id} />
+            ) : (
+              <div className="text-center py-16">
+                <PlayDiagram size={130} />
+                <h3 className="font-anton text-xl uppercase mt-4 mb-2" style={{ color: 'var(--theme-ink)' }}>No Roster Yet</h3>
+                <p className="font-work text-sm" style={{ color: 'var(--theme-ink-soft)' }}>Join a team in Discover to see your roster.</p>
+              </div>
+            )}
           </div>
         )}
 
