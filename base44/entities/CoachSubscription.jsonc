@@ -26,6 +26,20 @@
       ],
       "default": "active"
     },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "trial"
+      ],
+      "default": "monthly",
+      "description": "trial = one-time 7-day coaching pass. Same access as monthly, auto-expires at trial_ends_at (lapsed server-side by dmGuard)."
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Set by stripeWebhook when a 7-day pass is purchased."
+    },
     "stripe_subscription_id": {
       "type": "string"
     }

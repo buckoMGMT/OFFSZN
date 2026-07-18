@@ -7,7 +7,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { coachAthleteId, returnUrl } = await req.json();
+    const { coachAthleteId, returnUrl, plan = 'monthly' } = await req.json();
     if (!coachAthleteId || !returnUrl) return Response.json({ error: 'Missing coachAthleteId or returnUrl' }, { status: 400 });
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
@@ -26,6 +26,13 @@ Deno.serve(async (req) => {
     }
     const price = coach.coach_sub_price_usd;
     if (!price || price <= 0) return Response.json({ error: 'This coach has not set a subscription price yet.' }, { status: 400 });
+
+    // 7-day pass — a time-boxed try of the SAME coaching service, not a content SKU.
+    const isTrial = plan === 'trial';
+    if (isTrial && (!coach.coach_trial_enabled || !coach.coach_trial_price_usd || coach.coach_trial_price_usd <= 0)) {
+      return Response.json({ error: 'This coach does not offer a 7-day pass.' }, { status: 400 });
+    }
+    const chargeUsd = isTrial ? coach.coach_trial_price_usd : price;
 
     // §0 — minors need a verified guardian BEFORE any coach purchase.
     // Live age from DOB, fail-safe: missing/bad DOB = treated as minor.
@@ -53,35 +60,45 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'This coach is still building their drill library. Check back soon.' }, { status: 400 });
     }
 
+    const amountCents = Math.round(chargeUsd * 100);
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+      mode: isTrial ? 'payment' : 'subscription',
       line_items: [{
         price_data: {
           currency: 'usd',
-          product_data: {
+          product_data: isTrial ? {
+            name: `${coach.display_name} — 7-Day Coaching Pass`,
+            description: 'One week of full 1-on-1 coaching service access: direct messaging and personalized feedback',
+          } : {
             name: `${coach.display_name} — 1-on-1 Coaching Service`,
             description: 'Personal coaching service: direct messaging and personalized feedback from your coach',
           },
-          unit_amount: Math.round(price * 100),
-          recurring: { interval: 'month' },
+          unit_amount: amountCents,
+          ...(isTrial ? {} : { recurring: { interval: 'month' } }),
         },
         quantity: 1,
       }],
-      subscription_data: {
-        application_fee_percent: 20,
-        transfer_data: { destination: coach.stripe_account_id },
-        metadata: {
-          subscriber_athlete_id: me.id,
-          coach_athlete_id: coach.id,
+      ...(isTrial ? {
+        payment_intent_data: {
+          application_fee_amount: Math.round(amountCents * 0.2),
+          transfer_data: { destination: coach.stripe_account_id },
+          metadata: { subscriber_athlete_id: me.id, coach_athlete_id: coach.id, plan: 'trial' },
         },
-      },
+      } : {
+        subscription_data: {
+          application_fee_percent: 20,
+          transfer_data: { destination: coach.stripe_account_id },
+          metadata: { subscriber_athlete_id: me.id, coach_athlete_id: coach.id },
+        },
+      }),
       customer_email: user.email,
-      success_url: `${new URL(returnUrl).origin}/coach/${coach.id}/subscribed?price=${price}&coach_name=${encodeURIComponent(coach.display_name)}&sid={CHECKOUT_SESSION_ID}`,
+      success_url: `${new URL(returnUrl).origin}/coach/${coach.id}/subscribed?price=${chargeUsd}&coach_name=${encodeURIComponent(coach.display_name)}&sid={CHECKOUT_SESSION_ID}`,
       cancel_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}coach_sub=cancel`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
         subscriber_athlete_id: me.id,
         coach_athlete_id: coach.id,
+        plan: isTrial ? 'trial' : 'monthly',
       },
     });
 

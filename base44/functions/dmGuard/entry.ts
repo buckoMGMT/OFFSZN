@@ -56,6 +56,13 @@ async function assertDmAllowed(base44, me, other) {
   });
   if (!subs[0]) return { allowed: false, reason: 'no_subscription' };
 
+  // 7-day trial passes auto-expire — lapsed server-side on first check past expiry.
+  const sub = subs[0];
+  if (sub.plan === 'trial' && sub.trial_ends_at && new Date(sub.trial_ends_at) < new Date()) {
+    await base44.asServiceRole.entities.CoachSubscription.update(sub.id, { status: 'canceled', is_paid: false });
+    return { allowed: false, reason: 'trial_expired' };
+  }
+
   // Live-age computation for both parties — NEVER a stored flag, NEVER grade.
   const [coachUser, memberUser] = await Promise.all([
     base44.asServiceRole.entities.User.get(coach.created_by_id),
@@ -72,6 +79,7 @@ async function assertDmAllowed(base44, me, other) {
   // Missing DOB on the member = fail-safe: treat as minor.
   const memberIsMinor = memberAge === null || memberAge < 18;
   let guardianEmail = null;
+  let guardianName = null;
   if (memberIsMinor) {
     // Conditions 2–3 — verified GuardianLink with thread visibility.
     const links = await base44.asServiceRole.entities.GuardianLink.filter({
@@ -79,6 +87,9 @@ async function assertDmAllowed(base44, me, other) {
     });
     if (!links[0]) return { allowed: false, reason: 'needs_guardian', minor_involved: true };
     guardianEmail = links[0].guardian_email;
+    guardianName = links[0].guardian_name || null;
+    // Fail safe: a minor thread must always be able to name its guardian.
+    if (!guardianEmail) return { allowed: false, reason: 'needs_guardian', minor_involved: true };
   }
 
   return {
@@ -86,6 +97,7 @@ async function assertDmAllowed(base44, me, other) {
     coach, member,
     minor_involved: memberIsMinor,
     guardian_email: guardianEmail,
+    guardian_name: guardianName,
     sla_hours: coach.coach_response_sla_hours || 48,
   };
 }
@@ -122,6 +134,8 @@ Deno.serve(async (req) => {
         allowed: verdict.allowed,
         reason: verdict.reason || null,
         minor_involved: !!verdict.minor_involved,
+        guardian_name: verdict.guardian_name || null,
+        guardian_email: verdict.guardian_email || null,
         sla_hours: verdict.sla_hours || 48,
       });
     }

@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
-      const { subscriber_athlete_id, coach_athlete_id, pass, athlete_id } = session.metadata || {};
+      const { subscriber_athlete_id, coach_athlete_id, pass, athlete_id, plan } = session.metadata || {};
       // ── ALL-SZN Pass: grant premium tier instantly ──
       if (pass === 'all_szn' && athlete_id) {
         await base44.asServiceRole.entities.Athlete.update(athlete_id, {
@@ -25,25 +25,26 @@ Deno.serve(async (req) => {
         });
       }
       if (subscriber_athlete_id && coach_athlete_id) {
+        const isTrial = plan === 'trial';
+        const subFields = isTrial
+          ? { is_paid: true, status: 'active', plan: 'trial', trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }
+          : { is_paid: true, status: 'active', plan: 'monthly', stripe_subscription_id: session.subscription };
         const existing = await base44.asServiceRole.entities.CoachSubscription.filter({
           subscriber_athlete_id, coach_athlete_id,
         });
         if (existing[0]) {
-          await base44.asServiceRole.entities.CoachSubscription.update(existing[0].id, {
-            is_paid: true, status: 'active', stripe_subscription_id: session.subscription,
-          });
+          await base44.asServiceRole.entities.CoachSubscription.update(existing[0].id, subFields);
         } else {
           await base44.asServiceRole.entities.CoachSubscription.create({
-            subscriber_athlete_id, coach_athlete_id,
-            is_paid: true, status: 'active', stripe_subscription_id: session.subscription,
+            subscriber_athlete_id, coach_athlete_id, ...subFields,
           });
         }
         const subscriber = await base44.asServiceRole.entities.Athlete.get(subscriber_athlete_id);
         await base44.asServiceRole.entities.Notification.create({
           recipient_athlete_id: coach_athlete_id,
           type: 'new_subscriber',
-          title: 'New Paid Subscriber',
-          body: `${subscriber?.display_name || 'An athlete'} joined your coaching subscription.`,
+          title: isTrial ? 'New 7-Day Pass' : 'New Paid Subscriber',
+          body: `${subscriber?.display_name || 'An athlete'} ${isTrial ? 'started a 7-day pass to your coaching service.' : 'joined your coaching subscription.'}`,
           actor_name: subscriber?.display_name,
           actor_avatar: subscriber?.avatar_url,
         });

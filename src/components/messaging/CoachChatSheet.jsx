@@ -91,12 +91,18 @@ export default function CoachChatSheet({ open, onClose, me, other }) {
           <div className="flex-1 p-4 space-y-2">
             {[0, 1, 2].map(i => <div key={i} className="skeleton" style={{ height: 44 }} />)}
           </div>
-        ) : !gate.allowed ? (
-          <DmGate reason={gate.reason} />
+        ) : !gate.allowed || (gate.minor_involved && !gate.guardian_name && !gate.guardian_email) ? (
+          /* Fail safe: a minor thread never opens without a nameable guardian */
+          <DmGate reason={gate.allowed ? "needs_guardian" : gate.reason} />
         ) : (
           <>
             {/* §0/§5 — persistent, visible guardian-visibility banner on minor threads */}
-            {gate.minor_involved && <GuardianVisibilityBanner name={me.role === "coach" ? other.display_name : me.display_name} />}
+            {gate.minor_involved && (
+              <GuardianVisibilityBanner
+                coachSide={me.role === "coach"}
+                guardianName={gate.guardian_name || gate.guardian_email}
+              />
+            )}
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">

@@ -226,6 +226,11 @@ export default function Rewards() {
           return cheapestCard ? (
             <div className="mb-3">
               <PointsBar current={points} target={cheapestCard.points_required} label={`Progress to ${cheapestCard.name.match(/\$\d+/)?.[0] || "$5"} Gift Card`} />
+              {points < cheapestCard.points_required && (
+                <p className="font-work text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                  You're {Math.max(1, Math.ceil((cheapestCard.points_required - points) / 300)).toLocaleString()} max-effort days from your first reward. Keep stacking.
+                </p>
+              )}
             </div>
           ) : null;
         })()}

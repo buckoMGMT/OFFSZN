@@ -1,21 +1,47 @@
-// base44/entities/GuardianLink.jsonc
-// Links a minor's User account to a parent/guardian for the specific
-// interactions minorSafetyGuard.ts gates (coach purchases, direct contact).
-// This is deliberately narrow-scope, not a full "parental controls" system —
-// it exists to satisfy assertCoachInteractionAllowed(), not to replace
-// broader account settings.
 {
   "name": "GuardianLink",
   "type": "object",
   "title": "Guardian Link",
   "description": "Parent/guardian verification record for a minor athlete's account.",
   "properties": {
-    "minor_user_id": { "type": "string" },
-    "guardian_email": { "type": "string" },
-    "guardian_user_id": { "type": "string", "description": "Set once the guardian creates/links their own account" },
-    "status": { "type": "string", "enum": ["pending", "verified", "revoked"], "default": "pending" },
-    "verification_method": { "type": "string", "enum": ["email_confirmation", "payment_method_check"], "default": "email_confirmation" },
-    "verified_at": { "type": "string", "format": "date-time" }
+    "minor_user_id": {
+      "type": "string"
+    },
+    "guardian_email": {
+      "type": "string"
+    },
+    "guardian_name": {
+      "type": "string",
+      "description": "Guardian's display name \u2014 shown to the minor in the chat visibility banner. Falls back to guardian_email when absent."
+    },
+    "guardian_user_id": {
+      "type": "string",
+      "description": "Set once the guardian creates/links their own account"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "verified",
+        "revoked"
+      ],
+      "default": "pending"
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "email_confirmation",
+        "payment_method_check"
+      ],
+      "default": "email_confirmation"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
   },
-  "required": ["minor_user_id", "guardian_email"]
+  "required": [
+    "minor_user_id",
+    "guardian_email"
+  ]
 }

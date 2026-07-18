@@ -256,6 +256,15 @@
       "type": "number",
       "description": "Monthly price the coach charges for their 1-on-1 coaching service subscription"
     },
+    "coach_trial_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Coach offers a one-time 7-day pass to their coaching service (same access as a subscription, time-boxed)."
+    },
+    "coach_trial_price_usd": {
+      "type": "number",
+      "description": "One-time price of the 7-day coaching pass. Suggested ~30% of monthly."
+    },
     "identity_status": {
       "type": "string",
       "enum": [

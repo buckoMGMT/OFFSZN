@@ -30,14 +30,22 @@ export default function CoachServiceSection({ coach }) {
   const price = coach?.coach_sub_price_usd;
   if (!price || coach?.stripe_onboarding_status !== "complete" || coach?.identity_status !== "verified" || !me || me.id === coach.id) return null;
 
-  const join = async () => {
+  // 7-day pass state — an expired trial reads as "not a member" + a convert prompt.
+  const trialExpired = paidSub?.plan === "trial" && paidSub.trial_ends_at && new Date(paidSub.trial_ends_at) <= new Date();
+  const activeSub = paidSub && !trialExpired ? paidSub : null;
+  const trialDaysLeft = activeSub?.plan === "trial" && activeSub.trial_ends_at
+    ? Math.max(0, Math.ceil((new Date(activeSub.trial_ends_at) - Date.now()) / 864e5))
+    : null;
+  const trialOffered = coach.coach_trial_enabled && coach.coach_trial_price_usd > 0;
+
+  const join = async (plan = "monthly") => {
     if (window.self !== window.top) {
       toast({ variant: "destructive", title: "Checkout unavailable here", description: "Checkout only works from the published app — open your app in its own tab to subscribe." });
       return;
     }
     setBusy(true);
     try {
-      const res = await base44.functions.invoke("subscribeToCoach", { coachAthleteId: coach.id, returnUrl: window.location.href });
+      const res = await base44.functions.invoke("subscribeToCoach", { coachAthleteId: coach.id, returnUrl: window.location.href, plan });
       if (res.data?.url) { window.location.href = res.data.url; return; }
       if (res.data?.reason === "needs_guardian") { setNeedsGuardian(true); setBusy(false); return; }
       toast({ variant: "destructive", title: "Checkout failed", description: res.data?.error || "Could not start checkout. Try again." });
@@ -54,10 +62,12 @@ export default function CoachServiceSection({ coach }) {
         <Star size={12} fill="currentColor" style={{ color: 'var(--accent)' }} />
         <p className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>1-on-1 Coaching Service</p>
       </div>
-      {paidSub ? (
+      {activeSub ? (
         <>
           <p className="text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
-            You're a member — message your coach anytime, replies within {coach.coach_response_sla_hours || 48}h.
+            {trialDaysLeft !== null
+              ? `7-day pass active — ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left. Message your coach anytime, replies within ${coach.coach_response_sla_hours || 48}h.`
+              : `You're a member — message your coach anytime, replies within ${coach.coach_response_sla_hours || 48}h.`}
           </p>
           <button onClick={() => setShowChat(true)}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded font-elite text-[10px] uppercase tracking-widest"
@@ -67,20 +77,32 @@ export default function CoachServiceSection({ coach }) {
         </>
       ) : needsGuardian ? (
         <div className="rounded p-3" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)' }}>
-          <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>One more step — guardian approval</p>
+          <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Almost there</p>
           <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            Because you're under 18, a verified parent or guardian must be linked to your account before you can join a coach's service.
-            Ask your parent or guardian to complete the guardian link from your Player page, then come back here.
+            A parent or guardian approves coach subscriptions for athletes under 18 — it takes about 2 minutes.
+            Ask them to complete the guardian link from your Player page, then come back here. You're one step away.
           </p>
         </div>
       ) : (
         <>
+          {trialExpired && (
+            <p className="text-xs mb-2 rounded p-2" style={{ color: 'var(--text-primary)', background: 'var(--surface-1)', border: '1px solid var(--border-strong)' }}>
+              Your 7-day pass ended — loved the week? Join monthly to keep your direct line open.
+            </p>
+          )}
           <ServicesIncludedList services={coach.coach_services} slaHours={coach.coach_response_sla_hours} />
-          <button onClick={join} disabled={busy}
+          <button onClick={() => join("monthly")} disabled={busy}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded font-elite text-[10px] uppercase tracking-widest"
             style={{ background: 'var(--accent)', color: 'var(--on-accent)', opacity: busy ? 0.6 : 1 }}>
-            {busy ? "Opening checkout..." : `Join — $${Number(price).toFixed(2)}/mo`}
+            {busy ? "Opening checkout..." : `Subscribe — $${Number(price).toFixed(2)}/mo`}
           </button>
+          {trialOffered && !trialExpired && (
+            <button onClick={() => join("trial")} disabled={busy}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded font-elite text-[10px] uppercase tracking-widest mt-2"
+              style={{ background: 'var(--surface-1)', color: 'var(--text-primary)', border: '1px solid var(--border-strong)', opacity: busy ? 0.6 : 1 }}>
+              Try 7 days — ${Number(coach.coach_trial_price_usd).toFixed(2)}
+            </button>
+          )}
         </>
       )}
       <CoachChatSheet open={showChat} onClose={() => setShowChat(false)} me={me} other={coach} />

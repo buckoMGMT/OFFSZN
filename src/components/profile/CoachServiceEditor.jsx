@@ -17,6 +17,24 @@ const SLA_OPTIONS = [24, 48, 72];
 export default function CoachServiceEditor({ athlete, onUpdate }) {
   const [services, setServices] = useState(() => normalizeServices(athlete?.coach_services));
   const [sla, setSla] = useState(athlete?.coach_response_sla_hours || 48);
+  const [trialEnabled, setTrialEnabled] = useState(!!athlete?.coach_trial_enabled);
+  const [trialPrice, setTrialPrice] = useState(
+    athlete?.coach_trial_price_usd || (athlete?.coach_sub_price_usd ? Math.round(athlete.coach_sub_price_usd * 0.3 * 100) / 100 : "")
+  );
+
+  const toggleTrial = async (on) => {
+    setTrialEnabled(on);
+    const p = Number(trialPrice) > 0 ? Number(trialPrice) : undefined;
+    await base44.entities.Athlete.update(athlete.id, { coach_trial_enabled: on, ...(p ? { coach_trial_price_usd: p } : {}) });
+    onUpdate?.({ ...athlete, coach_trial_enabled: on, ...(p ? { coach_trial_price_usd: p } : {}) });
+  };
+
+  const saveTrialPrice = async () => {
+    const p = Number(trialPrice);
+    if (!p || p <= 0) return;
+    await base44.entities.Athlete.update(athlete.id, { coach_trial_price_usd: p });
+    onUpdate?.({ ...athlete, coach_trial_price_usd: p });
+  };
 
   const persist = async (nextServices, nextSla) => {
     await base44.entities.Athlete.update(athlete.id, {
@@ -69,6 +87,31 @@ export default function CoachServiceEditor({ athlete, onUpdate }) {
           <Switch checked={services.includes(key)} onCheckedChange={on => toggle(key, on)} />
         </div>
       ))}
+
+      {/* 7-day pass — low-friction entry to the same service, time-boxed */}
+      <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-work text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>7-Day Pass</p>
+            <p className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+              A one-time try of your full service. Suggested ~30% of your monthly price.
+            </p>
+          </div>
+          <Switch checked={trialEnabled} onCheckedChange={toggleTrial} />
+        </div>
+        {trialEnabled && (
+          <div className="flex items-center gap-2 mt-2">
+            <span className="font-elite text-xs" style={{ color: 'var(--text-secondary)' }}>$</span>
+            <input type="number" min="1" step="0.01"
+              className="w-24 rounded px-3 py-1.5 font-elite text-sm outline-none"
+              style={{ background: 'var(--surface-0)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
+              value={trialPrice}
+              onChange={e => setTrialPrice(e.target.value)}
+              onBlur={saveTrialPrice} />
+            <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>one-time, 7 days of access</span>
+          </div>
+        )}
+      </div>
 
       <div className="mt-2">
         <p className="text-[10px] mb-1.5 font-semibold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
