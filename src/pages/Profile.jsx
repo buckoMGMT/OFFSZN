@@ -446,7 +446,13 @@ export default function Profile() {
             <div className="rounded border overflow-hidden" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: 'var(--theme-ink-soft)' }}>Account</p>
               <button className="w-full flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}
-            onClick={() => base44.auth.logout('/')}>
+            onClick={() => {
+              // Clear USER state so a second user on this device starts clean.
+              // Device-level analytics consent (offszn_analytics_consent) is kept by design.
+              ['pb_notifs', 'pb_units', 'pb_privacy', 'pb_accent', 'pb_health_interest'].forEach(k => localStorage.removeItem(k));
+              sessionStorage.clear();
+              base44.auth.logout('/');
+            }}>
                 <div className="flex items-center gap-3">
                   <LogOut size={15} style={{ color: 'var(--accent)' }} />
                   <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Sign Out</span>

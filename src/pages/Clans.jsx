@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Shield, Trophy, Users, X, Swords } from "lucide-react";
+import { Plus, Search, Shield, Trophy, Users, X, Swords, Pencil, Trash2 } from "lucide-react";
 import ClanCard from "@/components/clans/ClanCard";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
@@ -9,6 +9,7 @@ import TeamRoster from "@/components/clans/TeamRoster";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import PullToRefresh from "@/components/layout/PullToRefresh";
 import useTabState from "@/lib/useTabState";
+import { validate, teamSchema } from "@/lib/validators";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "other"];
 const TYPES = ["high_school", "club", "college", "other"];
@@ -24,7 +25,13 @@ export default function Clans() {
   const [creating, setCreating] = useState(false);
   const [tab, setTab] = useTabState("clans.tab", "discover");
   const [showPaywall, setShowPaywall] = useState(false);
+  const [createError, setCreateError] = useState(null);
+  const [editingAnn, setEditingAnn] = useState(false);
+  const [annDraft, setAnnDraft] = useState("");
+  const [confirmDeleteAnn, setConfirmDeleteAnn] = useState(false);
+  const [challengeNotice, setChallengeNotice] = useState(false);
   const isPremiumUser = athlete?.subscription_tier === "premium";
+  const isTeamAdmin = !!myClan && athlete?.id === myClan.admin_id;
 
   const load = useCallback(async () => {
     const [athletes, clanList] = await Promise.all([
@@ -59,11 +66,37 @@ export default function Clans() {
   };
 
   const createClan = async () => {
-    if (!createForm.name || !athlete) return;
+    if (!athlete) return;
+    const r = validate(teamSchema, createForm);
+    if (r.error) { setCreateError(r.error); return; }
+    if (clans.some(c => (c.name || "").trim().toLowerCase() === r.value.name.toLowerCase())) {
+      setCreateError("A team with that name already exists."); return;
+    }
+    setCreateError(null);
     setCreating(true);
-    const newClan = await base44.entities.Clan.create({ ...createForm, admin_id: athlete.id, member_ids: [athlete.id], total_points: 0, wins: 0, losses: 0, is_public: true });
+    const newClan = await base44.entities.Clan.create({ ...createForm, ...r.value, admin_id: athlete.id, member_ids: [athlete.id], total_points: 0, wins: 0, losses: 0, is_public: true });
     await base44.entities.Athlete.update(athlete.id, { clan_id: newClan.id });
     setShowCreate(false); setCreating(false); load();
+  };
+
+  // Announcements — team admin only; optimistic update with rollback on failure
+  const saveAnnouncement = async () => {
+    if (!isTeamAdmin) return;
+    const prev = myClan.announcement;
+    const text = annDraft.trim();
+    setMyClan(c => ({ ...c, announcement: text }));
+    setEditingAnn(false);
+    try { await base44.entities.Clan.update(myClan.id, { announcement: text }); }
+    catch { setMyClan(c => ({ ...c, announcement: prev })); }
+  };
+
+  const deleteAnnouncement = async () => {
+    if (!isTeamAdmin) return;
+    setConfirmDeleteAnn(false);
+    const prev = myClan.announcement;
+    setMyClan(c => ({ ...c, announcement: "" }));
+    try { await base44.entities.Clan.update(myClan.id, { announcement: "" }); }
+    catch { setMyClan(c => ({ ...c, announcement: prev })); }
   };
 
   const filtered = clans.filter(c =>
@@ -87,7 +120,7 @@ export default function Clans() {
           <div className="flex items-center gap-3">
             <PageLabel number={4} />
             {!myClan && (
-              <StampButton onClick={() => isPremiumUser ? setShowCreate(true) : setShowPaywall(true)}>
+              <StampButton onClick={() => { if (isPremiumUser) { setCreateError(null); setShowCreate(true); } else setShowPaywall(true); }}>
                 <Plus size={12} /> Create
               </StampButton>
             )}
@@ -135,9 +168,41 @@ export default function Clans() {
                 <X size={14} style={{ color: 'var(--text-secondary)' }} />
               </button>
             </div>
-            {myClan.announcement && (
+            {(myClan.announcement || isTeamAdmin) && (
               <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-                <p className="font-marker text-sm" style={{ color: 'var(--theme-ink)', transform: 'rotate(-0.5deg)' }}>{myClan.announcement}</p>
+                {editingAnn ? (
+                  <div className="space-y-2">
+                    <textarea className="w-full rounded px-3 py-2 text-sm font-work outline-none resize-none h-16"
+                      style={{ background: 'var(--surface-0)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
+                      maxLength={300} placeholder="Team announcement…" value={annDraft}
+                      onChange={e => setAnnDraft(e.target.value)} autoFocus />
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => setEditingAnn(false)} className="px-3 py-1.5 rounded font-elite text-[9px] uppercase tracking-widest"
+                        style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>Cancel</button>
+                      <StampButton onClick={saveAnnouncement} className="text-[10px] px-3 py-1">Save</StampButton>
+                    </div>
+                  </div>
+                ) : myClan.announcement ? (
+                  <div>
+                    <div className="flex items-start gap-2">
+                      <p className="font-marker text-sm flex-1" style={{ color: 'var(--theme-ink)', transform: 'rotate(-0.5deg)' }}>{myClan.announcement}</p>
+                      {isTeamAdmin && (
+                        <>
+                          <button onClick={() => { setAnnDraft(myClan.announcement); setEditingAnn(true); setConfirmDeleteAnn(false); }} className="p-1 rounded">
+                            <Pencil size={12} style={{ color: 'var(--text-tertiary)' }} />
+                          </button>
+                          <button onClick={() => confirmDeleteAnn ? deleteAnnouncement() : setConfirmDeleteAnn(true)} className="p-1 rounded">
+                            <Trash2 size={12} style={{ color: confirmDeleteAnn ? 'var(--negative)' : 'var(--text-tertiary)' }} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {confirmDeleteAnn && <p className="text-[10px] mt-1 text-right" style={{ color: 'var(--negative)' }}>Tap the trash again to confirm delete</p>}
+                  </div>
+                ) : (
+                  <button onClick={() => { setAnnDraft(""); setEditingAnn(true); }}
+                    className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>+ Add Announcement</button>
+                )}
               </div>
             )}
           </div>
@@ -194,7 +259,11 @@ export default function Clans() {
               Head-to-head on macros, sleep, or workout streaks.
             </p>
             {myClan
-              ? <StampButton onClick={() => {}}>Send a Challenge</StampButton>
+              ? (challengeNotice
+                  ? <p className="font-work text-sm max-w-xs mx-auto" style={{ color: 'var(--text-primary)' }}>
+                      Coming soon — head-to-head team challenges drop in the next update. Keep stacking points so your squad's ready.
+                    </p>
+                  : <StampButton onClick={() => setChallengeNotice(true)}>Send a Challenge</StampButton>)
               : <p className="font-elite text-xs uppercase" style={{ color: '#9BA3AC' }}>Join a team first.</p>
             }
           </div>
@@ -259,8 +328,9 @@ export default function Clans() {
                 value={createForm.description}
                 onChange={e => setCreateForm(p => ({ ...p, description: e.target.value }))} />
             </div>
+            {createError && <p className="text-xs mt-3 text-center" style={{ color: 'var(--negative)' }}>{createError}</p>}
             <div className="mt-6 flex justify-center">
-              <StampButton onClick={createClan} disabled={creating || !createForm.name} className="text-base px-8 py-3">
+              <StampButton onClick={createClan} disabled={creating} className="text-base px-8 py-3">
                 {creating ? "Creating…" : "Create Team"}
               </StampButton>
             </div>

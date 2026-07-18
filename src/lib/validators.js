@@ -55,6 +55,12 @@ export const feedbackSchema = cleanStr.pipe(
 
 export const reportNoteSchema = cleanStr.pipe(z.string().max(500, "Max 500 characters"));
 
+export const teamSchema = z.object({
+  name: cleanStr.pipe(z.string().min(3, "Team name must be 3–40 characters").max(40, "Team name must be 3–40 characters")),
+  school_name: cleanStr.pipe(z.string().max(60, "School name — max 60 characters")),
+  description: cleanStr.pipe(z.string().max(300, "Description — max 300 characters")),
+});
+
 // Helper: validate, return { value } or { error: firstMessage }
 export function validate(schema, input) {
   const r = schema.safeParse(input);

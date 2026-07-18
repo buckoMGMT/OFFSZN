@@ -14,6 +14,8 @@ import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import PassRibbon from "@/components/monetization/PassRibbon";
 import PullToRefresh from "@/components/layout/PullToRefresh";
 import useTabState from "@/lib/useTabState";
+import WorkoutRunner from "@/components/workout/WorkoutRunner";
+import { buildStepsFromProgram, buildStepsFromPlaylist } from "@/lib/workoutSteps";
 
 const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming", "Lacrosse"];
 
@@ -68,6 +70,7 @@ export default function Playbook() {
   const [playlistName, setPlaylistName] = useState("");
   const [playlistPrograms, setPlaylistPrograms] = useState([]);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [runner, setRunner] = useState(null); // { title, steps, duration } — active workout session
   const [sortBy, setSortBy] = useState("featured");
   const [priceFilter, setPriceFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
@@ -196,12 +199,16 @@ export default function Playbook() {
             />
           ) : (
             <div className="flex justify-center">
-              <button className="btn-primary" style={{ fontSize: 'var(--text-base)', padding: '12px 40px' }}>
+              <button className="btn-primary" style={{ fontSize: 'var(--text-base)', padding: '12px 40px' }}
+                onClick={() => setRunner({ title: selected.title, steps: buildStepsFromProgram(selected), duration: selected.duration })}>
                 <Play size={14} fill="currentColor" /> Start Program
               </button>
             </div>
           )}
         </div>
+        {runner && athlete && (
+          <WorkoutRunner title={runner.title} steps={runner.steps} athlete={athlete} durationMinutes={runner.duration} onClose={() => setRunner(null)} />
+        )}
         <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
       </div>
     );
@@ -339,6 +346,14 @@ export default function Playbook() {
                           <p className="font-work font-semibold" style={{ color: 'var(--theme-ink)' }}>{pl.name}</p>
                           <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{(pl.program_ids || []).length} programs</p>
                         </div>
+                        {(pl.program_ids || []).length > 0 && (
+                          <button onClick={() => {
+                            const progs = (pl.program_ids || []).map(id => PROGRAMS.find(p => p.id === id)).filter(Boolean);
+                            if (progs.length) setRunner({ title: pl.name, steps: buildStepsFromPlaylist(progs), duration: progs.reduce((s, p) => s + p.duration, 0) });
+                          }} className="p-1.5 rounded" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                            <Play size={13} fill="var(--accent)" style={{ color: 'var(--accent)' }} />
+                          </button>
+                        )}
                         <button onClick={() => base44.entities.Playlist.delete(pl.id).then(() => setPlaylists(p => p.filter(x => x.id !== pl.id)))}>
                           <X size={14} style={{ color: '#9BA3AC' }} />
                         </button>
@@ -395,6 +410,9 @@ export default function Playbook() {
         </div>
       )}
 
+      {runner && athlete && (
+        <WorkoutRunner title={runner.title} steps={runner.steps} athlete={athlete} durationMinutes={runner.duration} onClose={() => setRunner(null)} />
+      )}
       <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );

@@ -126,6 +126,13 @@ export default function ExploreGrid({ programs, sportFilter, isPremium, athlete,
   const items = buildItems(programs, filteredVideos, sortBy === "featured");
   const buyingCoach = buying ? authors[buying.athlete_id] : null;
 
+  if (items.length === 0) return (
+    <div className="text-center py-16 px-6">
+      <p className="font-anton text-xl uppercase mb-2" style={{ color: 'var(--text-primary)' }}>Fresh Drops Incoming</p>
+      <p className="font-work text-sm" style={{ color: 'var(--text-secondary)' }}>More drops as coaches join. Clear a filter to see what's live now.</p>
+    </div>
+  );
+
   return (
     <>
       <div className="grid grid-cols-3 gap-0.5 -mx-4" style={{ gridAutoFlow: 'dense' }}>
