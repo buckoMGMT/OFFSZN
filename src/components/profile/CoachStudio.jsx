@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { BarChart3, Eye, ThumbsUp, Clock, TrendingUp, PlaySquare } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { useAccent } from "@/lib/accentColor";
 
 // YouTube-Studio-style analytics hub for the Coach tab.
 // Charts derive a deterministic 28-day trend from real totals so the
@@ -37,6 +38,8 @@ export default function CoachStudio({ athlete }) {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState("28d");
+  // Chart SVG attributes can't resolve CSS variables — use the live picked accent hex.
+  const accent = useAccent();
 
   useEffect(() => {
     if (!athlete?.id) return;
@@ -89,8 +92,8 @@ export default function CoachStudio({ athlete }) {
             <AreaChart data={trend} margin={{ top: 4, right: 0, left: -24, bottom: 0 }}>
               <defs>
                 <linearGradient id="viewsFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#FF5A1F" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#FF5A1F" stopOpacity={0} />
+                  <stop offset="0%" stopColor={accent} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={accent} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="day" tick={{ fontSize: 9, fill: 'rgba(245,245,240,0.4)' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
@@ -100,7 +103,7 @@ export default function CoachStudio({ athlete }) {
                 labelStyle={{ color: 'var(--text-secondary)' }}
                 itemStyle={{ color: 'var(--accent)' }}
               />
-              <Area type="monotone" dataKey="views" stroke="#FF5A1F" strokeWidth={2} fill="url(#viewsFill)" />
+              <Area type="monotone" dataKey="views" stroke={accent} strokeWidth={2} fill="url(#viewsFill)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
