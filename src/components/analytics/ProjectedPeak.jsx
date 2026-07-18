@@ -4,9 +4,12 @@ import { base44 } from "@/api/base44Client";
 import { projectTrend } from "@/lib/statEngine";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, ReferenceLine } from "recharts";
 import { format } from "date-fns";
+import { useAccent } from "@/lib/accentColor";
 
 export default function ProjectedPeak({ athlete }) {
   const [entries, setEntries] = useState(null);
+  // Chart SVG attributes can't resolve CSS variables — use the live picked hex.
+  const accent = useAccent();
 
   useEffect(() => {
     base44.entities.ProgressEntry.filter({ athlete_id: athlete.id }, "date", 60).then(setEntries);
@@ -37,7 +40,7 @@ export default function ProjectedPeak({ athlete }) {
                 <YAxis domain={['dataMin - 5', 'dataMax + 5']} tick={{ fontSize: 9, fill: 'var(--text-tertiary)' }} axisLine={false} tickLine={false} width={30} />
                 <Tooltip contentStyle={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', borderRadius: 8, fontSize: 11 }} />
                 {athlete.goal_weight_lbs && <ReferenceLine y={athlete.goal_weight_lbs} stroke="var(--positive)" strokeDasharray="4 3" />}
-                <Area type="monotone" dataKey="value" stroke="var(--accent)" strokeWidth={2} fill="var(--accent-subtle)" />
+                <Area type="monotone" dataKey="value" stroke={accent} strokeWidth={2} fill={`${accent}1F`} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

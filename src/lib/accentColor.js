@@ -1,6 +1,24 @@
 // User-customizable accent color — overrides the Cone Orange tokens app-wide.
 // Default stays #FF5A1F; custom picks persist in localStorage and apply on boot.
+import { useState, useEffect } from 'react';
+
 export const DEFAULT_ACCENT = '#FF5A1F';
+
+// Resolved hex for places CSS variables can't reach (e.g. chart libraries).
+export function getAccent() {
+  return localStorage.getItem('pb_accent') || DEFAULT_ACCENT;
+}
+
+// Reactive accent — re-renders consumers the moment the user picks a new color.
+export function useAccent() {
+  const [accent, setAccent] = useState(getAccent);
+  useEffect(() => {
+    const h = () => setAccent(getAccent());
+    window.addEventListener('offszn-accent-change', h);
+    return () => window.removeEventListener('offszn-accent-change', h);
+  }, []);
+  return accent;
+}
 
 function hexToRgb(hex) {
   const h = hex.replace('#', '');
@@ -24,12 +42,14 @@ export function applyAccent(hex) {
   const lum = 0.299 * r + 0.587 * g + 0.114 * b;
   root.style.setProperty('--on-accent', lum > 160 ? '#0A0B0D' : '#F5F5F0');
   localStorage.setItem('pb_accent', hex);
+  window.dispatchEvent(new Event('offszn-accent-change'));
 }
 
 export function resetAccent() {
   localStorage.removeItem('pb_accent');
   ['--accent', '--accent-hover', '--accent-pressed', '--accent-subtle', '--on-accent']
     .forEach(v => document.documentElement.style.removeProperty(v));
+  window.dispatchEvent(new Event('offszn-accent-change'));
 }
 
 // Apply a saved custom accent as early as possible (splash screen included).
