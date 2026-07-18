@@ -2,7 +2,8 @@
 // Athlete ID only. Never email, DOB, or name.
 import { base44 } from "@/api/base44Client";
 
-const consented = () => localStorage.getItem("offszn_analytics_consent") !== "off";
+// Opt-in only: no events fire until the user explicitly accepts in the ConsentBanner.
+const consented = () => localStorage.getItem("offszn_analytics_consent") === "on";
 
 const t = (eventName, properties = {}) => {
   if (!consented()) return;

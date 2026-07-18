@@ -25,6 +25,7 @@ const Profile = lazy(() => import('@/pages/Profile'));
 const Rewards = lazy(() => import('@/pages/Rewards'));
 const Onboarding = lazy(() => import('@/pages/Onboarding'));
 const AUP = lazy(() => import('@/pages/AUP'));
+const Help = lazy(() => import('@/pages/Help'));
 const Review = lazy(() => import('@/pages/Review'));
 const SubscriptionSuccess = lazy(() => import('@/pages/SubscriptionSuccess'));
 const Studio = lazy(() => import('@/pages/Studio'));
@@ -77,6 +78,7 @@ const AuthenticatedApp = () => {
         {/* Nested views get the TopBar in back-button mode */}
         <Route element={<SubPageLayout />}>
           <Route path="/aup" element={<AUP />} />
+          <Route path="/help" element={<Help />} />
           {/* /review is gated SERVER-SIDE in the reviewQueue function — non-admins get 403 */}
           <Route path="/review" element={<Review />} />
           <Route path="/subscription/success" element={<SubscriptionSuccess />} />

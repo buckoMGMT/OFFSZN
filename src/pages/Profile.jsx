@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Crown, Edit2, Sun, Moon, Bell, Lock, LogOut, ChevronRight, Zap } from "lucide-react";
+import { Trophy, Crown, Edit2, Sun, Moon, Bell, Lock, LogOut, ChevronRight, Zap, HelpCircle } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
 import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 import BadgesSection from "@/components/profile/BadgesSection";
@@ -436,6 +436,15 @@ export default function Profile() {
             </div>
 
             {/* Account */}
+            {/* Help & Support */}
+            <Link to="/help" className="rounded border flex items-center justify-between px-4 py-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+              <div className="flex items-center gap-3">
+                <HelpCircle size={15} style={{ color: 'var(--accent)' }} />
+                <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>Help & Support</span>
+              </div>
+              <ChevronRight size={14} style={{ color: 'var(--theme-ink-soft)' }} />
+            </Link>
+
             <div className="rounded border overflow-hidden" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-[9px] uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: 'var(--theme-ink-soft)' }}>Account</p>
               <button className="w-full flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--theme-border)' }}
