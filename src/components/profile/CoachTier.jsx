@@ -1,40 +1,12 @@
-import { useState } from "react";
-import { base44 } from "@/api/base44Client";
-import { Video, Upload, CheckCircle, Lock, Star, X } from "lucide-react";
+import { Video, Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
-export default function CoachTier({ athlete, onUpdate }) {
-  const [showUpload, setShowUpload] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", video_url: "", sport: "", position: "", category: "tutorial", difficulty: "intermediate" });
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
+// Coach Tier progress card. Video uploads live in the Studio tab (Studio → Content → New Drill).
+export default function CoachTier({ athlete }) {
   const approvedCount = athlete?.approved_video_count || 0;
   const totalViews = athlete?.total_video_views || 0;
   const isCoach = athlete?.is_coach_verified;
   const coachUnlocked = approvedCount >= 10 && totalViews >= 5000;
-
-  const submit = async () => {
-    if (!form.title || !form.video_url) return;
-    setSubmitting(true);
-    await base44.entities.UserVideoSubmission.create({
-      athlete_id: athlete.id,
-      title: form.title,
-      description: form.description,
-      video_url: form.video_url,
-      sport: form.sport || undefined,
-      position: form.position || undefined,
-      category: form.category,
-      difficulty: form.difficulty,
-      status: "pending",
-      likes: 0,
-      views: 0,
-    });
-    setSubmitting(false);
-    setSubmitted(true);
-    setShowUpload(false);
-    setForm({ title: "", description: "", video_url: "", sport: "", position: "", category: "tutorial", difficulty: "intermediate" });
-    if (onUpdate) onUpdate();
-  };
 
   return (
     <div className="space-y-3">
@@ -86,61 +58,11 @@ export default function CoachTier({ athlete, onUpdate }) {
         </p>
       </div>
 
-      {/* Upload Button */}
-      {submitted ? (
-        <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/30 rounded-xl">
-          <CheckCircle size={16} className="text-primary" />
-          <p className="text-sm text-primary font-medium">Submitted for review!</p>
-        </div>
-      ) : (
-        <button onClick={() => setShowUpload(!showUpload)}
-          className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-primary/40 text-primary text-sm font-semibold rounded-xl hover:bg-primary/5 transition-colors">
-          <Video size={15} /> Upload Training Video
-        </button>
-      )}
-
-      {/* Upload Form */}
-      {showUpload && (
-        <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-foreground">Submit Video</p>
-            <button onClick={() => setShowUpload(false)}><X size={14} className="text-muted-foreground" /></button>
-          </div>
-          <input className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-            placeholder="Title *" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
-          <input className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-            placeholder="YouTube or Vimeo URL *" value={form.video_url} onChange={e => setForm(p => ({ ...p, video_url: e.target.value }))} />
-          <textarea className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none resize-none h-16"
-            placeholder="Description" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
-          <div className="grid grid-cols-2 gap-2">
-            <input className="bg-secondary rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              placeholder="Sport" value={form.sport} onChange={e => setForm(p => ({ ...p, sport: e.target.value }))} />
-            <input className="bg-secondary rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              placeholder="Position" value={form.position} onChange={e => setForm(p => ({ ...p, position: e.target.value }))} />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <select className="bg-secondary rounded-xl px-3 py-2.5 text-sm text-foreground outline-none"
-              value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
-              <option value="workout">Workout</option>
-              <option value="tutorial">Tutorial</option>
-              <option value="form_check">Form Check</option>
-              <option value="progress">Progress</option>
-              <option value="challenge">Challenge</option>
-            </select>
-            <select className="bg-secondary rounded-xl px-3 py-2.5 text-sm text-foreground outline-none"
-              value={form.difficulty} onChange={e => setForm(p => ({ ...p, difficulty: e.target.value }))}>
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-          </div>
-          <p className="text-[10px] text-muted-foreground">Videos are reviewed before going live. Allow 24–48 hrs.</p>
-          <button onClick={submit} disabled={submitting || !form.title || !form.video_url}
-            className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold text-sm disabled:opacity-40 flex items-center justify-center gap-2">
-            <Upload size={14} /> {submitting ? "Submitting…" : "Submit for Review"}
-          </button>
-        </div>
-      )}
+      {/* Uploads happen in the Studio */}
+      <Link to="/studio"
+        className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-primary/40 text-primary text-sm font-semibold rounded-xl hover:bg-primary/5 transition-colors">
+        <Video size={15} /> Upload videos in your Studio →
+      </Link>
     </div>
   );
 }
