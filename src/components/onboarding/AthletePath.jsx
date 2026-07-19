@@ -11,7 +11,8 @@ import FirstAction from "@/components/onboarding/FirstAction";
 const SPORTS = [
   ["football", "Football"], ["basketball", "Basketball"], ["baseball", "Baseball"],
   ["soccer", "Soccer"], ["track", "Track & Field"], ["volleyball", "Volleyball"],
-  ["wrestling", "Wrestling"], ["swimming", "Swimming"], ["lacrosse", "Lacrosse"],
+  ["wrestling", "Wrestling"], ["boxing", "Boxing"], ["mma", "MMA"],
+  ["swimming", "Swimming"], ["lacrosse", "Lacrosse"],
   ["tennis", "Tennis"], ["softball", "Softball"], ["cross_country", "Cross Country"],
   ["golf", "Golf"], ["other", "Other"],
 ];

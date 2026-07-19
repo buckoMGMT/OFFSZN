@@ -7,7 +7,7 @@ import { base44 } from "@/api/base44Client";
 import { ProgressBar, StepShell, PrimaryButton, SkipButton, Chip, Field } from "@/components/onboarding/OnboardingUI";
 import CoachChecklist from "@/components/onboarding/CoachChecklist";
 
-const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "other"];
+const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "boxing", "mma", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "other"];
 const SPECIALTIES = ["Speed", "Strength", "Route running", "Shooting", "Footwork", "Recovery", "Nutrition", "Conditioning"];
 const LEVELS = [["youth", "Youth"], ["middle_school", "Middle school"], ["high_school", "High school"], ["college", "College"], ["semi_pro", "Semi-pro"], ["pro", "Pro"], ["private", "Private clients"]];
 const SLAS = [24, 48, 72];

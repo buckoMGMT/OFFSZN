@@ -17,7 +17,7 @@ import useTabState from "@/lib/useTabState";
 import WorkoutRunner from "@/components/workout/WorkoutRunner";
 import { buildStepsFromProgram, buildStepsFromPlaylist } from "@/lib/workoutSteps";
 
-const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Swimming", "Lacrosse"];
+const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Boxing", "MMA", "Swimming", "Lacrosse"];
 
 const PROGRAMS = [
   { id: 1, title: "Elite Linebacker Training", sport: "Football", duration: 45, isPremium: false, category: "Strength", aim: "Build explosive power and tackle force", targeted_areas: ["Legs", "Core", "Upper Body"], difficulty: "Advanced", description: "Full-body power program designed for linebackers.", cover: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&q=80", timing: "Pre-workout" },
