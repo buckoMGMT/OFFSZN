@@ -32,6 +32,21 @@ const Mark = ({ yes }) => yes
 export default function PassPaywallSheet({ open, onClose }) {
   const [buying, setBuying] = useState(false);
   const [error, setError] = useState("");
+  const [restoreMsg, setRestoreMsg] = useState("");
+
+  // Purchases are account-bound (Stripe subscription on the athlete record) —
+  // "restore" re-checks the account's live tier instead of being a dead tap.
+  const handleRestore = async () => {
+    setRestoreMsg("Checking your account…");
+    try {
+      const list = await base44.entities.Athlete.list("-created_date", 1);
+      setRestoreMsg(list[0]?.subscription_tier === "premium"
+        ? "Your ALL-SZN Pass is active on this account."
+        : "No Pass found. Purchases are tied to your login and restore automatically when you sign in.");
+    } catch {
+      setRestoreMsg("Couldn't check right now — try again in a moment.");
+    }
+  };
   // §4 — back gesture / hardware back dismisses this sheet first
   useSheetBack(open, onClose);
 
@@ -103,8 +118,9 @@ export default function PassPaywallSheet({ open, onClose }) {
           <p className="text-center tabular-nums text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>$9.99 / month</p>
           <p className="text-center text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
             Auto-renews monthly · Cancel anytime in Settings ·{' '}
-            <button className="underline" style={{ color: 'var(--text-tertiary)' }}>Restore purchases</button>
+            <button className="underline" style={{ color: 'var(--text-tertiary)' }} onClick={handleRestore}>Restore purchases</button>
           </p>
+          {restoreMsg && <p className="text-xs text-center mb-2" style={{ color: 'var(--text-secondary)' }}>{restoreMsg}</p>}
           {error && <p className="text-xs text-center mb-2" style={{ color: 'var(--negative)' }}>{error}</p>}
           <button className="btn-primary w-full mb-6" onClick={handleBuy} disabled={buying}>
             {buying ? "Opening checkout…" : "Get the All-SZN Pass"}
