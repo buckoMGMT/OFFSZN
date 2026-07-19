@@ -15,6 +15,7 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
+import Rewards from "@/pages/Rewards";
 import AdvancedStats from "@/components/analytics/AdvancedStats";
 import AccentColorPicker from "@/components/profile/AccentColorPicker";
 import MacroRecompute from "@/components/profile/MacroRecompute";
@@ -201,6 +202,7 @@ export default function Profile() {
         { id: "stats", label: "Stats" },
         { id: "badges", label: "Badges" },
         { id: "goals", label: "Goals" },
+        { id: "locker", label: "Locker" },
         { id: "coach", label: "Coach" },
         { id: "settings", label: "Settings" }].
         map((s) =>
@@ -279,6 +281,12 @@ export default function Profile() {
         }
 
         {activeSection === "badges" && <BadgesSection athlete={athlete} />}
+
+        {activeSection === "locker" &&
+        <div className="-mx-5 mt-3">
+            <Rewards />
+          </div>
+        }
 
         {activeSection === "goals" &&
         <div className="space-y-3 mt-3">
@@ -459,15 +467,6 @@ export default function Profile() {
               </p>
               <p className="font-elite text-[8px] uppercase tracking-widest mt-3" style={{ color: '#9BA3AC' }}>Coded with God</p>
             </div>
-
-            {/* Locker Room — points & rewards (moved off the bottom nav) */}
-            <Link to="/rewards" className="rounded border flex items-center justify-between px-4 py-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
-              <div className="flex items-center gap-3">
-                <Gift size={15} style={{ color: 'var(--accent)' }} />
-                <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>Locker Room</span>
-              </div>
-              <ChevronRight size={14} style={{ color: 'var(--theme-ink-soft)' }} />
-            </Link>
 
             {/* Account */}
             {/* Help & Support */}
