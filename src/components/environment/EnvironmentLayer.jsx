@@ -7,8 +7,10 @@ import { useLocation } from "react-router-dom";
 const ENV = {
   "/": "field",
   "/track": "film",
+  "/drills": "chalk",
   "/playbook": "chalk",
   "/clans": "sideline",
+  "/studio": "filmroom",
   "/rewards": "locker",
   "/profile": "rafters",
 };
@@ -55,12 +57,15 @@ export default function EnvironmentLayer() {
       {/* Stadium light wash — one warm light source, every tab */}
       <div className="stadium-light" style={{ position: "absolute", inset: 0 }} />
 
+      {/* Depth vignette — pulls the eye to content, darkens the far edges */}
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 120% 80% at 50% 40%, transparent 58%, rgba(0,0,0,0.35) 100%)" }} />
+
       {/* THE FIELD — real gridiron: yard lines, hash marks, yard numbers, sideline */}
       {env === "field" && (
         <>
           <div ref={fieldRef} style={{ position: "absolute", inset: 0 }}>
-            <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.05 }}>
-              <g stroke="rgb(245,245,240)" fill="none">
+            <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.09 }}>
+              <g stroke="rgb(120,220,150)" fill="none">
                 {/* Sidelines */}
                 <line x1="14" y1="0" x2="14" y2="900" strokeWidth="3" />
                 <line x1="466" y1="0" x2="466" y2="900" strokeWidth="3" />
@@ -90,7 +95,7 @@ export default function EnvironmentLayer() {
                 })}
               </g>
               {/* Yard numbers — rotated like real field paint */}
-              <g fill="rgb(245,245,240)" fontFamily="'Archivo Black', sans-serif" fontSize="34">
+              <g fill="rgb(120,220,150)" fontFamily="'Archivo Black', sans-serif" fontSize="34">
                 {[[90, "1 0"], [180, "2 0"], [270, "3 0"], [360, "4 0"], [450, "5 0"], [540, "4 0"], [630, "3 0"], [720, "2 0"]].map(([y, n], i) => (
                   <g key={i}>
                     <text x="52" y={y + 12} transform={`rotate(90 52 ${y})`} textAnchor="middle">{n}</text>
@@ -99,7 +104,7 @@ export default function EnvironmentLayer() {
                 ))}
               </g>
               {/* Directional arrows next to numbers */}
-              <g fill="rgb(245,245,240)">
+              <g fill="rgb(120,220,150)">
                 {[90, 180, 270, 360].map(y => <polygon key={`a${y}`} points={`52,${y - 34} 46,${y - 24} 58,${y - 24}`} />)}
                 {[540, 630, 720].map(y => <polygon key={`b${y}`} points={`52,${y + 34} 46,${y + 24} 58,${y + 24}`} />)}
               </g>
@@ -108,8 +113,50 @@ export default function EnvironmentLayer() {
         </>
       )}
 
-      {/* FILM ROOM — combine sheet graph paper */}
+      {/* FILM / STATS — combine-sheet graph paper */}
       {env === "film" && <div className="env-film" style={{ position: "absolute", inset: 0 }} />}
+
+      {/* FILM ROOM — projector screen, tape reels, seat rows, playback bar */}
+      {env === "filmroom" && (
+        <>
+          {/* Warm projector cone from top */}
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 40% at 50% 8%, rgba(255,90,31,0.10), transparent 62%)" }} />
+          <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.09 }}>
+            <g stroke="rgb(245,245,240)" fill="none" strokeWidth="2">
+              {/* Big projector screen */}
+              <rect x="60" y="70" width="360" height="210" rx="6" />
+              <line x1="60" y1="112" x2="420" y2="112" strokeWidth="1" />
+              {/* Grid overlay on screen — like frozen game tape */}
+              {[150, 240, 330].map(x => <line key={`v${x}`} x1={x} y1="112" x2={x} y2="280" strokeWidth="0.75" />)}
+              {[160, 210].map(y => <line key={`h${y}`} x1="60" y1={y} x2="420" y2={y} strokeWidth="0.75" />)}
+              {/* Play triangle center-screen */}
+              <polygon points="228,180 228,220 262,200" fill="rgb(245,245,240)" stroke="none" />
+              {/* Two film reels flanking the screen */}
+              {[[30, 360], [450, 360]].map(([cx, cy], i) => (
+                <g key={i}>
+                  <circle cx={cx} cy={cy} r="26" />
+                  <circle cx={cx} cy={cy} r="6" />
+                  {[0, 60, 120, 180, 240, 300].map(a => {
+                    const r = (a * Math.PI) / 180;
+                    return <circle key={a} cx={cx + Math.cos(r) * 15} cy={cy + Math.sin(r) * 15} r="4" />;
+                  })}
+                </g>
+              ))}
+              {/* Playback scrub bar under the screen */}
+              <line x1="70" y1="310" x2="410" y2="310" strokeWidth="3" />
+              <circle cx="180" cy="310" r="7" fill="rgb(255,90,31)" stroke="none" />
+              {/* Rows of theater seats */}
+              {[430, 500, 570].map((y, row) => (
+                <g key={row}>
+                  {[70, 150, 230, 310, 390].map(x => (
+                    <path key={x} d={`M${x} ${y} q0 -14 18 -14 q18 0 18 14 l0 22 l-36 0 z`} strokeWidth="1.5" />
+                  ))}
+                </g>
+              ))}
+            </g>
+          </svg>
+        </>
+      )}
 
       {/* CHALK TALK — sparse X's, O's, route arrows */}
       {env === "chalk" && (
@@ -140,8 +187,8 @@ export default function EnvironmentLayer() {
 
       {/* LOCKER — a real bank of lockers: doors, vents, handles, name plates, bench */}
       {env === "locker" && (
-        <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.05 }}>
-          <g stroke="rgb(245,245,240)" fill="none" strokeWidth="1.5">
+        <svg width="100%" height="100%" viewBox="0 0 480 900" preserveAspectRatio="xMidYMin slice" style={{ position: "absolute", inset: 0, opacity: 0.085 }}>
+          <g stroke="rgb(200,205,212)" fill="none" strokeWidth="1.5">
             {/* Locker bank — 4 doors */}
             {[20, 135, 250, 365].map((x, i) => (
               <g key={i}>

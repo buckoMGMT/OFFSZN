@@ -51,9 +51,9 @@ export default function Studio() {
   if (!athlete || athlete.role !== "coach") {
     return (
       <div className="px-5 pt-14 text-center" style={{ maxWidth: 480, margin: "0 auto" }}>
-        <h1 className="font-anton text-xl uppercase mb-2" style={{ color: "var(--text-primary)" }}>Coach Studio</h1>
+        <h1 className="font-anton text-xl uppercase mb-2" style={{ color: "var(--text-primary)" }}>Film Room</h1>
         <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
-          The Studio is for coach accounts. Athletes run their game from the Player tab.
+          The Film Room is for coach accounts. Athletes run their game from the Player tab.
         </p>
         <Link to="/profile" className="btn-secondary inline-flex">Go to Player</Link>
       </div>
@@ -63,7 +63,7 @@ export default function Studio() {
   return (
     <div className="px-5 pt-4 pb-32" style={{ maxWidth: 480, margin: "0 auto" }}>
       <PullToRefresh onRefresh={reload}>
-      <h1 className="font-anton text-2xl uppercase mb-4" style={{ color: "var(--text-primary)" }}>Coach Studio</h1>
+      <h1 className="font-anton text-2xl uppercase mb-4" style={{ color: "var(--text-primary)" }}>Film Room</h1>
 
       <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-5 -mx-5 px-5">
         {TABS.map(([v, l]) => (
