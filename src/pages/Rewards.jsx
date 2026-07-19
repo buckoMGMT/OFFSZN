@@ -246,35 +246,15 @@ export default function Rewards() {
 
       <div className="px-4 py-4">
 
-        {/* STORE TAB */}
+        {/* STORE TAB — hidden until merch & rewards are ready to fulfill */}
         {tab === "store" && (
-          <>
-            {/* Filter pills */}
-            <div className="flex gap-2 mb-4">
-              {[
-                { id: "all", label: "All", Icon: null },
-                { id: "merch", label: "Brand Merch", Icon: Shirt },
-                { id: "gift_card", label: "Gift Cards", Icon: Gift },
-              ].map(f => (
-                <button key={f.id} onClick={() => setFilter(f.id)}
-                  className="px-3 py-1 rounded font-elite text-[10px] uppercase tracking-widest inline-flex items-center gap-1.5"
-                  style={{
-                    background: filter === f.id ? 'var(--accent)' : 'var(--surface-2)',
-                        color: filter === f.id ? 'var(--on-accent)' : 'var(--text-secondary)',
-                        border: '1px solid var(--theme-border)',
-                  }}>
-                  {f.Icon && <f.Icon size={11} />}
-                  {f.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              {sorted.map(item => (
-                <RewardCard key={item.id} item={item} athletePoints={points} onRedeem={setRedeemTarget} />
-              ))}
-            </div>
-          </>
+          <div className="text-center py-16">
+            <Package size={40} style={{ color: 'var(--text-tertiary)' }} className="mx-auto mb-4" />
+            <h3 className="font-anton text-xl uppercase mb-2" style={{ color: 'var(--text-primary)' }}>Store Coming Soon</h3>
+            <p className="font-work text-sm max-w-xs mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              We're building out real rewards worth stacking points for. Keep earning — your balance is safe and waiting.
+            </p>
+          </div>
         )}
 
         {/* REFERRALS TAB */}
