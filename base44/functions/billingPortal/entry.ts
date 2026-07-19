@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@17';
+import { safeReturnUrl } from '../../shared/safeReturnUrl.ts';
 
 // Returns the caller's subscription summary + a Stripe customer-portal URL
 // (update card, cancel — access continues through the paid period, receipts).
@@ -13,6 +14,9 @@ Deno.serve(async (req) => {
     caller = user.id;
 
     const { returnUrl } = await req.json();
+    // Coerce returnUrl onto the app's own origin — blocks javascript: URIs and off-site redirects.
+    const safeUrl = safeReturnUrl(req, returnUrl);
+    if (!safeUrl) return Response.json({ error: 'Invalid returnUrl' }, { status: 400 });
     const mine = await base44.entities.Athlete.list('-created_date', 1);
     const me = mine[0];
     if (!me) return Response.json({ error: 'No athlete profile' }, { status: 404 });
@@ -27,7 +31,7 @@ Deno.serve(async (req) => {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: sub.customer,
-      return_url: returnUrl || 'https://example.com',
+      return_url: safeUrl,
     });
 
     console.log(JSON.stringify({ fn: 'billingPortal', caller, outcome: 'ok', ms: Date.now() - started }));

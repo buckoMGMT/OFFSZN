@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import Stripe from 'npm:stripe@17';
+import { safeReturnUrl } from '../../shared/safeReturnUrl.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -9,6 +10,9 @@ Deno.serve(async (req) => {
 
     const { coachAthleteId, returnUrl, plan = 'monthly' } = await req.json();
     if (!coachAthleteId || !returnUrl) return Response.json({ error: 'Missing coachAthleteId or returnUrl' }, { status: 400 });
+    // Coerce returnUrl onto the app's own origin — blocks javascript: URIs and off-site redirects.
+    const safeUrl = safeReturnUrl(req, returnUrl);
+    if (!safeUrl) return Response.json({ error: 'Invalid returnUrl' }, { status: 400 });
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
@@ -92,8 +96,8 @@ Deno.serve(async (req) => {
         },
       }),
       customer_email: user.email,
-      success_url: `${new URL(returnUrl).origin}/coach/${coach.id}/subscribed?price=${chargeUsd}&coach_name=${encodeURIComponent(coach.display_name)}&sid={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}coach_sub=cancel`,
+      success_url: `${new URL(safeUrl).origin}/coach/${coach.id}/subscribed?price=${chargeUsd}&coach_name=${encodeURIComponent(coach.display_name)}&sid={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${safeUrl}${safeUrl.includes('?') ? '&' : '?'}coach_sub=cancel`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
         subscriber_athlete_id: me.id,

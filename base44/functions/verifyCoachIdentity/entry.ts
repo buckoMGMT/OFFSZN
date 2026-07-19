@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import Stripe from 'npm:stripe@17';
+import { safeReturnUrl } from '../../shared/safeReturnUrl.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -8,6 +9,9 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { returnUrl } = await req.json();
+    // Coerce returnUrl onto the app's own origin — blocks javascript: URIs and off-site redirects.
+    const safeUrl = safeReturnUrl(req, returnUrl);
+    if (!safeUrl) return Response.json({ error: 'Invalid returnUrl' }, { status: 400 });
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
     const athletes = await base44.entities.Athlete.list('-created_date', 1);
@@ -33,7 +37,7 @@ Deno.serve(async (req) => {
     const session = await stripe.identity.verificationSessions.create({
       type: 'document',
       options: { document: { require_matching_selfie: true } },
-      return_url: returnUrl,
+      return_url: safeUrl,
       metadata: {
         athlete_id: athlete.id,
         base44_app_id: Deno.env.get('BASE44_APP_ID'),

@@ -151,31 +151,20 @@ export default function Rewards() {
   useEffect(() => { load(); }, [load]);
 
   const onRedeemed = async (item, address) => {
-    // economyGuard: real-world rewards need 90 days + 60 logged days + clean standing
+    // Everything happens server-side in redeemReward: eligibility (90 days +
+    // 60 logged days + clean standing), live balance check, and the deduction.
     try {
-      await base44.functions.invoke("economyGuard", { athleteId: athlete.id });
+      const res = await base44.functions.invoke("redeemReward", { rewardItemId: item.id, shippingAddress: address || "" });
+      setAthlete(prev => ({ ...prev, total_points: res.data?.new_balance ?? prev.total_points }));
     } catch (e) {
       const d = e.response?.data;
       const progress = d?.accountAgeDays != null
         ? ` (${d.accountAgeDays}/${d.requiredDays || 90} days on OFFSZN · ${d.loggedDays ?? 0}/${d.requiredLoggedDays || 60} logged days)`
         : "";
-      alert((d?.message || "Real-world rewards aren't unlocked yet.") + progress);
+      alert((d?.message || "Couldn't complete the redemption.") + progress);
       setRedeemTarget(null);
       return;
     }
-    await base44.entities.Redemption.create({
-      athlete_id: athlete.id,
-      reward_item_id: item.id,
-      reward_name: item.name,
-      reward_type: item.type,
-      points_spent: item.points_required,
-      shipping_address: address || "",
-      status: "pending",
-    });
-    await base44.entities.Athlete.update(athlete.id, {
-      total_points: Math.max(0, (athlete.total_points || 0) - item.points_required),
-    });
-    setAthlete(prev => ({ ...prev, total_points: Math.max(0, (prev.total_points || 0) - item.points_required) }));
     setRedeemTarget(null);
     load();
   };

@@ -2,6 +2,7 @@
 // Grants Athlete.subscription_tier='premium' via stripeWebhook on payment.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@17';
+import { safeReturnUrl } from '../../shared/safeReturnUrl.ts';
 
 const PASS_PRICE_ID = 'price_1TtXmiIPluSFOhP31KPn8tHk'; // ALL-SZN Pass $9.99/mo
 
@@ -21,8 +22,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'You already have the ALL-SZN Pass.' }, { status: 400 });
     }
 
+    // Coerce returnUrl onto the app's own origin — blocks javascript: URIs and off-site redirects.
+    const safeUrl = safeReturnUrl(req, returnUrl);
+    if (!safeUrl) return Response.json({ error: 'Invalid returnUrl' }, { status: 400 });
+
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
-    const origin = new URL(returnUrl).origin;
+    const origin = new URL(safeUrl).origin;
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -32,7 +37,7 @@ Deno.serve(async (req) => {
         metadata: { pass: 'all_szn', athlete_id: me.id },
       },
       success_url: `${origin}/subscription/success?sid={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}pass=cancel`,
+      cancel_url: `${safeUrl}${safeUrl.includes('?') ? '&' : '?'}pass=cancel`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
         pass: 'all_szn',
