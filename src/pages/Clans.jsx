@@ -13,6 +13,14 @@ import { validate, teamSchema } from "@/lib/validators";
 
 const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "other"];
 const TYPES = ["high_school", "club", "college", "other"];
+const DEFAULT_ROSTER_CAP = 25;
+
+// A clan is full when it's not on unlimited override and has hit its cap.
+const clanIsFull = (clan) => {
+  if (clan?.unlimited_roster) return false;
+  const cap = clan?.roster_cap ?? DEFAULT_ROSTER_CAP;
+  return (clan?.member_ids || []).length >= cap;
+};
 
 export default function Clans() {
   const [athlete, setAthlete] = useState(null);
@@ -49,6 +57,7 @@ export default function Clans() {
 
   const joinClan = async (clan) => {
     if (!athlete) return;
+    if (clanIsFull(clan)) return;
     await Promise.all([
       base44.entities.Clan.update(clan.id, { member_ids: [...(clan.member_ids || []), athlete.id] }),
       base44.entities.Athlete.update(athlete.id, { clan_id: clan.id }),
@@ -160,7 +169,7 @@ export default function Clans() {
                 <p className="eyebrow">My Team</p>
                 <h3 className="font-anton text-lg uppercase" style={{ color: 'var(--text-primary)' }}>{myClan.name}</h3>
                 <div className="flex items-center gap-3 mt-0.5">
-                  <span className="font-elite text-[9px]" style={{ color: 'var(--text-tertiary)' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length} members</span>
+                  <span className="font-elite text-[9px]" style={{ color: 'var(--text-tertiary)' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length}{myClan.unlimited_roster ? "" : `/${myClan.roster_cap ?? DEFAULT_ROSTER_CAP}`} members</span>
                   <span className="font-elite text-[9px]" style={{ color: 'var(--accent)' }}><Trophy size={9} className="inline mr-0.5" />{(myClan.total_points || 0).toLocaleString()} pts</span>
                 </div>
               </div>
@@ -224,14 +233,24 @@ export default function Clans() {
               </div>
             ) : (
               <div className="space-y-3">
-                {filtered.map(clan => (
-                  <div key={clan.id} className="space-y-2 animate-slide-up">
-                    <ClanCard clan={clan} isJoined={myClan?.id === clan.id} onClick={!myClan ? () => joinClan(clan) : undefined} />
-                    {!myClan && (
-                      <StampButton onClick={() => joinClan(clan)} fullWidth>Join This Team</StampButton>
-                    )}
-                  </div>
-                ))}
+                {filtered.map(clan => {
+                  const full = clanIsFull(clan);
+                  return (
+                    <div key={clan.id} className="space-y-2 animate-slide-up">
+                      <ClanCard clan={clan} isJoined={myClan?.id === clan.id} onClick={!myClan && !full ? () => joinClan(clan) : undefined} />
+                      {!myClan && (
+                        full ? (
+                          <div className="w-full text-center py-2.5 rounded font-elite text-[10px] uppercase tracking-widest"
+                            style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-tertiary)' }}>
+                            Team Full · {(clan.roster_cap ?? DEFAULT_ROSTER_CAP)} Spots
+                          </div>
+                        ) : (
+                          <StampButton onClick={() => joinClan(clan)} fullWidth>Join This Team</StampButton>
+                        )
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>

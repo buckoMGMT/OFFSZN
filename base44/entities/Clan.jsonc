@@ -29,6 +29,16 @@
         "type": "string"
       }
     },
+    "roster_cap": {
+      "type": "number",
+      "default": 25,
+      "description": "Max athletes allowed in this clan. Default 25. Ignored when unlimited_roster is true."
+    },
+    "unlimited_roster": {
+      "type": "boolean",
+      "default": false,
+      "description": "Admin override \u2014 set manually to let a clan grow past its roster_cap (e.g. large programs / school contracts)."
+    },
     "description": {
       "type": "string"
     },
