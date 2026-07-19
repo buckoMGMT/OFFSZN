@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Crown, Edit2, Sun, Moon, Bell, Lock, LogOut, ChevronRight, Zap, HelpCircle } from "lucide-react";
+import { Trophy, Crown, Edit2, Sun, Moon, Bell, Lock, LogOut, ChevronRight, Zap, HelpCircle, Shield, Gift } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
 import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 import BadgesSection from "@/components/profile/BadgesSection";
@@ -58,6 +58,8 @@ export default function Profile() {
   const [isMinorUser, setIsMinorUser] = useState(false);
   // Weight is "verified" when it came from a logged DailyLog (not just typed on the card).
   const [weightVerified, setWeightVerified] = useState(false);
+  // Athlete's clan — shown as a tappable badge in the header.
+  const [clan, setClan] = useState(null);
 
   useEffect(() => {
     base44.auth.me().then((me) => {
@@ -77,6 +79,11 @@ export default function Profile() {
         base44.entities.DailyLog.filter({ athlete_id: a.id, weight_lbs: { $gt: 0 } }, "-date", 1)
           .then((logs) => setWeightVerified(logs.length > 0))
           .catch(() => {});
+        if (a.clan_id) {
+          base44.entities.Clan.filter({ id: a.clan_id }, "-created_date", 1)
+            .then((cs) => setClan(cs[0] || null))
+            .catch(() => {});
+        }
       }
       setLoading(false);
     });
@@ -146,6 +153,13 @@ export default function Profile() {
                 {[athlete.sport, athlete.position, athlete.grade].filter(Boolean).join(" · ")}
               </p>
               {athlete.school && <p className="font-work text-xs" style={{ color: 'var(--theme-ink-soft)' }}>{athlete.school}</p>}
+              {clan &&
+                <Link to="/clans" className="inline-flex items-center gap-1 mt-1.5 px-2 py-1 rounded-full"
+                  style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                  <Shield size={10} style={{ color: 'var(--accent)' }} />
+                  <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>{clan.name}</span>
+                </Link>
+              }
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
@@ -159,11 +173,12 @@ export default function Profile() {
 
         {/* Stats strip */}
         <div className="flex items-center gap-4 mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-          <div className="flex items-center gap-1.5">
+          {/* Points → tap into the Locker Room (rewards) */}
+          <Link to="/rewards" className="flex items-center gap-1.5">
             <Trophy size={12} style={{ color: 'var(--accent)' }} />
             <span className="font-elite text-sm" style={{ color: 'var(--theme-ink)' }}>{(athlete.total_points || 0).toLocaleString()}</span>
             <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>pts</span>
-          </div>
+          </Link>
           {athlete.current_streak_days > 0 &&
           <div className="flex items-center gap-1.5">
               <span className="font-elite text-sm" style={{ color: 'var(--accent)' }}>{athlete.current_streak_days}</span>
@@ -444,6 +459,15 @@ export default function Profile() {
               </p>
               <p className="font-elite text-[8px] uppercase tracking-widest mt-3" style={{ color: '#9BA3AC' }}>Coded with God</p>
             </div>
+
+            {/* Locker Room — points & rewards (moved off the bottom nav) */}
+            <Link to="/rewards" className="rounded border flex items-center justify-between px-4 py-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+              <div className="flex items-center gap-3">
+                <Gift size={15} style={{ color: 'var(--accent)' }} />
+                <span className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink)' }}>Locker Room</span>
+              </div>
+              <ChevronRight size={14} style={{ color: 'var(--theme-ink-soft)' }} />
+            </Link>
 
             {/* Account */}
             {/* Help & Support */}

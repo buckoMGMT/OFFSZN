@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Rss, BarChart2, BookOpen, Shield, User, Gift, Clapperboard } from "lucide-react";
+import { Rss, BarChart2, BookOpen, Shield, User, Clapperboard } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-/* Floating dock: detached rounded pill, translucent blur, safe-area aware. */
+/* Floating dock: detached rounded pill, translucent blur, safe-area aware.
+   Locker (rewards) now lives inside the Player tab — keeps the dock uncluttered. */
 const baseTabs = [
   { icon: Rss,       label: "Field",   path: "/" },
   { icon: BarChart2, label: "Stats",   path: "/track" },
   { icon: BookOpen,  label: "Drills",  path: "/drills" },
   { icon: Shield,    label: "Teams",   path: "/clans" },
-  { icon: Gift,      label: "Locker",  path: "/rewards" },
   { icon: User,      label: "Player",  path: "/profile" },
 ];
 
@@ -23,7 +23,7 @@ export default function BottomNav() {
       .catch(() => {});
   }, []);
 
-  // Coaches are creators AND can be on a team — they get the Film room added, Teams stays.
+  // Coaches are creators AND can be on a team — they get the Film room added before Player.
   const tabs = isCoach
     ? [...baseTabs.slice(0, 4), { icon: Clapperboard, label: "Film", path: "/studio" }, ...baseTabs.slice(4)]
     : baseTabs;
