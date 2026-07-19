@@ -7,6 +7,7 @@ import PageLabel from "@/components/ui/PageLabel";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import StampButton from "@/components/ui/StampButton";
 import GameDayHero from "@/components/feed/GameDayHero";
+import SocialProofLine from "@/components/feed/SocialProofLine";
 import PullToRefresh from "@/components/layout/PullToRefresh";
 import { StaggerList } from "@/lib/motion.jsx";
 import { track } from "@/lib/analytics";
@@ -118,6 +119,8 @@ export default function Feed() {
       <div className="px-5 py-4">
         {/* Game-day hero — the screenshot moment */}
         {feedFilter !== "clan" && <GameDayHero athlete={athlete} />}
+        {/* Real social proof — hidden until the count is non-trivial */}
+        {feedFilter !== "clan" && <SocialProofLine />}
         {/* Live-from-the-field rule */}
         {feedFilter !== "clan" && (
           <div className="live-rule mb-4">Live from the Field</div>

@@ -6,6 +6,7 @@ import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 import BadgesSection from "@/components/profile/BadgesSection";
 import StrengthMaxes from "@/components/profile/StrengthMaxes";
 import HighlightReel from "@/components/profile/HighlightReel";
+import RecruitingCard from "@/components/profile/RecruitingCard";
 import CoachTier from "@/components/profile/CoachTier";
 import CoachPayoutSetup from "@/components/profile/CoachPayoutSetup";
 import CoachInbox from "@/components/messaging/CoachInbox";
@@ -55,6 +56,8 @@ export default function Profile() {
   const [privacy, setPrivacy] = useState(() => localStorage.getItem('pb_privacy') || 'public');
   const [showPaywall, setShowPaywall] = useState(false);
   const [isMinorUser, setIsMinorUser] = useState(false);
+  // Weight is "verified" when it came from a logged DailyLog (not just typed on the card).
+  const [weightVerified, setWeightVerified] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then((me) => {
@@ -67,7 +70,14 @@ export default function Profile() {
     base44.entities.Athlete.list("-created_date", 1).then((list) => {
       const a = list[0] || null;
       setAthlete(a);
-      if (a) {setForm(a);checkMilestones(a);}
+      if (a) {
+        setForm(a);
+        checkMilestones(a);
+        // A logged weight (from a DailyLog) is verified data vs a self-typed number.
+        base44.entities.DailyLog.filter({ athlete_id: a.id, weight_lbs: { $gt: 0 } }, "-date", 1)
+          .then((logs) => setWeightVerified(logs.length > 0))
+          .catch(() => {});
+      }
       setLoading(false);
     });
   }, []);
@@ -226,6 +236,8 @@ export default function Profile() {
 
         {activeSection === "stats" &&
         <div className="space-y-3 mt-3">
+            {/* Shareable recruiting card — the viral loop. Real data only. */}
+            <RecruitingCard athlete={athlete} verifiedFlags={{ weight_lbs: weightVerified }} />
             <HighlightReel athlete={athlete} onUpdate={reload} />
             <div className="grid grid-cols-2 gap-2">
               {[

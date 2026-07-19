@@ -32,12 +32,17 @@ export default function FirstAction({ athlete }) {
   };
 
   if (done) {
+    // Never a dead end: streak started + ONE clear next action, framed as identity.
     return (
       <div className="flex flex-col flex-1 items-center justify-center px-5 text-center">
-        <h1 className="font-display text-4xl text-tx-primary mb-2">SZN STARTED.</h1>
-        <p className="text-lg mb-8" style={{ color: "var(--accent)" }}>Day 1.</p>
-        <div className="w-full" style={{ maxWidth: 420 }}>
-          <PrimaryButton onClick={() => navigate("/", { replace: true })}>Take the field</PrimaryButton>
+        <h1 className="font-display text-4xl text-tx-primary mb-2">DAY 1 🔥</h1>
+        <p className="text-lg mb-1" style={{ color: "var(--accent)" }}>Your streak is live.</p>
+        <p className="text-tx-secondary text-sm mb-8" style={{ maxWidth: "34ch" }}>
+          You're the kind of athlete who shows up. Keep the SZN going — run your first drill.
+        </p>
+        <div className="w-full flex flex-col gap-2" style={{ maxWidth: 420 }}>
+          <PrimaryButton onClick={() => navigate("/drills", { replace: true })}>Run your first drill</PrimaryButton>
+          <SkipButton onClick={() => navigate("/", { replace: true })} children="Take me to the Field" />
         </div>
       </div>
     );
