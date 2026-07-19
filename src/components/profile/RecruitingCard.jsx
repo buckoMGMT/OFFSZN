@@ -1,24 +1,24 @@
-// Shareable recruiting card — the core viral loop.
-// Renders REAL Athlete data only. Numbers are marked "verified" (from a logged
-// DailyLog / tested strength max) vs "self-reported". Nothing is fabricated.
-// Free users get the basic card; All-SZN Pass unlocks HD export + share.
+// Shareable player card — the core viral loop. Real data only.
+// Athlete card = performance (up to 6 stats — ONLY what exists; 2 stats = 2 big cells).
+// Coach card = credibility + services — never grade/position/body stats.
+// ZERO truncation: name auto-scales, meta wraps. Nothing on the card ellipsizes.
+// Verified shield = logged/tested data ONLY. Subscription is never "verified".
 import { useState, useRef } from "react";
 import html2canvas from "html2canvas";
-import { Share2, Download, Lock, ShieldCheck, Flame } from "lucide-react";
+import { Share2, Download, Lock, ShieldCheck } from "lucide-react";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 
 const IN = (n) => (n ? `${Math.floor(n / 12)}'${n % 12}"` : null);
 const MILE = (s) => (s ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : null);
 
-function StatCell({ label, value, verified }) {
-  if (!value) return null;
+function StatCell({ label, value, verified, big }) {
   return (
-    <div className="flex flex-col items-center px-2 py-2">
+    <div className="flex flex-col items-center justify-center px-1 py-3">
       <div className="flex items-center gap-1">
-        <span style={{ fontFamily: "'Archivo Black', sans-serif", fontVariantNumeric: "tabular-nums", fontSize: 20, color: "#fff", lineHeight: 1 }}>{value}</span>
-        {verified && <ShieldCheck size={11} style={{ color: "#2FBF71" }} />}
+        <span style={{ fontFamily: "'Archivo Black', sans-serif", fontVariantNumeric: "tabular-nums", fontSize: big ? 28 : 20, color: "#fff", lineHeight: 1 }}>{value}</span>
+        {verified && <ShieldCheck size={big ? 13 : 11} style={{ color: "#2FBF71", flexShrink: 0 }} />}
       </div>
-      <span style={{ fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginTop: 4 }}>{label}</span>
+      <span style={{ fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", marginTop: 5 }}>{label}</span>
     </div>
   );
 }
@@ -31,9 +31,49 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
 
   if (!athlete) return null;
   const isPremium = athlete.subscription_tier === "premium";
+  const isCoach = athlete.role === "coach";
   const streak = athlete.current_streak_days || 0;
+  const points = athlete.total_points || 0;
 
-  const meta = [athlete.position, athlete.grade, athlete.school].filter(Boolean).join(" · ");
+  const name = (athlete.display_name || "Athlete").toUpperCase();
+  // Auto-scale so long names NEVER truncate
+  const nameSize = name.length <= 12 ? 22 : name.length <= 18 ? 18 : 15;
+
+  // Identity meta — height/weight are identity, not performance; they live here.
+  const identity = isCoach
+    ? [
+        athlete.sport ? `${athlete.sport.replace(/_/g, " ")} coach` : "coach",
+        athlete.coach_years_experience ? `${athlete.coach_years_experience} yrs` : null,
+        ...(athlete.coach_levels_coached || []).slice(0, 3).map((l) => l.replace(/_/g, " ")),
+      ].filter(Boolean)
+    : [
+        athlete.sport?.replace(/_/g, " "),
+        athlete.position,
+        athlete.grade,
+        IN(athlete.height_inches),
+        athlete.weight_lbs ? `${athlete.weight_lbs} lbs` : null,
+      ].filter(Boolean);
+
+  // Performance grid — only stats that exist. A day-one athlete leads with STREAK + PTS.
+  const stats = isCoach
+    ? [
+        { label: "Yrs Exp", value: athlete.coach_years_experience },
+        { label: "Videos", value: athlete.approved_video_count || null, verified: !!athlete.approved_video_count },
+        { label: "Views", value: athlete.total_video_views ? athlete.total_video_views.toLocaleString() : null, verified: !!athlete.total_video_views },
+      ].filter((s) => s.value)
+    : [
+        { label: "Bench", value: athlete.bench_press_lbs, verified: verifiedFlags.bench_press_lbs },
+        { label: "Squat", value: athlete.squat_lbs, verified: verifiedFlags.squat_lbs },
+        { label: "Deadlift", value: athlete.deadlift_lbs, verified: verifiedFlags.deadlift_lbs },
+        { label: "Mile", value: MILE(athlete.mile_time_seconds), verified: verifiedFlags.mile_time_seconds },
+        // Streak & points are system-logged data — always verified.
+        { label: "Streak", value: streak > 0 ? streak : null, verified: streak > 0 },
+        { label: "Pts", value: points > 0 ? points.toLocaleString() : null, verified: points > 0 },
+      ].filter((s) => s.value);
+
+  const cols = Math.min(Math.max(stats.length, 1), 3);
+  const big = stats.length <= 3;
+  const anyVerified = stats.some((s) => s.verified) || (!isCoach && verifiedFlags.weight_lbs && athlete.weight_lbs);
 
   const renderPng = async () => {
     const canvas = await html2canvas(cardRef.current, {
@@ -53,7 +93,6 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: "My OFFSZN card", text: "Built on OFFSZN — offsznapp.com" });
       } else {
-        // Fallback: download the image
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
         URL.revokeObjectURL(a.href);
@@ -88,7 +127,6 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
           borderRadius: 16,
           background: "linear-gradient(150deg, #1A1D21 0%, #0A0B0D 60%)",
           border: "1px solid var(--border-strong)",
-          filter: isPremium ? "none" : "none",
         }}
       >
         {/* Accent header band */}
@@ -101,39 +139,62 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
           </g>
         </svg>
 
+        {/* Jersey number — big, on the card, where it flexes */}
+        <span style={{ position: "absolute", top: 16, right: 14, fontFamily: "'Archivo Black', sans-serif", fontSize: 54, lineHeight: 1, color: "rgba(255,90,31,0.15)", letterSpacing: "-0.02em", pointerEvents: "none" }}>
+          05
+        </span>
+
         <div className="relative p-4">
-          <div className="flex items-center gap-3 mb-3">
+          {/* Identity row — nothing here may ellipsize; meta wraps to two lines */}
+          <div className="flex items-start gap-3 mb-3" style={{ paddingRight: 48 }}>
             <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style={{ background: "#23272C", border: "2px solid var(--accent)" }}>
               {athlete.avatar_url
                 ? <img src={athlete.avatar_url} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
-                : <span style={{ fontFamily: "'Archivo Black', sans-serif", color: "var(--accent)", fontSize: 22 }}>{(athlete.display_name || "A")[0].toUpperCase()}</span>}
+                : <span style={{ fontFamily: "'Archivo Black', sans-serif", color: "var(--accent)", fontSize: 22 }}>{name[0]}</span>}
             </div>
-            <div className="min-w-0">
-              <p style={{ fontFamily: "'Archivo Black', sans-serif", textTransform: "uppercase", color: "#fff", fontSize: 20, lineHeight: 1.05 }} className="truncate">{athlete.display_name}</p>
-              <p style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginTop: 2 }} className="truncate">
-                {athlete.sport?.replace(/_/g, " ")}{meta ? ` — ${meta}` : ""}
+            <div className="min-w-0" style={{ paddingTop: 2 }}>
+              <p style={{ fontFamily: "'Archivo Black', sans-serif", textTransform: "uppercase", color: "#fff", fontSize: nameSize, lineHeight: 1.1, wordBreak: "break-word" }}>{name}</p>
+              <p style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginTop: 3, lineHeight: 1.5 }}>
+                {identity.join(" · ")}
+                {!isCoach && verifiedFlags.weight_lbs && athlete.weight_lbs
+                  ? <ShieldCheck size={9} style={{ color: "#2FBF71", display: "inline", marginLeft: 3, verticalAlign: "-1px" }} />
+                  : null}
               </p>
+              {athlete.school && <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{athlete.school}</p>}
             </div>
-            {streak > 0 && (
-              <div className="ml-auto flex items-center gap-1 px-2 py-1 rounded-full flex-shrink-0" style={{ background: "rgba(255,90,31,0.15)", border: "1px solid var(--accent)" }}>
-                <Flame size={11} style={{ color: "var(--accent)" }} />
-                <span style={{ fontVariantNumeric: "tabular-nums", fontSize: 11, fontWeight: 600, color: "var(--accent)" }}>{streak}</span>
-              </div>
-            )}
           </div>
 
-          {/* Stat grid — verified numbers marked with a green shield */}
-          <div className="grid grid-cols-4 rounded-lg mb-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <StatCell label="Bench" value={athlete.bench_press_lbs} verified={verifiedFlags.bench_press_lbs} />
-            <StatCell label="Squat" value={athlete.squat_lbs} verified={verifiedFlags.squat_lbs} />
-            <StatCell label="Deadlift" value={athlete.deadlift_lbs} verified={verifiedFlags.deadlift_lbs} />
-            <StatCell label="Mile" value={MILE(athlete.mile_time_seconds)} verified={verifiedFlags.mile_time_seconds} />
-            <StatCell label="Height" value={IN(athlete.height_inches)} />
-            <StatCell label="Weight" value={athlete.weight_lbs ? `${athlete.weight_lbs}` : null} verified={verifiedFlags.weight_lbs} />
-          </div>
+          {/* Coach credibility — identity verification only, never subscription */}
+          {isCoach && athlete.is_coach_verified && (
+            <div className="inline-flex items-center gap-1 px-2 py-1 rounded mb-3" style={{ background: "rgba(47,191,113,0.12)", border: "1px solid #2FBF71" }}>
+              <ShieldCheck size={11} style={{ color: "#2FBF71" }} />
+              <span style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", color: "#2FBF71", fontWeight: 600 }}>Verified Coach</span>
+            </div>
+          )}
+          {isCoach && (athlete.coach_specialties || []).length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {athlete.coach_specialties.slice(0, 4).map((s) => (
+                <span key={s} style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.75)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: "3px 8px", borderRadius: 6 }}>{s}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Stat grid — jersey-back energy. Cells scale up when fewer stats exist. */}
+          {stats.length > 0 && (
+            <div className="grid rounded-lg mb-3" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              {stats.map((s) => <StatCell key={s.label} label={s.label} value={s.value} verified={s.verified} big={big} />)}
+            </div>
+          )}
+
+          {/* Coach services line */}
+          {isCoach && athlete.coach_sub_price_usd > 0 && (
+            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>
+              1-on-1 coaching · ${athlete.coach_sub_price_usd}/mo
+            </p>
+          )}
 
           {/* Verified legend — only when at least one verified number exists */}
-          {Object.values(verifiedFlags).some(Boolean) && (
+          {anyVerified && (
             <div className="flex items-center gap-1 mb-2">
               <ShieldCheck size={10} style={{ color: "#2FBF71" }} />
               <span style={{ fontSize: 8, color: "rgba(255,255,255,0.5)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Verified from logged / tested data</span>
@@ -143,15 +204,16 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
           {/* Branded footer — every share is a growth touch */}
           <div className="flex items-center justify-between pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
             <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 11, color: "var(--accent)", letterSpacing: "0.04em" }}>OFFSZN</span>
-            <span style={{ fontSize: 8, color: "rgba(255,255,255,0.45)", letterSpacing: "0.08em" }}>Built on OFFSZN — offsznapp.com</span>
+            <span className="flex items-center gap-2">
+              {!isPremium && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                  <Lock size={8} style={{ color: "rgba(255,255,255,0.6)" }} />
+                  <span style={{ fontSize: 7, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.6)" }}>Basic</span>
+                </span>
+              )}
+              <span style={{ fontSize: 8, color: "rgba(255,255,255,0.45)", letterSpacing: "0.08em" }}>Built on OFFSZN — offsznapp.com</span>
+            </span>
           </div>
-
-          {!isPremium && (
-            <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--border-strong)" }}>
-              <Lock size={9} style={{ color: "rgba(255,255,255,0.7)" }} />
-              <span style={{ fontSize: 8, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.7)" }}>Basic</span>
-            </div>
-          )}
         </div>
       </div>
 

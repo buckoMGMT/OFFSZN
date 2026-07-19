@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Crown, Edit2, Sun, Moon, Bell, Lock, LogOut, ChevronRight, Zap, HelpCircle, Shield, Gift } from "lucide-react";
+import { Trophy, Crown, Edit2, Sun, Moon, Bell, LogOut, ChevronRight, Zap, HelpCircle, Shield, ShieldCheck, Settings as SettingsIcon } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
 import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 import BadgesSection from "@/components/profile/BadgesSection";
@@ -10,7 +10,6 @@ import RecruitingCard from "@/components/profile/RecruitingCard";
 import CoachTier from "@/components/profile/CoachTier";
 import CoachPayoutSetup from "@/components/profile/CoachPayoutSetup";
 import CoachInbox from "@/components/messaging/CoachInbox";
-import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import AvatarUpload from "@/components/profile/AvatarUpload";
@@ -27,20 +26,17 @@ import { validate, goalsSchema } from "@/lib/validators";
 import ChipSelect from "@/components/ui/ChipSelect";
 import useTabState from "@/lib/useTabState";
 
-const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
+const SPORTS = ["football", "basketball", "baseball", "soccer", "track", "volleyball", "wrestling", "boxing", "mma", "swimming", "lacrosse", "tennis", "softball", "cross_country", "golf", "athlete", "other"];
 const GRADES = ["freshman", "sophomore", "junior", "senior", "college"];
 
-// Chrome foil seal for premium
-function ChromeSeal() {
+// Flat subscription chip — never says "verified" (verification = identity only)
+function PassChip() {
   return (
-    <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-      <circle cx="26" cy="26" r="24" stroke="#9BA3AC" strokeWidth="2.5" fill="#DCDEE1" />
-      <circle cx="26" cy="26" r="19" stroke="#5E646B" strokeWidth="1" fill="none" strokeDasharray="3 2" />
-      <text x="26" y="22" textAnchor="middle" fontFamily="Anton" fontSize="7" fill="var(--accent)" letterSpacing="1">ALL‑SZN</text>
-      <text x="26" y="31" textAnchor="middle" fontFamily="Special Elite" fontSize="5" fill="#5E646B" letterSpacing="1">PASS</text>
-      <text x="26" y="37" textAnchor="middle" fontFamily="Special Elite" fontSize="4" fill="#9BA3AC" letterSpacing="0.5">VERIFIED</text>
-    </svg>);
-
+    <span className="px-2 py-1 rounded font-elite text-[9px] uppercase tracking-widest"
+      style={{ background: 'var(--accent-subtle)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
+      ALL-SZN
+    </span>
+  );
 }
 
 export default function Profile() {
@@ -132,6 +128,7 @@ export default function Profile() {
 
 
   const isPremium = athlete.subscription_tier === "premium";
+  const isCoach = athlete.role === "coach";
 
   const bg = darkMode ? '#0D0D0F' : '#EDEEF0';
   const surface = darkMode ? '#1B1B1D' : '#DCDEE1';
@@ -146,14 +143,23 @@ export default function Profile() {
       <div className="px-5 pt-5 pb-5 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-1)' }}>
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-3">
-            {/* Avatar — tap to change photo */}
-            <AvatarUpload athlete={athlete} onUpdated={reload} />
+            {/* Avatar — camera badge appears in edit mode only */}
+            <AvatarUpload athlete={athlete} onUpdated={reload} editable={editing} />
             <div>
               <h1 className="font-anton text-xl uppercase leading-tight" style={{ color: 'var(--theme-ink)' }}>{athlete.display_name || "Athlete"}</h1>
+              {/* Role-aware meta — coaches show coaching identity, never grade/position */}
               <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>
-                {[athlete.sport, athlete.position, athlete.grade].filter(Boolean).join(" · ")}
+                {isCoach
+                  ? [athlete.sport ? `${athlete.sport.replace(/_/g, " ")} coach` : "coach", athlete.coach_years_experience ? `${athlete.coach_years_experience} yrs` : null, ...(athlete.coach_levels_coached || []).slice(0, 2).map((l) => l.replace(/_/g, " "))].filter(Boolean).join(" · ")
+                  : [athlete.sport?.replace(/_/g, " "), athlete.position, athlete.grade].filter(Boolean).join(" · ")}
               </p>
               {athlete.school && <p className="font-work text-xs" style={{ color: 'var(--theme-ink-soft)' }}>{athlete.school}</p>}
+              {isCoach && athlete.is_coach_verified &&
+                <span className="inline-flex items-center gap-1 mt-1.5 mr-1.5 px-2 py-1 rounded-full" style={{ background: 'rgba(47,191,113,0.12)', border: '1px solid var(--positive)' }}>
+                  <ShieldCheck size={10} style={{ color: 'var(--positive)' }} />
+                  <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--positive)' }}>Verified Coach</span>
+                </span>
+              }
               {clan &&
                 <Link to="/clans" className="inline-flex items-center gap-1 mt-1.5 px-2 py-1 rounded-full"
                   style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
@@ -163,33 +169,41 @@ export default function Profile() {
               }
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <PageLabel number={5} />
+          <div className="flex items-center gap-2">
+            {/* Settings lives behind the gear — not a tab */}
+            <button onClick={() => setActiveSection("settings")} aria-label="Settings" className="p-2 rounded"
+            style={{
+              background: activeSection === "settings" ? 'var(--accent-subtle)' : 'var(--theme-bg)',
+              border: `1px solid ${activeSection === "settings" ? 'var(--accent)' : 'var(--theme-border)'}`
+            }}>
+              <SettingsIcon size={14} style={{ color: activeSection === "settings" ? 'var(--accent)' : 'var(--theme-ink-soft)' }} />
+            </button>
             <button onClick={() => setEditing(!editing)} className="flex items-center gap-1 px-2.5 py-1.5 rounded font-elite text-[9px] uppercase tracking-widest"
-            style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
+            style={{ background: editing ? 'var(--accent-subtle)' : 'var(--theme-bg)', border: `1px solid ${editing ? 'var(--accent)' : 'var(--theme-border)'}`, color: editing ? 'var(--accent)' : 'var(--theme-ink-soft)' }}>
               <Edit2 size={10} /> Edit
             </button>
           </div>
         </div>
 
-        {/* Stats strip */}
+        {/* Stats strip — icon, number, and chip centered on one axis */}
         <div className="flex items-center gap-4 mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
           {/* Points → tap into the Locker Room (rewards) */}
-          <Link to="/rewards" className="flex items-center gap-1.5">
-            <Trophy size={12} style={{ color: 'var(--accent)' }} />
-            <span className="font-elite text-sm" style={{ color: 'var(--theme-ink)' }}>{(athlete.total_points || 0).toLocaleString()}</span>
-            <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>pts</span>
+          <Link to="/rewards" className="flex items-center gap-1.5" style={{ lineHeight: 1 }}>
+            <Trophy size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+            <span className="font-elite text-sm" style={{ color: 'var(--theme-ink)', lineHeight: 1 }}>{(athlete.total_points || 0).toLocaleString()}</span>
+            <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)', lineHeight: 1 }}>pts</span>
           </Link>
           {athlete.current_streak_days > 0 &&
-          <div className="flex items-center gap-1.5">
-              <span className="font-elite text-sm" style={{ color: 'var(--accent)' }}>{athlete.current_streak_days}</span>
-                <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>SZN Streak</span>
+          <div className="flex items-center gap-1.5" style={{ lineHeight: 1 }}>
+              <span className="font-elite text-sm" style={{ color: 'var(--accent)', lineHeight: 1 }}>{athlete.current_streak_days}</span>
+                <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)', lineHeight: 1 }}>SZN Streak</span>
             </div>
           }
           {isPremium ?
           <div className="ml-auto flex items-center gap-2">
-                <button onClick={() => setShowPaywall(true)} className="font-elite text-[9px] uppercase tracking-widest underline" style={{ color: 'var(--text-tertiary)' }}>Compare Plans</button>
-                <ChromeSeal />
+                <button onClick={() => setShowPaywall(true)} className="px-2 py-1 rounded font-elite text-[9px] uppercase tracking-widest"
+                style={{ border: '1px solid var(--border-strong)', color: 'var(--text-secondary)', background: 'transparent' }}>Compare Plans</button>
+                <PassChip />
               </div> :
           <button onClick={() => setShowPaywall(true)} className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Get ALL-SZN Pass →</button>
           }
@@ -203,8 +217,8 @@ export default function Profile() {
         { id: "badges", label: "Badges" },
         { id: "goals", label: "Goals" },
         { id: "locker", label: "Locker" },
-        { id: "coach", label: "Coach" },
-        { id: "settings", label: "Settings" }].
+        // Coach tab is role-gated; Settings lives behind the header gear
+        ...(isCoach ? [{ id: "coach", label: "Coach" }] : [])].
         map((s) =>
         <button key={s.id} onClick={() => setActiveSection(s.id)}
         className="flex-1 py-3 font-elite text-[9px] uppercase tracking-widest"
@@ -236,8 +250,8 @@ export default function Profile() {
             {/* App-styled pickers — never native <select> */}
             <ChipSelect label="Sport" options={SPORTS} value={form.sport || ""}
             onChange={(v) => setForm((p) => ({ ...p, sport: v }))} />
-            <ChipSelect label="Grade" options={GRADES} value={form.grade || ""}
-            onChange={(v) => setForm((p) => ({ ...p, grade: v }))} />
+            {!isCoach && <ChipSelect label="Grade" options={GRADES} value={form.grade || ""}
+            onChange={(v) => setForm((p) => ({ ...p, grade: v }))} />}
             <textarea className="w-full rounded px-4 py-3 text-sm font-work outline-none resize-none h-16"
           style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
           placeholder="Bio" value={form.bio || ""} onChange={(e) => setForm((p) => ({ ...p, bio: e.target.value }))} />
@@ -260,8 +274,10 @@ export default function Profile() {
               {[
             { label: "Day Streak", value: athlete.current_streak_days || 0 },
             { label: "OFFSZN Points", value: (athlete.total_points || 0).toLocaleString(), accent: true },
+            // Body-comp cells are athlete-only — never on a coach profile
+            ...(isCoach ? [] : [
             { label: "Current lbs", value: athlete.weight_lbs || "--" },
-            { label: "Goal lbs", value: athlete.goal_weight_lbs || "--" }].
+            { label: "Goal lbs", value: athlete.goal_weight_lbs || "--" }])].
             map(({ label, value, accent }) =>
             <div key={label} className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: accent ? 'var(--accent)' : 'var(--theme-border)', borderLeftWidth: accent ? 3 : 1 }}>
                   <p className="font-elite text-[8px] uppercase tracking-widest mb-1" style={{ color: 'var(--theme-ink-soft)' }}>{label}</p>
@@ -269,8 +285,8 @@ export default function Profile() {
                 </div>
             )}
             </div>
-            <StrengthMaxes athlete={athlete} onUpdate={reload} />
-            <AdvancedStats athlete={athlete} isPremium={isPremium} onUpgrade={() => setShowPaywall(true)} />
+            {!isCoach && <StrengthMaxes athlete={athlete} onUpdate={reload} />}
+            {!isCoach && <AdvancedStats athlete={athlete} isPremium={isPremium} onUpgrade={() => setShowPaywall(true)} />}
             {athlete.bio &&
           <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
                 <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Bio</p>
@@ -338,7 +354,7 @@ export default function Profile() {
           </div>
         }
 
-        {activeSection === "coach" &&
+        {activeSection === "coach" && isCoach &&
         <div className="mt-3 space-y-4">
             <CoachPayoutSetup athlete={athlete} onUpdate={(a) => setAthlete(a)} />
             <CoachInbox athlete={athlete} />
@@ -500,7 +516,7 @@ export default function Profile() {
             <DeleteAccountSection />
 
             <p className="text-center text-xs pb-2">
-              <Link to="/aup" className="underline" style={{ color: 'var(--text-tertiary)' }}>Acceptable Use Policy</Link>
+              <Link to="/aup" style={{ color: 'var(--text-tertiary)' }}>Acceptable Use Policy</Link>
             </p>
 
           </div>

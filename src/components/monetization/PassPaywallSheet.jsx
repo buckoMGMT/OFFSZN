@@ -118,7 +118,7 @@ export default function PassPaywallSheet({ open, onClose }) {
           <p className="text-center tabular-nums text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>$9.99 / month</p>
           <p className="text-center text-xs mb-3" style={{ color: 'var(--text-tertiary)' }}>
             Auto-renews monthly · Cancel anytime in Settings ·{' '}
-            <button className="underline" style={{ color: 'var(--text-tertiary)' }} onClick={handleRestore}>Restore purchases</button>
+            <button style={{ color: 'var(--text-secondary)', fontWeight: 600 }} onClick={handleRestore}>Restore purchases</button>
           </p>
           {restoreMsg && <p className="text-xs text-center mb-2" style={{ color: 'var(--text-secondary)' }}>{restoreMsg}</p>}
           {error && <p className="text-xs text-center mb-2" style={{ color: 'var(--negative)' }}>{error}</p>}
