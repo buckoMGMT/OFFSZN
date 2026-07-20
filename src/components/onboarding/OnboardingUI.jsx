@@ -14,8 +14,10 @@ export function ProgressBar({ filled, total }) {
 }
 
 export function StepShell({ eyebrow, title, children, onBack, canBack }) {
+  // Full-height flex shell: any `mt-auto` action block is pinned to the SAME
+  // bottom position on every step, clear of the native home indicator.
   return (
-    <div className="flex flex-col min-h-full px-5 pt-6 pb-8 flex-1" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
+    <div className="flex flex-col min-h-full px-5 pt-6 flex-1" style={{ maxWidth: 480, margin: "0 auto", width: "100%", paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}>
       {canBack && (
         <button onClick={onBack} aria-label="Back"
                 className="self-start mb-4 text-tx-secondary text-sm font-medium">

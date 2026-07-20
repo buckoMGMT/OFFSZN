@@ -94,11 +94,18 @@ export default function Profile() {
     const g = validate(goalsSchema, form);
     if (g.error) { setGoalsError(g.error); return; }
     setGoalsError(null);
-    setSaving(true);
-    const updated = await base44.entities.Athlete.update(athlete.id, form);
-    setAthlete(updated);
+    // Optimistic save — the UI responds instantly, the write happens in the background.
+    const prev = athlete;
+    setAthlete({ ...athlete, ...form });
     setEditing(false);
-    setSaving(false);
+    try {
+      const updated = await base44.entities.Athlete.update(athlete.id, form);
+      setAthlete(updated);
+    } catch {
+      setAthlete(prev);
+      setForm(prev);
+      setGoalsError("Couldn't save your changes — check your connection and try again.");
+    }
   };
 
   const createProfile = async () => {
@@ -110,9 +117,17 @@ export default function Profile() {
   const reload = () => base44.entities.Athlete.list("-created_date", 1).then((list) => {if (list[0]) {setAthlete(list[0]);setForm(list[0]);}});
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: 'var(--surface-0)' }}>
-      <PlayDiagram size={150} />
-      <p className="font-elite text-xs mt-4" style={{ color: 'var(--text-tertiary)' }}>Loading player card…</p>
+    <div className="px-5 pt-5 space-y-4" style={{ maxWidth: 480, margin: '0 auto' }}>
+      <div className="flex items-center gap-3">
+        <div className="skeleton" style={{ width: 64, height: 64, borderRadius: 8 }} />
+        <div className="flex-1 space-y-2">
+          <div className="skeleton" style={{ width: '55%', height: 20 }} />
+          <div className="skeleton" style={{ width: '35%', height: 12 }} />
+        </div>
+      </div>
+      <div className="skeleton" style={{ width: '100%', height: 34, borderRadius: 'var(--r-sm)' }} />
+      <div className="skeleton" style={{ width: '100%', height: 200, borderRadius: 'var(--r-lg)' }} />
+      <div className="skeleton" style={{ width: '100%', height: 80, borderRadius: 'var(--r-lg)' }} />
     </div>);
 
 

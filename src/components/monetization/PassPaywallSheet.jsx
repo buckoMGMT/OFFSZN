@@ -122,8 +122,12 @@ export default function PassPaywallSheet({ open, onClose }) {
           </p>
           {restoreMsg && <p className="text-xs text-center mb-2" style={{ color: 'var(--text-secondary)' }}>{restoreMsg}</p>}
           {error && <p className="text-xs text-center mb-2" style={{ color: 'var(--negative)' }}>{error}</p>}
-          <button className="btn-primary w-full mb-6" onClick={handleBuy} disabled={buying}>
+          <button className="btn-primary w-full mb-2" onClick={handleBuy} disabled={buying}>
             {buying ? "Opening checkout…" : "Get the All-SZN Pass"}
+          </button>
+          {/* Frictionless exit — declining is always as easy as buying */}
+          <button className="w-full py-3 mb-4 text-sm font-medium" style={{ color: 'var(--text-secondary)' }} onClick={onClose}>
+            Not now
           </button>
 
           <p className="eyebrow mb-2">Questions</p>
