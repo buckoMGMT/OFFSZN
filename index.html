@@ -20,6 +20,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@300;400;500;600&family=Special+Elite&family=Permanent+Marker&display=swap" rel="stylesheet" />
   </head>
   <body>
+    <script>
+      // App Store screenshot mode — only runs under automated capture (webdriver).
+      // A 1284px-wide viewport zoomed 3× renders the exact 428×926 mobile layout
+      // at native 1284×2778 pixel output. Never affects real users.
+      if (navigator.webdriver && window.innerWidth >= 1200) {
+        document.documentElement.style.zoom = 3;
+      }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
