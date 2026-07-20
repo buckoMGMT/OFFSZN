@@ -5,7 +5,8 @@ const KEY = "offszn_analytics_consent";
 
 export default function ConsentBanner() {
   const [answered, setAnswered] = useState(() => localStorage.getItem(KEY) !== null);
-  if (answered) return null;
+  // Automated/headless sessions (screenshot capture) never see the banner
+  if (answered || navigator.webdriver) return null;
 
   const choose = (value) => {
     localStorage.setItem(KEY, value);

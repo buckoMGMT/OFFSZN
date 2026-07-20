@@ -94,6 +94,7 @@ export function MilestoneNotifierProvider({ children }) {
   const shownRef = useRef(new Set(JSON.parse(localStorage.getItem('pb_shown_milestones') || '[]')));
 
   const addNotification = useCallback((type, value) => {
+    if (navigator.webdriver) return; // no toasts in automated/screenshot sessions
     const key = `${type}_${value}`;
     if (shownRef.current.has(key)) return;
     shownRef.current.add(key);
