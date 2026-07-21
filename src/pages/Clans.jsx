@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Shield, Trophy, Users, X, Swords, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Shield, Trophy, Users, X, Pencil, Trash2 } from "lucide-react";
 import ClanCard from "@/components/clans/ClanCard";
+import ChallengesTab from "@/components/clans/ChallengesTab";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
@@ -37,7 +38,6 @@ export default function Clans() {
   const [editingAnn, setEditingAnn] = useState(false);
   const [annDraft, setAnnDraft] = useState("");
   const [confirmDeleteAnn, setConfirmDeleteAnn] = useState(false);
-  const [challengeNotice, setChallengeNotice] = useState(false);
   const isPremiumUser = athlete?.subscription_tier === "premium";
   const isTeamAdmin = !!myClan && athlete?.id === myClan.admin_id;
 
@@ -271,21 +271,7 @@ export default function Clans() {
         )}
 
         {tab === "challenges" && (
-          <div className="text-center py-16">
-            <Swords size={40} style={{ color: '#9BA3AC' }} className="mx-auto mb-4" />
-            <h3 className="font-anton text-2xl uppercase mb-2" style={{ color: 'var(--theme-ink)' }}>Team Challenges</h3>
-            <p className="font-work text-sm mb-6 max-w-xs mx-auto" style={{ color: 'var(--theme-ink-soft)' }}>
-              Head-to-head on macros, sleep, or workout streaks.
-            </p>
-            {myClan
-              ? (challengeNotice
-                  ? <p className="font-work text-sm max-w-xs mx-auto" style={{ color: 'var(--text-primary)' }}>
-                      Coming soon — head-to-head team challenges drop in the next update. Keep stacking points so your squad's ready.
-                    </p>
-                  : <StampButton onClick={() => setChallengeNotice(true)}>Send a Challenge</StampButton>)
-              : <p className="font-elite text-xs uppercase" style={{ color: '#9BA3AC' }}>Join a team first.</p>
-            }
-          </div>
+          <ChallengesTab myClan={myClan} allClans={clans} />
         )}
       </div>
       </PullToRefresh>

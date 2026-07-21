@@ -31,6 +31,10 @@
     "position": {
       "type": "string"
     },
+    "jersey_number": {
+      "type": "string",
+      "description": "Athlete's jersey number, shown on the recruiting card. Free text (supports '00'). Absent = no number shown."
+    },
     "school": {
       "type": "string"
     },

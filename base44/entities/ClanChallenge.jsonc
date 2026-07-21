@@ -1,6 +1,7 @@
 {
   "name": "ClanChallenge",
   "type": "object",
+  "description": "A head-to-head team challenge. Score = sum of members' points earned during the window (current team total minus the baseline snapshot taken at start). Resolves to a winner when end_date passes.",
   "properties": {
     "challenger_clan_id": {
       "type": "string"
@@ -17,27 +18,35 @@
     "metric": {
       "type": "string",
       "enum": [
-        "macro_streak",
-        "sleep_score",
-        "workout_completion",
-        "total_points",
-        "water_intake"
-      ]
+        "team_points"
+      ],
+      "default": "team_points",
+      "description": "MVP: total team points earned during the window. Enum kept for future metrics."
     },
     "duration_days": {
       "type": "number"
     },
     "start_date": {
       "type": "string",
-      "format": "date"
+      "format": "date-time"
     },
     "end_date": {
       "type": "string",
-      "format": "date"
+      "format": "date-time"
+    },
+    "challenger_baseline": {
+      "type": "number",
+      "default": 0,
+      "description": "Challenger team's summed total_points at start. Live score = current sum minus this."
+    },
+    "opponent_baseline": {
+      "type": "number",
+      "default": 0
     },
     "challenger_score": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Frozen final score, written on resolution."
     },
     "opponent_score": {
       "type": "number",
@@ -46,12 +55,10 @@
     "status": {
       "type": "string",
       "enum": [
-        "pending",
         "active",
-        "completed",
-        "declined"
+        "completed"
       ],
-      "default": "pending"
+      "default": "active"
     },
     "winner_clan_id": {
       "type": "string"
@@ -60,7 +67,6 @@
   "required": [
     "challenger_clan_id",
     "opponent_clan_id",
-    "metric",
     "duration_days"
   ]
 }

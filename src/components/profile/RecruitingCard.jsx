@@ -139,10 +139,13 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
           </g>
         </svg>
 
-        {/* Jersey number — big, on the card, where it flexes */}
-        <span style={{ position: "absolute", top: 16, right: 14, fontFamily: "'Archivo Black', sans-serif", fontSize: 54, lineHeight: 1, color: "rgba(255,90,31,0.15)", letterSpacing: "-0.02em", pointerEvents: "none" }}>
-          05
-        </span>
+        {/* Jersey number — real, from the profile. Hidden when unset so the card
+            never shows a fake number. */}
+        {!isCoach && athlete.jersey_number && (
+          <span style={{ position: "absolute", top: 16, right: 14, fontFamily: "'Archivo Black', sans-serif", fontSize: 54, lineHeight: 1, color: "rgba(255,90,31,0.15)", letterSpacing: "-0.02em", pointerEvents: "none" }}>
+            {String(athlete.jersey_number).slice(0, 3)}
+          </span>
+        )}
 
         <div className="relative p-4">
           {/* Identity row — nothing here may ellipsize; meta wraps to two lines */}

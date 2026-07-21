@@ -140,14 +140,18 @@ export default function PostCard({ post, currentAthleteId, currentAthleteName, o
             <MoreHorizontal size={16} />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-7 z-20 rounded overflow-hidden overlay-shadow"
-              style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', minWidth: 130 }}>
-              <button onClick={() => { setMenuOpen(false); setReport({ type: "post" }); }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left"
-                style={{ color: 'var(--negative)' }}>
-                <Flag size={11} /> Report post
-              </button>
-            </div>
+            <>
+              {/* Tap-anywhere-else closes the menu */}
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 top-7 z-20 rounded overflow-hidden overlay-shadow"
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', minWidth: 130 }}>
+                <button onClick={() => { setMenuOpen(false); setReport({ type: "post" }); }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left"
+                  style={{ color: 'var(--negative)' }}>
+                  <Flag size={11} /> Report post
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>

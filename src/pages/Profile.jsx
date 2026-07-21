@@ -254,7 +254,9 @@ export default function Profile() {
             {[
           { placeholder: "Display name", field: "display_name" },
           { placeholder: "Club name", field: "school" },
-          { placeholder: "Position", field: "position" }].
+          { placeholder: "Position", field: "position" },
+          // Jersey number appears on the recruiting card — athlete-only.
+          ...(isCoach ? [] : [{ placeholder: "Jersey number (optional)", field: "jersey_number" }])].
           map(({ placeholder, field }) =>
           <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
           style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
