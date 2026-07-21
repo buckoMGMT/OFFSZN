@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Shield, Trophy, Users, X, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Shield, Trophy, Users, X, Pencil, Trash2, Settings } from "lucide-react";
 import ClanCard from "@/components/clans/ClanCard";
+import TeamEmblemUpload from "@/components/clans/TeamEmblemUpload";
+import EditTeamModal from "@/components/clans/EditTeamModal";
 import ChallengesTab from "@/components/clans/ChallengesTab";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
@@ -30,8 +32,9 @@ export default function Clans() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [createForm, setCreateForm] = useState({ name: "", type: "high_school", sport: "football", school_name: "", description: "" });
+  const [createForm, setCreateForm] = useState({ name: "", type: "high_school", sport: "football", school_name: "", description: "", emblem_url: "" });
   const [creating, setCreating] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [tab, setTab] = useTabState("clans.tab", "discover");
   const [showPaywall, setShowPaywall] = useState(false);
   const [createError, setCreateError] = useState(null);
@@ -162,8 +165,12 @@ export default function Clans() {
           <div className="card-base p-4 mb-4 relative overflow-hidden">
             <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: 'var(--accent)' }} />
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded flex items-center justify-center flex-shrink-0" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
-                <Shield size={18} style={{ color: 'var(--accent)' }} />
+              <div className="w-11 h-11 rounded flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                {myClan.emblem_url ? (
+                  <img src={myClan.emblem_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Shield size={18} style={{ color: 'var(--accent)' }} />
+                )}
               </div>
               <div className="flex-1">
                 <p className="eyebrow">My Team</p>
@@ -173,10 +180,18 @@ export default function Clans() {
                   <span className="font-elite text-[9px]" style={{ color: 'var(--accent)' }}><Trophy size={9} className="inline mr-0.5" />{(myClan.total_points || 0).toLocaleString()} pts</span>
                 </div>
               </div>
+              {isTeamAdmin && (
+                <button onClick={() => setShowEdit(true)} className="p-1.5 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
+                  <Settings size={14} style={{ color: 'var(--text-secondary)' }} />
+                </button>
+              )}
               <button onClick={leaveClan} className="p-1.5 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
                 <X size={14} style={{ color: 'var(--text-secondary)' }} />
               </button>
             </div>
+            {myClan.description && (
+              <p className="font-work text-xs mt-2 pt-2 border-t leading-relaxed" style={{ color: 'var(--theme-ink-soft)', borderColor: 'var(--theme-border)' }}>{myClan.description}</p>
+            )}
             {(myClan.announcement || isTeamAdmin) && (
               <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                 {editingAnn ? (
@@ -288,6 +303,7 @@ export default function Clans() {
               </button>
             </div>
             <div className="space-y-3">
+              <TeamEmblemUpload emblemUrl={createForm.emblem_url} onUploaded={(url) => setCreateForm(p => ({ ...p, emblem_url: url }))} />
               {[
                 { placeholder: "Team name *", field: "name", type: "text" },
                 { placeholder: "School / Organization", field: "school_name", type: "text" },
@@ -341,6 +357,14 @@ export default function Clans() {
             </div>
           </div>
         </div>
+      )}
+
+      {showEdit && myClan && (
+        <EditTeamModal
+          clan={myClan}
+          onClose={() => setShowEdit(false)}
+          onSaved={(updated) => { setMyClan(updated); setShowEdit(false); load(); }}
+        />
       )}
 
       <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
