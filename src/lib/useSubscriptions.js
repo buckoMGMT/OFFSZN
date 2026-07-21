@@ -16,6 +16,9 @@ export default function useSubscriptions(athlete) {
     if (!athlete?.id || !coach?.id) return;
     const existing = subs.find(s => s.coach_athlete_id === coach.id);
     if (existing) {
+      // Paid coaching subscriptions are managed through billing, never the bell toggle —
+      // deleting the record here would orphan a live Stripe subscription.
+      if (existing.is_paid) return;
       await base44.entities.CoachSubscription.delete(existing.id);
       setSubs(prev => prev.filter(s => s.id !== existing.id));
     } else {

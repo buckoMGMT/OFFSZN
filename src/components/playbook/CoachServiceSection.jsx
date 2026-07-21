@@ -28,7 +28,10 @@ export default function CoachServiceSection({ coach }) {
   }, [coach?.id]);
 
   const price = coach?.coach_sub_price_usd;
-  if (!price || coach?.stripe_onboarding_status !== "complete" || coach?.identity_status !== "verified" || !me || me.id === coach.id) return null;
+  if (!price || !me || me.id === coach.id) return null;
+  // Coach offers a service but hasn't finished payouts/identity — show an honest
+  // state instead of hiding the whole section (no invisible features, no dead ends).
+  const serviceOpen = coach?.stripe_onboarding_status === "complete" && coach?.identity_status === "verified";
 
   // 7-day pass state — an expired trial reads as "not a member" + a convert prompt.
   const trialExpired = paidSub?.plan === "trial" && paidSub.trial_ends_at && new Date(paidSub.trial_ends_at) <= new Date();
@@ -62,7 +65,16 @@ export default function CoachServiceSection({ coach }) {
         <Star size={12} fill="currentColor" style={{ color: 'var(--accent)' }} />
         <p className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>1-on-1 Coaching Service</p>
       </div>
-      {activeSub ? (
+      {!serviceOpen ? (
+        <>
+          <p className="text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
+            {coach.display_name.split(" ")[0]} offers 1-on-1 coaching — ${Number(price).toFixed(2)}/mo.
+          </p>
+          <p className="text-xs rounded p-2.5" style={{ color: 'var(--text-secondary)', background: 'var(--surface-1)', border: '1px solid var(--border-strong)' }}>
+            Not open yet — this coach is finishing payout and identity verification. Subscribing and direct messaging unlock the moment they're done. Their drills below are live now.
+          </p>
+        </>
+      ) : activeSub ? (
         <>
           <p className="text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
             {trialDaysLeft !== null
