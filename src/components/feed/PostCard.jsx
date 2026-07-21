@@ -33,7 +33,7 @@ function MacroChips({ content }) {
   );
 }
 
-export default function PostCard({ post, currentAthleteId, onUpdate }) {
+export default function PostCard({ post, currentAthleteId, currentAthleteName, onUpdate, onOpenProfile }) {
   const [commenting, setCommenting] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentError, setCommentError] = useState(null);
@@ -81,7 +81,7 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
     await base44.entities.SocialPost.update(post.id, {
       comments: [...(post.comments || []), {
         author_id: currentAthleteId,
-        author_name: "You",
+        author_name: currentAthleteName || "Athlete",
         text: r.value,
         created_at: new Date().toISOString(),
       }],
@@ -102,16 +102,21 @@ export default function PostCard({ post, currentAthleteId, onUpdate }) {
 
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <div className="w-9 h-9 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0" style={{ background: 'var(--surface-3)', border: '1px solid var(--border-subtle)' }}>
-          {post.athlete_avatar
-            ? <img src={post.athlete_avatar} alt="" className="w-full h-full object-cover" />
-            : <span className="font-elite text-xs" style={{ color: 'var(--accent)' }}>{(post.athlete_name || "A")[0].toUpperCase()}</span>
-          }
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-work font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{post.athlete_name || "Athlete"}</p>
-          <p className="font-elite text-[9px] uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>{timeAgo}</p>
-        </div>
+        {/* Author identity is tappable — opens their public profile */}
+        <button onClick={() => onOpenProfile?.(post.athlete_id)}
+          className="flex items-center gap-3 flex-1 min-w-0 text-left"
+          style={{ background: 'transparent', border: 'none', padding: 0 }}>
+          <div className="w-9 h-9 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0" style={{ background: 'var(--surface-3)', border: '1px solid var(--border-subtle)' }}>
+            {post.athlete_avatar
+              ? <img src={post.athlete_avatar} alt="" className="w-full h-full object-cover" />
+              : <span className="font-elite text-xs" style={{ color: 'var(--accent)' }}>{(post.athlete_name || "A")[0].toUpperCase()}</span>
+            }
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-work font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{post.athlete_name || "Athlete"}</p>
+            <p className="font-elite text-[9px] uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>{timeAgo}</p>
+          </div>
+        </button>
         {/* PR chip — pulses once on first viewport entry */}
         {isPR && (
           <motion.span

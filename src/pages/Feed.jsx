@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Image, Video, Users, Globe } from "lucide-react";
+import { Plus, Image, Search } from "lucide-react";
+import SearchSheet from "@/components/search/SearchSheet";
+import AthleteProfileSheet from "@/components/profile/AthleteProfileSheet";
 import PostCard from "@/components/feed/PostCard";
 import ClanFeed from "@/components/feed/ClanFeed";
 import PageLabel from "@/components/ui/PageLabel";
@@ -29,6 +31,8 @@ export default function Feed() {
   const [posting, setPosting] = useState(false);
   const [composeError, setComposeError] = useState(null);
   const [feedFilter, setFeedFilter] = useTabState("feed.filter", "all");
+  const [showSearch, setShowSearch] = useState(false);
+  const [profileAthlete, setProfileAthlete] = useState(null);
 
   const load = useCallback(async () => {
     const [athleteList, postList] = await Promise.all([
@@ -75,6 +79,24 @@ export default function Feed() {
     load();
   };
 
+  // Tap a post author (or search result) → their public profile
+  const openProfile = async (athleteId) => {
+    if (!athleteId) return;
+    if (athleteId === athlete?.id) { setProfileAthlete(athlete); return; }
+    const a = await base44.entities.Athlete.get(athleteId).catch(() => null);
+    if (a) setProfileAthlete(a);
+  };
+
+  const visiblePosts = posts.filter(post => {
+    // Pending/rejected posts are visible only to their author — never a scary error.
+    const mine = post.athlete_id === athlete?.id;
+    if ((post.status || "approved") !== "approved" && !mine) return false;
+    if (feedFilter === "friends") {
+      return (athlete?.friends || []).includes(post.athlete_id) || mine;
+    }
+    return true;
+  });
+
   return (
     <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Header */}
@@ -83,7 +105,12 @@ export default function Feed() {
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--accent)', opacity: 0.9 }} />
         <div className="flex items-center justify-between mb-1">
           <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>The Field</h1>
-          <PageLabel number={1} />
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowSearch(true)} aria-label="Search athletes" style={{ color: 'var(--text-secondary)', background: 'transparent', border: 'none' }}>
+              <Search size={18} />
+            </button>
+            <PageLabel number={1} />
+          </div>
         </div>
         <div className="flex items-center gap-2 mb-3">
           <span className="relative flex h-2 w-2">
@@ -210,19 +237,25 @@ export default function Feed() {
           </div>
         )}
 
+        {/* Friends tab, nobody followed yet — clear path, not a blank wall */}
+        {feedFilter === "friends" && !loading && posts.length > 0 && visiblePosts.length === 0 && (
+          <div className="flex flex-col items-center text-center py-12 px-5">
+            <p style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-xl)', color: 'var(--text-primary)', textTransform: 'uppercase', marginBottom: 8 }}>
+              No Friends Yet.
+            </p>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)', maxWidth: '32ch' }}>
+              Follow athletes and their wins land here.
+            </p>
+            <button onClick={() => setShowSearch(true)} className="btn-secondary">
+              <Search size={13} /> Find Athletes
+            </button>
+          </div>
+        )}
+
         {/* Posts */}
-        {feedFilter !== "clan" && !loading && posts.length > 0 && (
+        {feedFilter !== "clan" && !loading && visiblePosts.length > 0 && (
           <StaggerList>
-            {posts
-              .filter(post => {
-                // Pending/rejected posts are visible only to their author — never a scary error.
-                const mine = post.athlete_id === athlete?.id;
-                if ((post.status || "approved") !== "approved" && !mine) return false;
-                if (feedFilter === "friends") {
-                  return (athlete?.friends || []).includes(post.athlete_id) || mine;
-                }
-                return true;
-              })
+            {visiblePosts
               .map(post => (
                 <div key={post.id} className="relative">
                   {(post.status || "approved") === "pending" && post.athlete_id === athlete?.id && (
@@ -231,7 +264,7 @@ export default function Feed() {
                       In review
                     </span>
                   )}
-                  <PostCard post={post} currentAthleteId={athlete?.id} onUpdate={load} />
+                  <PostCard post={post} currentAthleteId={athlete?.id} currentAthleteName={athlete?.display_name} onUpdate={load} onOpenProfile={openProfile} />
                 </div>
               ))
             }
@@ -239,6 +272,15 @@ export default function Feed() {
         )}
       </div>
       </PullToRefresh>
+
+      <SearchSheet open={showSearch} onClose={() => setShowSearch(false)} onSelect={a => setProfileAthlete(a)} />
+      <AthleteProfileSheet
+        open={!!profileAthlete}
+        onClose={() => setProfileAthlete(null)}
+        athlete={profileAthlete}
+        me={athlete}
+        onFollowChange={friends => setAthlete(prev => (prev ? { ...prev, friends } : prev))}
+      />
     </div>
   );
 }
