@@ -6,10 +6,12 @@ import { X, ChevronRight, CheckCircle, Share2 } from "lucide-react";
 import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
 import Countdown from "@/components/workout/Countdown";
 import { completeWorkout } from "@/lib/points";
+import { useImmersiveDock } from "@/lib/DockContext";
 
 const REST_SECONDS = 45;
 
 export default function WorkoutRunner({ title, steps, athlete, durationMinutes, onClose }) {
+  useImmersiveDock(); // §1 — dock hidden while the runner is open, restored on exit
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState("work"); // work | rest | saving | done
   const [result, setResult] = useState(null);

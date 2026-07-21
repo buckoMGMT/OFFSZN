@@ -16,6 +16,7 @@ import { MilestoneNotifierProvider } from '@/lib/MilestoneNotifier';
 import AppScroll from '@/components/layout/AppScroll';
 import { initAccent } from '@/lib/accentColor';
 import AppErrorBoundary from '@/components/AppErrorBoundary';
+import { DockProvider } from '@/lib/DockContext';
 
 // Lazy page routes — nothing heavy loads on first paint (Lighthouse §6)
 const Feed = lazy(() => import('@/pages/Feed'));
@@ -137,9 +138,11 @@ function App() {
         <QueryClientProvider client={queryClientInstance}>
           <Router>
             <AppErrorBoundary>
-              <AppScroll>
-                <AuthenticatedApp />
-              </AppScroll>
+              <DockProvider>
+                <AppScroll>
+                  <AuthenticatedApp />
+                </AppScroll>
+              </DockProvider>
             </AppErrorBoundary>
           </Router>
           <Toaster />

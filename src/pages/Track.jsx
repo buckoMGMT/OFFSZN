@@ -5,6 +5,8 @@ import { format } from "date-fns";
 import MealCard from "@/components/tracking/MealCard";
 import AddMealModal from "@/components/tracking/AddMealModal";
 import DailyChallenges from "@/components/tracking/DailyChallenges";
+import SleepLogger from "@/components/tracking/SleepLogger";
+import ManualWorkoutModal from "@/components/tracking/ManualWorkoutModal";
 import AppleHealthBanner from "@/components/tracking/AppleHealthBanner";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
@@ -91,6 +93,7 @@ export default function Track() {
   const [log, setLog] = useState(null);
   const [meals, setMeals] = useState([]);
   const [showAddMeal, setShowAddMeal] = useState(false);
+  const [showManualWorkout, setShowManualWorkout] = useState(false);
   const [loading, setLoading] = useState(true);
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -122,6 +125,24 @@ export default function Track() {
     const updated = await base44.entities.DailyLog.update(log.id, fields);
     setLog(updated);
   };
+
+  // §2 — Weight quick-log: updates today's DailyLog, the athlete's weight_lbs,
+  // and upserts today's ProgressEntry so the progress chart reflects it.
+  const saveWeight = async (lbs) => {
+    if (!log) return;
+    const w = Number(lbs) || null;
+    await base44.entities.DailyLog.update(log.id, { weight_lbs: w });
+    setLog(l => ({ ...l, weight_lbs: w }));
+    if (w && athlete) {
+      await base44.entities.Athlete.update(athlete.id, { weight_lbs: w });
+      const existing = await base44.entities.ProgressEntry.filter({ athlete_id: athlete.id, date: today });
+      if (existing[0]) await base44.entities.ProgressEntry.update(existing[0].id, { weight_lbs: w });
+      else await base44.entities.ProgressEntry.create({ athlete_id: athlete.id, date: today, weight_lbs: w });
+    }
+  };
+
+  // §2 — Manual workout logged (points already awarded server-side by completeWorkout)
+  const onManualWorkout = () => load();
 
   const deleteMeal = async (mealId) => {
     const meal = meals.find(m => m.id === mealId);
@@ -185,7 +206,8 @@ export default function Track() {
   const fatsGoal = athlete?.goal_fats_g || 80;
   const cal = log?.calories_consumed || 0;
   const remaining = Math.max(0, calGoal - cal);
-  const waterPct = Math.min(100, ((log?.water_oz || 0) / 128) * 100);
+  const waterGoal = athlete?.water_goal_oz || 128;
+  const waterPct = Math.min(100, ((log?.water_oz || 0) / waterGoal) * 100);
 
   return (
     <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
@@ -240,68 +262,52 @@ export default function Track() {
           </div>
         </div>
 
-        {/* Quick stats row — surface-1 cards, no shadows */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* Water */}
+        {/* Water + Workout row */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Water — tap-to-add increments against water_goal_oz */}
           <div className="card-base p-3">
             <div className="flex items-center gap-1 mb-2">
-              <Droplets size={12} style={{ color: 'var(--theme-ink-soft)' }} />
-              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Water</span>
+              <Droplets size={12} style={{ color: 'var(--text-tertiary)' }} />
+              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Water</span>
             </div>
-            <p className="font-anton text-2xl" style={{ color: 'var(--theme-ink)' }}>{log?.water_oz || 0}</p>
-            <p className="font-elite text-[9px]" style={{ color: 'var(--theme-ink-soft)' }}>oz / 128</p>
-            <div className="h-1 rounded-full my-2 overflow-hidden" style={{ background: 'var(--theme-border)' }}>
-              <div className="h-full rounded-full" style={{ width: `${waterPct}%`,               background: 'var(--accent)', transition: 'width 0.5s ease' }} />
+            <p className="font-anton text-2xl" style={{ color: 'var(--text-primary)' }}>{log?.water_oz || 0}</p>
+            <p className="font-elite text-[9px]" style={{ color: 'var(--text-tertiary)' }}>oz / {waterGoal}</p>
+            <div className="h-1 rounded-full my-2 overflow-hidden" style={{ background: 'var(--border-subtle)' }}>
+              <div className="h-full rounded-full" style={{ width: `${waterPct}%`, background: 'var(--accent)', transition: 'width 0.5s ease' }} />
             </div>
-            <button onClick={() => updateLog({ water_oz: (log?.water_oz || 0) + 8 })}
-              className="w-full py-1 rounded font-elite text-[9px] uppercase tracking-wide" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
-              +8 oz
-            </button>
-          </div>
-
-          {/* Sleep */}
-          <div className="rounded border p-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
-            <div className="flex items-center gap-1 mb-2">
-              <Moon size={12} style={{ color: 'var(--theme-ink-soft)' }} />
-              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Sleep</span>
-            </div>
-            <p className="font-anton text-2xl" style={{ color: 'var(--theme-ink)' }}>{log?.sleep_hours || "--"}</p>
-            <p className="font-elite text-[9px] mb-2" style={{ color: 'var(--theme-ink-soft)' }}>hours</p>
-            <div className="flex gap-0.5">
-              {["7", "8", "9"].map(h => (
-                <button key={h} onClick={() => updateLog({ sleep_hours: Number(h) })}
-                  className="flex-1 rounded py-1 font-elite text-[9px]"
-                  style={{
-                    background: log?.sleep_hours === Number(h) ? 'var(--accent)' : 'var(--theme-surface-alt)',
-                    color: log?.sleep_hours === Number(h) ? '#0A0B0D' : 'var(--theme-ink-soft)',
-                    border: '1px solid var(--theme-border)',
-                  }}>
-                  {h}h
-                </button>
-              ))}
+            <div className="flex gap-1.5">
+              <button onClick={() => updateLog({ water_oz: (log?.water_oz || 0) + 8 })}
+                className="flex-1 py-1 rounded font-elite text-[9px] uppercase tracking-wide" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                +8
+              </button>
+              <button onClick={() => updateLog({ water_oz: (log?.water_oz || 0) + 16 })}
+                className="flex-1 py-1 rounded font-elite text-[9px] uppercase tracking-wide" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                +16
+              </button>
             </div>
           </div>
 
-          {/* Workout */}
-          <div className="rounded border p-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+          {/* Workout — opens manual log; shows done state */}
+          <div className="card-base p-3 flex flex-col">
             <div className="flex items-center gap-1 mb-2">
-              <CheckCircle size={12} style={{ color: log?.workout_complete ? 'var(--accent)' : 'var(--theme-ink-soft)' }} />
-              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Workout</span>
+              <CheckCircle size={12} style={{ color: log?.workout_complete ? 'var(--accent)' : 'var(--text-tertiary)' }} />
+              <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Workout</span>
             </div>
-            <button onClick={() => updateLog({ workout_complete: !log?.workout_complete })} className="w-full text-left">
-              <p className="font-anton text-2xl mb-2" style={{ color: log?.workout_complete ? 'var(--accent)' : 'var(--theme-ink)' }}>
-                {log?.workout_complete ? "✓" : "–"}
-              </p>
-              <div className="w-full py-1 rounded font-elite text-[9px] uppercase text-center" style={{
-                background: log?.workout_complete ? 'var(--accent)' : 'var(--theme-surface-alt)',
-                color: log?.workout_complete ? '#0A0B0D' : 'var(--theme-ink-soft)',
-                border: '1px solid var(--theme-border)',
-              }}>
-                {log?.workout_complete ? "Done" : "Log It"}
-              </div>
+            <p className="font-anton text-2xl mb-1" style={{ color: log?.workout_complete ? 'var(--accent)' : 'var(--text-primary)' }}>
+              {log?.workout_complete ? "✓" : "–"}
+            </p>
+            <p className="font-elite text-[9px] mb-2" style={{ color: 'var(--text-tertiary)' }}>
+              {log?.workout_complete ? "Logged today" : "Nothing yet"}
+            </p>
+            <button onClick={() => setShowManualWorkout(true)}
+              className="mt-auto w-full py-1.5 rounded font-elite text-[9px] uppercase text-center" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+              {log?.workout_complete ? "Log Another" : "Log a Workout"}
             </button>
           </div>
         </div>
+
+        {/* Sleep — 0–14h stepper in 30-min increments */}
+        <SleepLogger hours={log?.sleep_hours} onSave={(h) => updateLog({ sleep_hours: h })} />
 
         {/* Weight */}
         <div className="card-base p-4">
@@ -317,11 +323,13 @@ export default function Track() {
           <div className="flex items-center gap-3">
             <input
               type="number"
+              inputMode="decimal"
               className="input-base flex-1"
               style={{ minHeight: 44 }}
               placeholder="0"
               value={log?.weight_lbs || ""}
-              onChange={e => updateLog({ weight_lbs: Number(e.target.value) || null })}
+              onChange={e => setLog(l => ({ ...l, weight_lbs: e.target.value === "" ? null : Number(e.target.value) }))}
+              onBlur={e => saveWeight(e.target.value)}
             />
             <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)', fontFamily: 'Inter, sans-serif' }}>lbs</span>
           </div>
@@ -360,6 +368,8 @@ export default function Track() {
       {showAddMeal && athlete && (
         <AddMealModal onClose={() => setShowAddMeal(false)} onSaved={onMealSaved} athleteId={athlete.id} logId={log?.id} />
       )}
+
+      <ManualWorkoutModal open={showManualWorkout} onClose={() => setShowManualWorkout(false)} athlete={athlete} onSaved={onManualWorkout} />
     </div>
   );
 }
