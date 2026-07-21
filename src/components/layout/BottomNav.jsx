@@ -28,22 +28,22 @@ export default function BottomNav() {
     ? [...baseTabs.slice(0, 4), { icon: Clapperboard, label: "Film", path: "/studio" }, ...baseTabs.slice(4)]
     : baseTabs;
 
+  /* Full-width app tab bar: fixed to the viewport bottom, stretches the whole
+     device width, safe-area aware. Never scrolls with content. */
   return (
     <nav
-      className="fixed left-0 right-0 z-50 px-4 pointer-events-none"
-      style={{ bottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
+      className="fixed left-0 right-0 bottom-0 z-50"
+      style={{
+        background: "color-mix(in srgb, var(--surface-0) 90%, transparent)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        borderTop: "1px solid var(--border-subtle)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}
     >
       <div
-        className="flex items-stretch justify-around mx-auto pointer-events-auto overlay-shadow"
-        style={{
-          maxWidth: 420,
-          borderRadius: "var(--r-full)",
-          background: "color-mix(in srgb, var(--surface-1) 82%, transparent)",
-          border: "1px solid var(--border-strong)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          padding: "6px 8px",
-        }}
+        className="flex items-stretch justify-around mx-auto"
+        style={{ maxWidth: 480, padding: "6px 8px" }}
       >
         {tabs.map(({ icon: Icon, label, path }) => {
           const active = location.pathname === path;

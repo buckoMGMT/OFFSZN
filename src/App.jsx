@@ -1,8 +1,8 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -31,6 +31,23 @@ const Review = lazy(() => import('@/pages/Review'));
 const SubscriptionSuccess = lazy(() => import('@/pages/SubscriptionSuccess'));
 const Studio = lazy(() => import('@/pages/Studio'));
 const CoachSubscribed = lazy(() => import('@/pages/CoachSubscribed'));
+// Branded auth pages — users must NEVER land on a default platform login page
+const Login = lazy(() => import('@/pages/Login'));
+const Register = lazy(() => import('@/pages/Register'));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+
+const AuthRoutes = () => (
+  <Suspense fallback={<PageSkeleton />}>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  </Suspense>
+);
 
 // Apply any saved custom accent before first paint
 initAccent();
@@ -46,9 +63,15 @@ const PageSkeleton = () => (
 );
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+  // Loader shows for a minimum of 300ms — one steady branded state, no strobe on fast loads
+  const [minHold, setMinHold] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setMinHold(false), 300);
+    return () => clearTimeout(t);
+  }, []);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoadingPublicSettings || isLoadingAuth || minHold) {
     return (
       <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--surface-0)' }}>
         <div className="flex flex-col items-center" style={{ gap: 24 }}>
@@ -66,14 +89,19 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
+      // Branded OFFSZN login — never the platform's default page
+      return <AuthRoutes />;
     }
   }
 
   return (
     <Suspense fallback={<PageSkeleton />}>
       <Routes>
+        {/* Auth pages stay reachable (email links, deep links) even with a live session */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         {/* Onboarding lives OUTSIDE AppLayout — no tab bar */}
         <Route path="/onboarding" element={<Onboarding />} />
         {/* Nested views get the TopBar in back-button mode */}

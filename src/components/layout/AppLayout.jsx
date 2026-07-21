@@ -24,8 +24,11 @@ export default function AppLayout() {
           color: 'var(--text-primary)',
           minHeight: '100dvh',
           maxWidth: 480,
-          paddingBottom: 'calc(72px + env(safe-area-inset-bottom))',
-          zIndex: 1,
+          /* Content always clears the fixed tab bar + safe inset */
+          paddingBottom: 'calc(var(--bottomnav-h) + 16px)',
+          /* No zIndex here — a stacking context on the content container traps
+             full-screen sheets (workout runner, video player) UNDER the fixed
+             nav/header. Sheets must win on their own z-index. */
         }}
       >
         <PastDueBanner />

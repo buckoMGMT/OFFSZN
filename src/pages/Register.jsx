@@ -16,36 +16,35 @@ function AppleIcon() {
 }
 
 const inputStyle = {
-  background: '#272729',
-  border: '1px solid #5E646B',
-  color: '#EDEEF0',
-  borderRadius: 4,
-  padding: '0 1rem 0 2.75rem',
-  height: 48,
   width: '100%',
-  fontFamily: 'Work Sans, sans-serif',
+  minHeight: 52,
+  padding: '0 1rem 0 2.75rem',
+  background: 'var(--surface-2)',
+  color: 'var(--text-primary)',
+  border: '1px solid var(--border-strong)',
+  borderRadius: 'var(--r-sm)',
+  fontFamily: 'Inter, sans-serif',
   fontSize: 16, /* §3 — inputs < 16px trigger iOS focus zoom */
   outline: 'none',
 };
 
-const socialBtnStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
-  height: 48,
-  borderRadius: 4,
-  border: '1px solid #5E646B',
-  background: '#272729',
-  color: '#EDEEF0',
-  fontFamily: 'Special Elite, cursive',
-  fontSize: '0.75rem',
-  textTransform: 'uppercase',
-  letterSpacing: '0.08em',
-  cursor: 'pointer',
-  marginBottom: 12,
-  transition: 'border-color 0.15s',
+const errorBoxStyle = {
+  background: 'var(--surface-2)',
+  color: 'var(--negative)',
+  border: '1px solid var(--negative)',
 };
+
+function Checkbox({ checked, onToggle }) {
+  return (
+    <div
+      onClick={onToggle}
+      className="mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center border"
+      style={{ background: checked ? 'var(--accent)' : 'transparent', borderColor: checked ? 'var(--accent)' : 'var(--border-strong)' }}
+    >
+      {checked && <span style={{ color: 'var(--on-accent)', fontSize: 10, fontWeight: 700 }}>✓</span>}
+    </div>
+  );
+}
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -99,14 +98,16 @@ export default function Register() {
     }
   };
 
-  const handleGoogle = () => base44.auth.loginWithProvider("google", "/");
-  const handleApple = () => base44.auth.loginWithProvider("apple", "/");
+  // Absolute fromUrl — the OAuth callback must land back inside OFFSZN, never a default page.
+  const dest = `${window.location.origin}/`;
+  const handleGoogle = () => base44.auth.loginWithProvider("google", dest);
+  const handleApple = () => base44.auth.loginWithProvider("apple", dest);
 
   if (showOtp) {
     return (
       <AuthLayout title="Verify Email" subtitle={`Code sent to ${email}`}>
         {error && (
-          <div className="mb-4 p-3 rounded font-work text-sm" style={{ background: '#D7263D22', color: '#D7263D', border: '1px solid #D7263D55' }}>
+          <div className="mb-4 p-3 rounded text-sm" style={errorBoxStyle}>
             {error}
           </div>
         )}
@@ -118,14 +119,12 @@ export default function Register() {
             </InputOTPGroup>
           </InputOTP>
         </div>
-        <button onClick={handleVerify} disabled={loading || otpCode.length < 6}
-          className="btn-stamp w-full"
-          style={{ height: 48, fontSize: '0.85rem', opacity: (loading || otpCode.length < 6) ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+        <button onClick={handleVerify} disabled={loading || otpCode.length < 6} className="btn-primary w-full">
           {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin inline" /> Verifying…</> : "Verify Code"}
         </button>
-        <p className="text-center text-sm font-work mt-4" style={{ color: '#5A5D63' }}>
+        <p className="text-center text-sm mt-4" style={{ color: 'var(--text-secondary)' }}>
           Didn't get it?{" "}
-          <button onClick={handleResend} style={{ color: '#D7263D', fontWeight: 500 }}>Resend</button>
+          <button onClick={handleResend} style={{ color: 'var(--accent)', fontWeight: 600 }}>Resend</button>
         </p>
       </AuthLayout>
     );
@@ -133,90 +132,76 @@ export default function Register() {
 
   return (
     <AuthLayout
-      title="Create Account"
-      subtitle="Join the next 500 athletes"
+      title="Join Up."
+      subtitle="Create your account. Put in the work."
       footer={
         <>
           Already have an account?{" "}
-          <Link to="/login" style={{ color: '#D7263D', fontWeight: 500 }}>Log in</Link>
+          <Link to="/login" style={{ color: 'var(--accent)', fontWeight: 600 }}>Log in</Link>
         </>
       }
     >
       {/* Social logins */}
-      <button style={socialBtnStyle} onClick={handleApple}>
+      <button className="btn-secondary w-full mb-3" style={{ minHeight: 52 }} onClick={handleApple}>
         <AppleIcon /> Continue with Apple
       </button>
-      <button style={socialBtnStyle} onClick={handleGoogle}>
+      <button className="btn-secondary w-full" style={{ minHeight: 52 }} onClick={handleGoogle}>
         <GoogleIcon className="w-5 h-5 mr-2" /> Continue with Google
       </button>
 
       {/* Divider */}
       <div className="relative my-5">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full" style={{ borderTop: '1px solid #272729' }} />
+          <div className="w-full" style={{ borderTop: '1px solid var(--border-subtle)' }} />
         </div>
         <div className="relative flex justify-center">
-          <span className="px-3 font-elite text-xs uppercase" style={{ background: '#1B1B1D', color: '#5A5D63' }}>or</span>
+          <span className="px-3 eyebrow" style={{ background: 'var(--surface-1)' }}>or</span>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded font-work text-sm" style={{ background: '#D7263D22', color: '#D7263D', border: '1px solid #D7263D55' }}>
+        <div className="mb-4 p-3 rounded text-sm" style={errorBoxStyle}>
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#5A5D63' }} />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-10" style={{ color: 'var(--text-tertiary)' }} />
           <input type="email" autoComplete="email" placeholder="you@example.com" autoFocus
             value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} required />
         </div>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#5A5D63' }} />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-10" style={{ color: 'var(--text-tertiary)' }} />
           <input type="password" autoComplete="new-password" placeholder="Password"
             value={password} onChange={e => setPassword(e.target.value)} style={inputStyle} required />
         </div>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#5A5D63' }} />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-10" style={{ color: 'var(--text-tertiary)' }} />
           <input type="password" autoComplete="new-password" placeholder="Confirm Password"
             value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={inputStyle} required />
         </div>
 
         {/* US Residency */}
         <label className="flex items-start gap-3 cursor-pointer">
-          <div
-            onClick={() => setUsResident(u => !u)}
-            className="mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center border"
-            style={{ background: usResident ? '#D7263D' : 'transparent', borderColor: usResident ? '#D7263D' : '#5E646B' }}
-          >
-            {usResident && <span style={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>✓</span>}
-          </div>
-          <span className="font-work text-xs leading-snug" style={{ color: '#5A5D63' }}>
-            I confirm I am a <span style={{ color: '#9BA3AC' }}>resident of the United States</span>. This service is not available outside the US.
+          <Checkbox checked={usResident} onToggle={() => setUsResident(u => !u)} />
+          <span className="text-xs leading-snug" style={{ color: 'var(--text-tertiary)' }}>
+            I confirm I am a <span style={{ color: 'var(--text-secondary)' }}>resident of the United States</span>. This service is not available outside the US.
           </span>
         </label>
 
         {/* Age + Terms agreement */}
         <label className="flex items-start gap-3 cursor-pointer">
-          <div
-            onClick={() => setAgreed(!agreed)}
-            className="mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center border"
-            style={{ background: agreed ? '#D7263D' : 'transparent', borderColor: agreed ? '#D7263D' : '#5E646B' }}
-          >
-            {agreed && <span style={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>✓</span>}
-          </div>
-          <span className="font-work text-xs leading-snug" style={{ color: '#5A5D63' }}>
-            I am at least <span style={{ color: '#9BA3AC' }}>18 years old</span> and agree to the{" "}
-            <span style={{ color: '#9BA3AC' }}>Terms of Service</span> and{" "}
-            <span style={{ color: '#9BA3AC' }}>Privacy Policy</span>.
+          <Checkbox checked={agreed} onToggle={() => setAgreed(a => !a)} />
+          <span className="text-xs leading-snug" style={{ color: 'var(--text-tertiary)' }}>
+            I am at least <span style={{ color: 'var(--text-secondary)' }}>18 years old</span> and agree to the{" "}
+            <span style={{ color: 'var(--text-secondary)' }}>Terms of Service</span> and{" "}
+            <span style={{ color: 'var(--text-secondary)' }}>Privacy Policy</span>.
             This app is for athletic performance tracking only — not medical advice.
           </span>
         </label>
 
-        <button type="submit" disabled={loading}
-          className="btn-stamp w-full"
-          style={{ height: 48, fontSize: '0.85rem', opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+        <button type="submit" disabled={loading} className="btn-primary w-full">
           {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin inline" /> Creating…</> : "Create Account"}
         </button>
       </form>

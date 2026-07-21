@@ -57,11 +57,22 @@ export default function PassPaywallSheet({ open, onClose }) {
     }
     setBuying(true);
     setError("");
+    // Session check FIRST — an expired/missing session routes to the branded
+    // login instead of surfacing a raw authentication error on the buy button.
+    const authed = await base44.auth.isAuthenticated().catch(() => false);
+    if (!authed) {
+      window.location.href = `/login`;
+      return;
+    }
     try {
       const res = await base44.functions.invoke("subscribeToPass", { returnUrl: window.location.href });
       if (res.data?.url) window.location.href = res.data.url;
       else setError(res.data?.error || "Couldn't start checkout. Try again.");
     } catch (e) {
+      if (e?.response?.status === 401) {
+        window.location.href = `/login`;
+        return;
+      }
       setError(e?.response?.data?.error || "Couldn't start checkout. Try again.");
     } finally {
       setBuying(false);

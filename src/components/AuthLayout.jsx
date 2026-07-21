@@ -1,45 +1,34 @@
 import React from "react";
+import BrandMark from "@/components/BrandMark";
 
 export default function AuthLayout({ title, subtitle, footer, children }) {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: '#0D0D0F' }}>
-      {/* Binder rings decoration */}
-      <div className="fixed left-0 top-0 bottom-0 w-8 hidden sm:flex flex-col items-center justify-center gap-8 py-12" style={{ borderRight: '1px solid #272729' }}>
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="w-4 h-4 rounded-full border-2" style={{ borderColor: '#5E646B', background: '#0D0D0F' }} />
-        ))}
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 stadium-light" style={{ background: 'var(--surface-0)' }}>
       <div className="w-full max-w-sm">
-        {/* Logo / Brand */}
+        {/* Brand */}
         <div className="text-center mb-8">
-          <div className="inline-block mb-3">
-            <span className="font-elite text-xs uppercase tracking-widest" style={{ color: '#5A5D63' }}>PG. 00</span>
+          <div className="flex justify-center mb-5">
+            <BrandMark size="lg" />
           </div>
-          <h1 className="font-anton text-4xl uppercase tracking-wide mb-1" style={{ color: '#EDEEF0' }}>
-            OFFSZN
-          </h1>
-          <div className="mx-auto my-2" style={{ width: 48, height: 2, background: '#D7263D' }} />
           {title && (
-            <p className="font-anton text-lg uppercase tracking-widest mt-3" style={{ color: '#9BA3AC' }}>{title}</p>
+            <h1 className="font-anton text-4xl uppercase" style={{ color: 'var(--text-primary)' }}>{title}</h1>
           )}
+          <div className="mx-auto my-3" style={{ width: 48, height: 3, background: 'var(--accent)', borderRadius: 'var(--r-full)' }} />
           {subtitle && (
-            <p className="font-work text-sm mt-1" style={{ color: '#5A5D63' }}>{subtitle}</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{subtitle}</p>
           )}
         </div>
 
         {/* Card */}
-        <div className="rounded border p-6" style={{ background: '#1B1B1D', borderColor: '#272729' }}>
+        <div className="card-base p-6">
           {children}
         </div>
 
         {footer && (
-          <p className="text-center text-sm font-work mt-6" style={{ color: '#5A5D63' }}>{footer}</p>
+          <p className="text-center text-sm mt-6" style={{ color: 'var(--text-secondary)' }}>{footer}</p>
         )}
 
-        <p className="text-center font-elite text-xs uppercase tracking-widest mt-8" style={{ color: '#272729' }}>
-          OFFSZN · Athletic Performance
-        </p>
+        <p className="text-center eyebrow mt-8">It's not the off-season. It's OFFSZN.</p>
       </div>
     </div>
   );

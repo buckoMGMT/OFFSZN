@@ -13,36 +13,18 @@ function AppleIcon() {
   );
 }
 
+const inputWrap = "relative";
 const inputStyle = {
-  background: '#272729',
-  border: '1px solid #5E646B',
-  color: '#EDEEF0',
-  borderRadius: 4,
+  width: '100%',
+  minHeight: 52,
   padding: '0 1rem 0 2.75rem',
-  height: 48,
-  width: '100%',
-  fontFamily: 'Work Sans, sans-serif',
-  fontSize: 14,
+  background: 'var(--surface-2)',
+  color: 'var(--text-primary)',
+  border: '1px solid var(--border-strong)',
+  borderRadius: 'var(--r-sm)',
+  fontFamily: 'Inter, sans-serif',
+  fontSize: 16,
   outline: 'none',
-};
-
-const socialBtnStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
-  height: 48,
-  borderRadius: 4,
-  border: '1px solid #5E646B',
-  background: '#272729',
-  color: '#EDEEF0',
-  fontFamily: 'Special Elite, cursive',
-  fontSize: '0.75rem',
-  textTransform: 'uppercase',
-  letterSpacing: '0.08em',
-  cursor: 'pointer',
-  marginBottom: 12,
-  transition: 'border-color 0.15s',
 };
 
 export default function Login() {
@@ -65,70 +47,70 @@ export default function Login() {
     }
   };
 
-  const handleGoogle = () => base44.auth.loginWithProvider("google", "/");
-  const handleApple = () => base44.auth.loginWithProvider("apple", "/");
+  // Absolute fromUrl — the OAuth callback must land back inside OFFSZN, never a default page.
+  const dest = `${window.location.origin}/`;
+  const handleGoogle = () => base44.auth.loginWithProvider("google", dest);
+  const handleApple = () => base44.auth.loginWithProvider("apple", dest);
 
   return (
     <AuthLayout
-      title="Welcome Back"
-      subtitle="Log in to your account"
+      title="Get In."
+      subtitle="Log in and get back to work."
       footer={
         <>
           Don't have an account?{" "}
-          <Link to="/register" style={{ color: '#D7263D', fontWeight: 500 }}>
+          <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 600 }}>
             Create one
           </Link>
         </>
       }
     >
       {/* Social logins */}
-      <button style={socialBtnStyle} onClick={handleApple}>
+      <button className="btn-secondary w-full mb-3" style={{ minHeight: 52 }} onClick={handleApple}>
         <AppleIcon /> Continue with Apple
       </button>
-      <button style={socialBtnStyle} onClick={handleGoogle}>
+      <button className="btn-secondary w-full" style={{ minHeight: 52 }} onClick={handleGoogle}>
         <GoogleIcon className="w-5 h-5 mr-2" /> Continue with Google
       </button>
 
       {/* Divider */}
       <div className="relative my-5">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full" style={{ borderTop: '1px solid #272729' }} />
+          <div className="w-full" style={{ borderTop: '1px solid var(--border-subtle)' }} />
         </div>
         <div className="relative flex justify-center">
-          <span className="px-3 font-elite text-xs uppercase" style={{ background: '#1B1B1D', color: '#5A5D63' }}>or</span>
+          <span className="px-3 eyebrow" style={{ background: 'var(--surface-1)' }}>or</span>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded font-work text-sm" style={{ background: '#D7263D22', color: '#D7263D', border: '1px solid #D7263D55' }}>
+        <div className="mb-4 p-3 rounded text-sm" style={{ background: 'var(--surface-2)', color: 'var(--negative)', border: '1px solid var(--negative)' }}>
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#5A5D63' }} />
+        <div className={inputWrap}>
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-10" style={{ color: 'var(--text-tertiary)' }} />
           <input type="email" autoComplete="email" placeholder="you@example.com"
             value={email} onChange={e => setEmail(e.target.value)}
             style={inputStyle} required autoFocus />
         </div>
         <div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#5A5D63' }} />
+          <div className={inputWrap}>
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-10" style={{ color: 'var(--text-tertiary)' }} />
             <input type="password" autoComplete="current-password" placeholder="••••••••"
               value={password} onChange={e => setPassword(e.target.value)}
               style={inputStyle} required />
           </div>
           <div className="flex justify-end mt-1.5">
-            <Link to="/forgot-password" className="font-elite text-xs uppercase" style={{ color: '#D7263D', letterSpacing: '0.06em' }}>
+            <Link to="/forgot-password" className="text-xs font-semibold" style={{ color: 'var(--accent)' }}>
               Forgot password?
             </Link>
           </div>
         </div>
 
-        <button type="submit" disabled={loading}
-          className="btn-stamp w-full mt-2"
-          style={{ height: 48, fontSize: '0.85rem', opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+        <button type="submit" disabled={loading} className="btn-primary w-full mt-2">
           {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin inline" /> Logging in…</> : "Log In"}
         </button>
       </form>

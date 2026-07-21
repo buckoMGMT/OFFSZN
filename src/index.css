@@ -55,6 +55,10 @@ html {
     /* Sticky app header height (48px bar + notch safe area) */
     --topbar-h: calc(48px + env(safe-area-inset-top));
 
+    /* Fixed bottom tab bar height (60px bar + home-indicator safe area) —
+       every scroll container pads its bottom by this so content never hides under it */
+    --bottomnav-h: calc(60px + env(safe-area-inset-bottom));
+
     /* Radius scale */
     --r-sm:   8px;
     --r-md:   12px;
@@ -657,6 +661,9 @@ html, body {
   overscroll-behavior: none;
   height: 100%;
   overflow: hidden;
+  /* Document-level surface color — no white can ever flash through
+     during transitions, in either theme */
+  background: var(--surface-0);
 }
 #root {
   height: 100%;
@@ -709,6 +716,9 @@ button::after {
 .overflow-x-auto, .overflow-x-scroll {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  /* Horizontal rows scroll horizontally ONLY — no vertical drag, no bounce */
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
 }
 .overflow-x-auto::-webkit-scrollbar,
 .overflow-x-scroll::-webkit-scrollbar { display: none; }

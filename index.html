@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <!-- Document-level background — kills white flashes during sheet transitions,
+         video exits, and route changes before CSS loads -->
+    <style>html { background-color: #0A0B0D; }</style>
     <link rel="manifest" href="/manifest.json" />
     <title>OFFSZN — High Performance System</title>
     <meta name="description" content="OFFSZN is the ultimate high-performance hub for athletes. Track macros, log workouts, and dominate your position." />

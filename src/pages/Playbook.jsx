@@ -42,8 +42,8 @@ const PROGRAMS = [
 function XsOs({ size = 28 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      <circle cx="8" cy="8" r="4" stroke="#9BA3AC" strokeWidth="1.5" fill="none" />
-      <circle cx="20" cy="8" r="4" stroke="#9BA3AC" strokeWidth="1.5" fill="none" />
+      <circle cx="8" cy="8" r="4" stroke="var(--text-tertiary)" strokeWidth="1.5" fill="none" />
+      <circle cx="20" cy="8" r="4" stroke="var(--text-tertiary)" strokeWidth="1.5" fill="none" />
       <line x1="5" y1="19" x2="11" y2="25" stroke="var(--accent)" strokeWidth="1.5" />
       <line x1="11" y1="19" x2="5" y2="25" stroke="var(--accent)" strokeWidth="1.5" />
       <line x1="17" y1="19" x2="23" y2="25" stroke="var(--accent)" strokeWidth="1.5" />
@@ -217,7 +217,7 @@ export default function Playbook() {
   return (
     <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
       {/* Header */}
-      <div className="sticky z-40 px-4 pt-3 pb-3 border-b" style={{ top: 'var(--topbar-h)', background: 'rgba(10,11,13,0.72)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
+      <div className="sticky z-40 px-4 pt-3 pb-3 border-b" style={{ top: 'var(--topbar-h)', background: 'color-mix(in srgb, var(--surface-0) 85%, transparent)', borderColor: 'var(--border-subtle)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}>
         <div className="flex items-center justify-between mb-1">
           <h1 className="font-anton text-3xl uppercase" style={{ color: 'var(--text-primary)' }}>Drills</h1>
           <div className="flex items-center gap-2">
@@ -300,7 +300,7 @@ export default function Playbook() {
             ) : savedPrograms.length === 0 ? (
               <div className="text-center py-16">
                 <PlayDiagram size={130} />
-                <p className="font-work text-sm mt-4" style={{ color: '#5A5D63' }}>Tap the bookmark icon on any program to save it.</p>
+                <p className="font-work text-sm mt-4" style={{ color: 'var(--text-tertiary)' }}>Tap the bookmark icon on any program to save it.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -335,7 +335,7 @@ export default function Playbook() {
                 {playlists.length === 0 ? (
                   <div className="text-center py-12">
                     <PlayDiagram size={120} />
-                    <p className="font-work text-sm mt-4" style={{ color: '#5A5D63' }}>No playlists yet.</p>
+                    <p className="font-work text-sm mt-4" style={{ color: 'var(--text-tertiary)' }}>No playlists yet.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -355,7 +355,7 @@ export default function Playbook() {
                           </button>
                         )}
                         <button onClick={() => base44.entities.Playlist.delete(pl.id).then(() => setPlaylists(p => p.filter(x => x.id !== pl.id)))}>
-                          <X size={14} style={{ color: '#9BA3AC' }} />
+                          <X size={14} style={{ color: 'var(--text-secondary)' }} />
                         </button>
                       </div>
                     ))}
