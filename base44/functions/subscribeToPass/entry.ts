@@ -4,7 +4,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import Stripe from 'npm:stripe@17';
 import { safeReturnUrl } from '../../shared/safeReturnUrl.ts';
 
-const PASS_PRICE_ID = 'price_1TtXmiIPluSFOhP31KPn8tHk'; // ALL-SZN Pass $9.99/mo
+const PASS_PRICE_ID = 'price_1TvTXGLnvT5ZI8sDERu3EEOL'; // ALL-SZN Pass $9.99/mo
 
 Deno.serve(async (req) => {
   try {
