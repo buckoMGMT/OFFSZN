@@ -225,8 +225,9 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Stats strip — icon, number, and chip centered on one axis */}
-        <div className="flex items-center gap-4 px-5 py-3" style={{ background: 'var(--surface-1)' }}>
+        {/* Stats strip — icon, number, and chip centered on one axis.
+            Wraps on narrow screens so the plan chip never runs off the edge. */}
+        <div className="flex items-center gap-x-4 gap-y-2 flex-wrap px-5 py-3" style={{ background: 'var(--surface-1)' }}>
           {/* Points → tap into the Locker Room (rewards) */}
           <Link to="/rewards" className="flex items-center gap-1.5" style={{ lineHeight: 1 }}>
             <Trophy size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
@@ -246,12 +247,12 @@ export default function Profile() {
             <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)', lineHeight: 1 }}>friends</span>
           </button>
           {isPremium ?
-          <div className="ml-auto flex items-center gap-2">
-                <button onClick={() => setShowPaywall(true)} className="px-2 py-1 rounded font-elite text-[9px] uppercase tracking-widest"
-                style={{ border: '1px solid var(--border-strong)', color: 'var(--text-secondary)', background: 'transparent' }}>Compare Plans</button>
+          <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+                <button onClick={() => setShowPaywall(true)} className="px-2 py-1 rounded font-elite text-[9px] uppercase tracking-widest whitespace-nowrap"
+                style={{ border: '1px solid var(--border-strong)', color: 'var(--text-secondary)', background: 'transparent' }}>Compare</button>
                 <PassChip />
               </div> :
-          <button onClick={() => setShowPaywall(true)} className="ml-auto font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Get ALL-SZN Pass →</button>
+          <button onClick={() => setShowPaywall(true)} className="ml-auto flex-shrink-0 whitespace-nowrap font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>Get ALL-SZN Pass →</button>
           }
         </div>
       </div>
