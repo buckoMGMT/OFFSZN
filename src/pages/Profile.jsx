@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Crown, Edit2, Sun, Moon, Bell, LogOut, ChevronRight, Zap, HelpCircle, Shield, ShieldCheck, Settings as SettingsIcon, Users } from "lucide-react";
+import { Crown, Edit2, Sun, Moon, Bell, LogOut, ChevronRight, Zap, HelpCircle, Shield, ShieldCheck, Settings as SettingsIcon, Users } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
 import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 import BadgesSection from "@/components/profile/BadgesSection";
@@ -244,7 +244,7 @@ export default function Profile() {
         <div className="flex items-center gap-x-4 gap-y-2 flex-wrap px-5 py-3" style={{ background: 'var(--surface-1)' }}>
           {/* Points → tap into the Locker Room (rewards) */}
           <Link to="/rewards" className="flex items-center gap-1.5" style={{ lineHeight: 1 }}>
-            <Trophy size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+            <Zap size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
             <span className="font-elite text-sm" style={{ color: 'var(--theme-ink)', lineHeight: 1 }}>{(athlete.total_points || 0).toLocaleString()}</span>
             <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)', lineHeight: 1 }}>pts</span>
           </Link>

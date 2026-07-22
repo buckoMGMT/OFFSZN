@@ -2,7 +2,7 @@
 // Role-gated: coaches never show athletic grade / body-comp fields (none shown here at all).
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, Flame, Trophy } from "lucide-react";
+import { X, Flame, Zap } from "lucide-react";
 import useSheetBack from "@/lib/useSheetBack";
 import FollowButton from "@/components/profile/FollowButton";
 
@@ -56,7 +56,7 @@ export default function AthleteProfileSheet({ open, onClose, athlete, me, onFoll
         {/* Stats */}
         <div className="flex gap-3 px-6 mb-4">
           <div className="card-base flex-1 p-3 text-center">
-            <Trophy size={14} className="mx-auto mb-1" style={{ color: 'var(--accent)' }} />
+            <Zap size={14} className="mx-auto mb-1" style={{ color: 'var(--accent)' }} />
             <p className="stat-number text-xl">{athlete.total_points || 0}</p>
             <p className="eyebrow mt-1">Points</p>
           </div>
