@@ -1,0 +1,48 @@
+{
+  "name": "CoachRating",
+  "type": "object",
+  "description": "Subscriber rating of a coach (1\u20135 stars, optional short review). Written ONLY server-side by the rateCoach function: rater must have a CoachSubscription (past or present) to that coach that is at least 7 days old; one rating per rater per coach (edits update in place). Review text is hidden until moderated (review_status 'approved'); stars count immediately. Never editable by the coach.",
+  "properties": {
+    "coach_athlete_id": {
+      "type": "string"
+    },
+    "rater_athlete_id": {
+      "type": "string"
+    },
+    "rater_name": {
+      "type": "string"
+    },
+    "stars": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "review_text": {
+      "type": "string",
+      "description": "Optional, 300 char cap enforced server-side."
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Moderation state for the TEXT only. Stars are always live."
+    }
+  },
+  "required": [
+    "coach_athlete_id",
+    "rater_athlete_id",
+    "stars"
+  ],
+  "rls": {
+    "read": true,
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

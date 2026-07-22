@@ -23,6 +23,7 @@ import CurrentStats from "@/components/profile/CurrentStats";
 import FriendsSheet from "@/components/profile/FriendsSheet";
 import BecomeCoachSheet from "@/components/profile/BecomeCoachSheet";
 import GuardianPanel from "@/components/profile/GuardianPanel";
+import GuardianInviteSection from "@/components/profile/GuardianInviteSection";
 import DeleteAccountSection from "@/components/profile/DeleteAccountSection";
 import { Link } from "react-router-dom";
 import { ageFromDob } from "@/lib/macroEngine";
@@ -498,6 +499,9 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+
+            {/* Guardian link — minors invite their parent/guardian here */}
+            <GuardianInviteSection />
 
             {/* Guardian Center — renders only when this user is a linked guardian */}
             <GuardianPanel />

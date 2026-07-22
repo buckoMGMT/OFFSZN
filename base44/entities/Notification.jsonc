@@ -18,6 +18,8 @@
         "payout",
         "streak_risk",
         "clan_challenge",
+        "pvp_challenge",
+        "guardian",
         "moderation"
       ]
     },

@@ -2,7 +2,7 @@
   "name": "GuardianLink",
   "type": "object",
   "title": "Guardian Link",
-  "description": "Parent/guardian verification record for a minor athlete's account.",
+  "description": "Parent/guardian verification record for a minor athlete's account. Created by the minor via guardianConsent 'invite' (share-link mechanism); verified only by a logged-in ADULT whose account email matches guardian_email. Pending links grant NOTHING \u2014 every guard checks status === 'verified'.",
   "properties": {
     "minor_user_id": {
       "type": "string"
@@ -17,6 +17,10 @@
     "guardian_user_id": {
       "type": "string",
       "description": "Set once the guardian creates/links their own account"
+    },
+    "invite_code": {
+      "type": "string",
+      "description": "Random one-time code embedded in the shareable invite link. Consumed at verification."
     },
     "status": {
       "type": "string",
@@ -48,5 +52,13 @@
   "required": [
     "minor_user_id",
     "guardian_email"
-  ]
+  ],
+  "rls": {
+    "read": true,
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

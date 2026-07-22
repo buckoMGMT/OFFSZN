@@ -27,8 +27,8 @@ export default function FriendsSheet({ open, onClose, athlete, onUpdated }) {
       setRefreshKey(k => k + 1);
     } catch (e) {
       setPvpMsg(e?.message === "active_exists"
-        ? "You've already got a live challenge with them."
-        : "Couldn't start it — try again.");
+        ? "You've already got a live or pending challenge with them."
+        : "Couldn't send it — try again.");
     } finally {
       setPvpBusy(false);
     }
@@ -113,7 +113,7 @@ export default function FriendsSheet({ open, onClose, athlete, onUpdated }) {
                   </div>
                   {challengeTarget === f.id && (
                     <div className="px-2.5 pb-2.5">
-                      <p className="eyebrow mb-2">Most points wins — pick a window</p>
+                      <p className="eyebrow mb-2">Send a challenge offer — they get 24h to accept</p>
                       <div className="flex gap-2">
                         {PVP_DURATIONS.map(d => (
                           <button key={d} onClick={() => startChallenge(f, d)} disabled={pvpBusy}

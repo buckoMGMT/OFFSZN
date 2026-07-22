@@ -16,13 +16,18 @@ function StatCard({ label, value }) {
 
 export default function StudioOverview({ athlete, drills }) {
   const [subCount, setSubCount] = useState(null);
+  const [rating, setRating] = useState(null);
   const [preview, setPreview] = useState(false);
 
   useEffect(() => {
     base44.functions.invoke("studioSubscribers", {})
       .then(r => setSubCount((r.data?.subscribers || []).length))
       .catch(() => setSubCount(0));
-  }, []);
+    // Read-only for the coach — ratings are never editable from this side
+    base44.functions.invoke("rateCoach", { action: "get", coachAthleteId: athlete.id })
+      .then(r => setRating(r.data))
+      .catch(() => setRating({ average: null, count: 0 }));
+  }, [athlete.id]);
 
   const approved = drills.filter(d => d.status === "approved");
   const totalViews = drills.reduce((s, d) => s + (d.view_count || d.views || 0), 0);
@@ -72,7 +77,7 @@ export default function StudioOverview({ athlete, drills }) {
         <StatCard label="Active Subscribers" value={subCount === null ? "…" : subCount || "—"} />
         <StatCard label="Monthly Revenue" value={mrr ? `$${mrr.toFixed(0)}` : "—"} />
         <StatCard label="Total Drill Views" value={totalViews || "—"} />
-        <StatCard label="Avg Rating" value="—" />
+        <StatCard label="Avg Rating" value={rating === null ? "…" : rating.count ? `${rating.average} ★ (${rating.count})` : "—"} />
       </div>
 
       {/* Get discoverable checklist */}

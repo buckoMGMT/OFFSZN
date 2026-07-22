@@ -32,6 +32,7 @@ const Review = lazy(() => import('@/pages/Review'));
 const SubscriptionSuccess = lazy(() => import('@/pages/SubscriptionSuccess'));
 const Studio = lazy(() => import('@/pages/Studio'));
 const CoachSubscribed = lazy(() => import('@/pages/CoachSubscribed'));
+const GuardianVerify = lazy(() => import('@/pages/GuardianVerify'));
 // Branded auth pages — users must NEVER land on a default platform login page
 const Login = lazy(() => import('@/pages/Login'));
 const Register = lazy(() => import('@/pages/Register'));
@@ -115,6 +116,8 @@ const AuthenticatedApp = () => {
           <Route path="/review" element={<Review />} />
           <Route path="/subscription/success" element={<SubscriptionSuccess />} />
           <Route path="/coach/:id/subscribed" element={<CoachSubscribed />} />
+          {/* Guardian invite landing — outside OnboardingGate (guardians may have no athlete profile) */}
+          <Route path="/guardian" element={<GuardianVerify />} />
         </Route>
         <Route element={<OnboardingGate><AppLayout /></OnboardingGate>}>
           <Route path="/" element={<Feed />} />

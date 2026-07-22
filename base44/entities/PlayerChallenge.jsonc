@@ -1,7 +1,7 @@
 {
   "name": "PlayerChallenge",
   "type": "object",
-  "description": "1v1 athlete challenge. Score = points earned during the window (current total_points minus the baseline snapshot at start). Created and resolved ONLY server-side by the pvpChallenge function \u2014 client writes are blocked by RLS so baselines and final scores can't be tampered with.",
+  "description": "1v1 athlete challenge. Offer \u2192 accept flow: created as 'pending' (24h expiry), baselines + window are snapshotted ONLY at accept. Score = points earned during the window (current total_points minus the baseline snapshot). All writes happen server-side via the pvpChallenge function \u2014 client writes are blocked by RLS.",
   "properties": {
     "challenger_athlete_id": {
       "type": "string"
@@ -27,11 +27,13 @@
     },
     "start_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Set at ACCEPT, not at creation."
     },
     "end_date": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "Set at ACCEPT: start + duration_days."
     },
     "challenger_baseline": {
       "type": "number",
@@ -53,10 +55,13 @@
     "status": {
       "type": "string",
       "enum": [
+        "pending",
         "active",
+        "declined",
+        "expired",
         "completed"
       ],
-      "default": "active"
+      "default": "pending"
     },
     "winner_athlete_id": {
       "type": "string"

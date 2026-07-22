@@ -4,6 +4,7 @@ import { X, BadgeCheck, Eye, Play, BellRing, BellPlus, Flag } from "lucide-react
 import PricePill from "@/components/monetization/PricePill";
 import CoachServiceSection from "@/components/playbook/CoachServiceSection";
 import ReportSheet from "@/components/safety/ReportSheet";
+import CoachRatingSection from "@/components/coach/CoachRatingSection";
 import useSheetBack from "@/lib/useSheetBack";
 
 function fmt(n) {
@@ -89,6 +90,11 @@ export default function CoachProfileSheet({ open, onClose, coach, videos = [], o
               </button>
             ))}
             {videos.length === 0 && <p className="text-xs text-center py-4" style={{ color: 'var(--text-tertiary)' }}>No published drills yet.</p>}
+          </div>
+
+          {/* Subscriber ratings — read + rate (server-gated: ≥7 days subscribed) */}
+          <div className="mt-5">
+            <CoachRatingSection coachId={coach.id} />
           </div>
 
           <button onClick={() => setShowReport(true)}
