@@ -15,6 +15,9 @@ import PassRibbon from "@/components/monetization/PassRibbon";
 import PullToRefresh from "@/components/layout/PullToRefresh";
 import useTabState from "@/lib/useTabState";
 import WorkoutRunner from "@/components/workout/WorkoutRunner";
+import PlaylistDetail from "@/components/playbook/PlaylistDetail";
+import { PLAYLIST_ICONS, PlaylistIcon, DEFAULT_PLAYLIST_ICON } from "@/components/playbook/playlistIcons";
+import useSheetBack from "@/lib/useSheetBack";
 import { buildStepsFromProgram, buildStepsFromPlaylist } from "@/lib/workoutSteps";
 
 const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Boxing", "MMA", "Swimming", "Lacrosse"];
@@ -75,7 +78,12 @@ export default function Playbook() {
   const [tab, setTab] = useTabState("playbook.tab", "explore");
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [playlistName, setPlaylistName] = useState("");
+  const [playlistIcon, setPlaylistIcon] = useState(DEFAULT_PLAYLIST_ICON);
   const [playlistPrograms, setPlaylistPrograms] = useState([]);
+  const [openPlaylistId, setOpenPlaylistId] = useState("");
+  const openPlaylist = playlists.find(p => p.id === openPlaylistId) || null;
+  // Sheets hide the dock + participate in back navigation
+  useSheetBack(showCreatePlaylist, () => setShowCreatePlaylist(false));
   const [showPaywall, setShowPaywall] = useState(false);
   const [runner, setRunner] = useState(null); // { title, steps, duration } — active workout session
   const [sortBy, setSortBy] = useState("featured");
@@ -121,9 +129,9 @@ export default function Playbook() {
 
   const createPlaylist = async () => {
     if (!playlistName || !athlete) return;
-    const p = await base44.entities.Playlist.create({ name: playlistName, athlete_id: athlete.id, program_ids: playlistPrograms });
+    const p = await base44.entities.Playlist.create({ name: playlistName, athlete_id: athlete.id, program_ids: playlistPrograms, icon: playlistIcon });
     setPlaylists(prev => [...prev, p]);
-    setShowCreatePlaylist(false); setPlaylistName(""); setPlaylistPrograms([]);
+    setShowCreatePlaylist(false); setPlaylistName(""); setPlaylistPrograms([]); setPlaylistIcon(DEFAULT_PLAYLIST_ICON);
   };
 
   let filtered = PROGRAMS.filter(p =>
@@ -347,23 +355,25 @@ export default function Playbook() {
                 ) : (
                   <div className="space-y-3">
                     {playlists.map(pl => (
-                      <div key={pl.id} className="rounded border p-4 flex items-center gap-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
-                        <XsOs size={32} />
+                      <div key={pl.id} className="rounded border p-4 flex items-center gap-3 cursor-pointer" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}
+                        onClick={() => setOpenPlaylistId(pl.id)}>
+                        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                          <PlaylistIcon name={pl.icon} size={20} />
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-work font-semibold" style={{ color: 'var(--theme-ink)' }}>{pl.name}</p>
+                          <p className="font-work font-semibold truncate" style={{ color: 'var(--theme-ink)' }}>{pl.name}</p>
                           <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{(pl.program_ids || []).length} programs</p>
                         </div>
                         {(pl.program_ids || []).length > 0 && (
-                          <button onClick={() => {
+                          <button onClick={(e) => {
+                            e.stopPropagation();
                             const progs = (pl.program_ids || []).map(id => PROGRAMS.find(p => p.id === id)).filter(Boolean);
                             if (progs.length) setRunner({ title: pl.name, steps: buildStepsFromPlaylist(progs), duration: progs.reduce((s, p) => s + p.duration, 0) });
                           }} className="p-1.5 rounded" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
                             <Play size={13} fill="var(--accent)" style={{ color: 'var(--accent)' }} />
                           </button>
                         )}
-                        <button onClick={() => base44.entities.Playlist.delete(pl.id).then(() => setPlaylists(p => p.filter(x => x.id !== pl.id)))}>
-                          <X size={14} style={{ color: 'var(--text-secondary)' }} />
-                        </button>
+                        <span className="font-elite text-[9px]" style={{ color: 'var(--theme-border)' }}>→</span>
                       </div>
                     ))}
                   </div>
@@ -390,6 +400,20 @@ export default function Playbook() {
               style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
               placeholder="Playlist name"
               value={playlistName} onChange={e => setPlaylistName(e.target.value)} />
+            {/* Icon picker — the playlist's cover art */}
+            <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Pick an Icon</p>
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 mb-4">
+              {Object.keys(PLAYLIST_ICONS).map(key => (
+                <button key={key} onClick={() => setPlaylistIcon(key)}
+                  className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: playlistIcon === key ? 'var(--accent-subtle)' : 'var(--theme-surface)',
+                    border: playlistIcon === key ? '2px solid var(--accent)' : '1px solid var(--theme-border)',
+                  }}>
+                  <PlaylistIcon name={key} size={20} color={playlistIcon === key ? 'var(--accent)' : 'var(--text-secondary)'} />
+                </button>
+              ))}
+            </div>
             <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Add Programs — recently watched first</p>
             <div className="space-y-2 mb-5">
               {(() => {
@@ -422,6 +446,19 @@ export default function Playbook() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Playlist detail — Apple Music-style view / edit / play */}
+      {openPlaylist && (
+        <PlaylistDetail
+          playlist={openPlaylist}
+          allPrograms={PROGRAMS}
+          onClose={() => setOpenPlaylistId("")}
+          onPlay={(progs) => setRunner({ title: openPlaylist.name, steps: buildStepsFromPlaylist(progs), duration: progs.reduce((s, p) => s + p.duration, 0) })}
+          onOpenProgram={(p) => { setOpenPlaylistId(""); setSelected(p); }}
+          onSaved={(updated) => setPlaylists(prev => prev.map(x => x.id === updated.id ? updated : x))}
+          onDeleted={(id) => setPlaylists(prev => prev.filter(x => x.id !== id))}
+        />
       )}
 
       {runner && athlete && (

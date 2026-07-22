@@ -7,6 +7,8 @@ const LIFTS = [
   { key: "squat_lbs", label: "Squat", unit: "lbs" },
   { key: "deadlift_lbs", label: "Deadlift", unit: "lbs" },
   { key: "mile_time_seconds", label: "Mile Time", unit: "min", isTime: true },
+  { key: "forty_yd_seconds", label: "40-Yard Dash", unit: "sec", isDecimal: true },
+  { key: "vertical_jump_inches", label: "Vertical Jump", unit: "in", isDecimal: true },
 ];
 
 function secondsToTime(s) {
@@ -18,8 +20,9 @@ function secondsToTime(s) {
 
 function timeToSeconds(str) {
   const parts = str.split(":");
-  if (parts.length === 2) return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-  return parseInt(str) || 0;
+  // Time math: no value over 59 exists — clamp minutes AND seconds to 59
+  if (parts.length === 2) return Math.min(59, parseInt(parts[0]) || 0) * 60 + Math.min(59, parseInt(parts[1]) || 0);
+  return Math.min(59, parseInt(str) || 0);
 }
 
 export default function StrengthMaxes({ athlete, onUpdate }) {
@@ -29,6 +32,8 @@ export default function StrengthMaxes({ athlete, onUpdate }) {
     squat_lbs: athlete?.squat_lbs || "",
     deadlift_lbs: athlete?.deadlift_lbs || "",
     mile_time_seconds: athlete?.mile_time_seconds ? secondsToTime(athlete.mile_time_seconds) : "",
+    forty_yd_seconds: athlete?.forty_yd_seconds || "",
+    vertical_jump_inches: athlete?.vertical_jump_inches || "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -39,6 +44,8 @@ export default function StrengthMaxes({ athlete, onUpdate }) {
       squat_lbs: form.squat_lbs ? Number(form.squat_lbs) : null,
       deadlift_lbs: form.deadlift_lbs ? Number(form.deadlift_lbs) : null,
       mile_time_seconds: form.mile_time_seconds ? timeToSeconds(form.mile_time_seconds) : null,
+      forty_yd_seconds: form.forty_yd_seconds ? Number(form.forty_yd_seconds) : null,
+      vertical_jump_inches: form.vertical_jump_inches ? Number(form.vertical_jump_inches) : null,
     };
     await base44.entities.Athlete.update(athlete.id, data);
     setEditing(false);
@@ -63,22 +70,30 @@ export default function StrengthMaxes({ athlete, onUpdate }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {LIFTS.map(({ key, label, unit, isTime }) => (
+        {LIFTS.map(({ key, label, unit, isTime, isDecimal }) => (
           <div key={key} className="bg-secondary rounded-xl p-3">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
             {editing ? (
               <input
                 type={isTime ? "text" : "number"}
                 inputMode={isTime ? "numeric" : "decimal"}
-                placeholder={isTime ? "5:30" : "0"}
+                step={isDecimal ? "0.1" : undefined}
+                placeholder={isTime ? "5:30" : isDecimal ? "0.0" : "0"}
                 className="w-full bg-transparent text-lg font-bold text-foreground outline-none"
                 value={form[key]}
                 onChange={e => {
                   let v = e.target.value;
                   if (isTime) {
-                    // Auto-format: digits only, colon inserted before the last two (530 → 5:30)
+                    // Auto-format: digits only, colon before the last two (530 → 5:30).
+                    // No value over 59 exists in time — minutes and seconds clamp at 59.
                     const digits = v.replace(/\D/g, "").slice(0, 4);
-                    v = digits.length > 2 ? `${digits.slice(0, -2)}:${digits.slice(-2)}` : digits;
+                    if (digits.length > 2) {
+                      const mins = Math.min(59, parseInt(digits.slice(0, -2)) || 0);
+                      const secs = Math.min(59, parseInt(digits.slice(-2)) || 0);
+                      v = `${mins}:${String(secs).padStart(2, "0")}`;
+                    } else {
+                      v = digits;
+                    }
                   }
                   setForm(p => ({ ...p, [key]: v }));
                 }}

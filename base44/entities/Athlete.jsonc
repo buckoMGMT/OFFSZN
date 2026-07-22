@@ -39,6 +39,10 @@
       "type": "number",
       "description": "Optional self-reported GPA (0.0-5.0, weighted scales allowed). Shown on the recruiting card \u2014 the numbers college coaches actually check."
     },
+    "hometown": {
+      "type": "string",
+      "description": "City, ST \u2014 shown on the recruiting card so recruiters know where to find film and games."
+    },
     "school": {
       "type": "string"
     },
@@ -211,6 +215,14 @@
     },
     "mile_time_seconds": {
       "type": "number"
+    },
+    "forty_yd_seconds": {
+      "type": "number",
+      "description": "40-yard dash time in seconds (e.g. 4.55). Optional recruiting metric."
+    },
+    "vertical_jump_inches": {
+      "type": "number",
+      "description": "Standing vertical jump in inches. Optional recruiting metric."
     },
     "highlight_url": {
       "type": "string"

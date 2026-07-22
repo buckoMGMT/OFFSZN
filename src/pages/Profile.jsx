@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Crown, Edit2, Sun, Moon, Bell, LogOut, ChevronRight, Zap, HelpCircle, Shield, ShieldCheck, Settings as SettingsIcon } from "lucide-react";
+import { Trophy, Crown, Edit2, Sun, Moon, Bell, LogOut, ChevronRight, Zap, HelpCircle, Shield, ShieldCheck, Settings as SettingsIcon, Users } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
 import { useMilestoneNotifier } from "@/lib/MilestoneNotifier";
 import BadgesSection from "@/components/profile/BadgesSection";
@@ -19,6 +19,8 @@ import AdvancedStats from "@/components/analytics/AdvancedStats";
 import AccentColorPicker from "@/components/profile/AccentColorPicker";
 import MacroRecompute from "@/components/profile/MacroRecompute";
 import ManageSubscription from "@/components/profile/ManageSubscription";
+import CurrentStats from "@/components/profile/CurrentStats";
+import FriendsSheet from "@/components/profile/FriendsSheet";
 import DeleteAccountSection from "@/components/profile/DeleteAccountSection";
 import { Link } from "react-router-dom";
 import { ageFromDob } from "@/lib/macroEngine";
@@ -52,6 +54,7 @@ export default function Profile() {
   const [units, setUnits] = useState(() => localStorage.getItem('pb_units') || 'imperial');
   const [privacy, setPrivacy] = useState(() => localStorage.getItem('pb_privacy') || 'public');
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
   const [isMinorUser, setIsMinorUser] = useState(false);
   // Weight is "verified" when it came from a logged DailyLog (not just typed on the card).
   const [weightVerified, setWeightVerified] = useState(false);
@@ -214,6 +217,12 @@ export default function Profile() {
                 <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)', lineHeight: 1 }}>SZN Streak</span>
             </div>
           }
+          {/* Friends — tap to see who you follow */}
+          <button onClick={() => setShowFriends(true)} className="flex items-center gap-1.5" style={{ lineHeight: 1, background: 'transparent', border: 'none', padding: 0 }}>
+            <Users size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+            <span className="font-elite text-sm" style={{ color: 'var(--theme-ink)', lineHeight: 1 }}>{(athlete.friends || []).length}</span>
+            <span className="font-elite text-[8px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)', lineHeight: 1 }}>friends</span>
+          </button>
           {isPremium ?
           <div className="ml-auto flex items-center gap-2">
                 <button onClick={() => setShowPaywall(true)} className="px-2 py-1 rounded font-elite text-[9px] uppercase tracking-widest"
@@ -255,8 +264,11 @@ export default function Profile() {
           { placeholder: "Display name", field: "display_name" },
           { placeholder: "Club name", field: "school" },
           { placeholder: "Position", field: "position" },
-          // Jersey number appears on the recruiting card — athlete-only.
-          ...(isCoach ? [] : [{ placeholder: "Jersey number (optional)", field: "jersey_number" }])].
+          // Jersey number + hometown appear on the recruiting card — athlete-only.
+          ...(isCoach ? [] : [
+            { placeholder: "Jersey number (optional)", field: "jersey_number" },
+            { placeholder: "Hometown (City, ST — optional)", field: "hometown" },
+          ])].
           map(({ placeholder, field }) =>
           <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
           style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
@@ -332,6 +344,8 @@ export default function Profile() {
 
         {activeSection === "goals" &&
         <div className="space-y-3 mt-3">
+            {/* Current height + weight — editable, feeds Recalculate Targets */}
+            <CurrentStats athlete={athlete} onUpdate={(a) => {setAthlete(a);setForm(a);}} />
             <MacroRecompute athlete={athlete} onUpdate={(a) => {setAthlete(a);setForm(a);}} />
             <div className="rounded border p-4 space-y-3" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Macro Goals</p>
@@ -555,6 +569,7 @@ export default function Profile() {
         }
       </div>
 
+      <FriendsSheet open={showFriends} onClose={() => setShowFriends(false)} athlete={athlete} onUpdated={(a) => {setAthlete(a);setForm(a);}} />
       <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>);
 

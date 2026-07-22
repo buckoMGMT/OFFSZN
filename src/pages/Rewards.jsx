@@ -8,6 +8,10 @@ import RedeemModal from "@/components/rewards/RedeemModal";
 import ReferralPanel from "@/components/rewards/ReferralPanel";
 import useTabState from "@/lib/useTabState";
 
+// The store is intentionally dark until rewards are ready to fulfill.
+// The goal progress bar mirrors the store 1:1 — no store, no goal bar.
+const STORE_LIVE = false;
+
 const DAILY_BREAKDOWN = [
   { action: "Hit your water goal (80oz)", pts: 10 },
   { action: "Hit your calorie goal", pts: 20 },
@@ -210,8 +214,9 @@ export default function Rewards() {
           </div>
         </div>
 
-        {/* Progress to YOUR goal — athlete picks the target; falls back to the cheapest gift card */}
-        {(() => {
+        {/* Progress to YOUR goal — only exists when the store is live and stocked.
+            The bar is a reflection of the item shop, never a manual input. */}
+        {STORE_LIVE && items.length > 0 && (() => {
           const sortedItems = [...items].sort((a, b) => a.points_required - b.points_required);
           const goalItem = sortedItems.find(i => i.id === goalItemId)
             || sortedItems.filter(i => i.type === "gift_card")[0]
@@ -378,8 +383,8 @@ export default function Rewards() {
         <RedeemModal item={redeemTarget} onClose={() => setRedeemTarget(null)} onConfirm={onRedeemed} />
       )}
 
-      {/* Goal picker sheet — pick which reward the progress bar chases */}
-      {showGoalPicker && (
+      {/* Goal picker sheet — live shop items only, pick which one the bar chases */}
+      {STORE_LIVE && showGoalPicker && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowGoalPicker(false)}>
           <div className="w-full max-w-lg rounded-t-2xl border-t border-l border-r animate-slide-up max-h-[70vh] overflow-y-auto p-5"
             style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}

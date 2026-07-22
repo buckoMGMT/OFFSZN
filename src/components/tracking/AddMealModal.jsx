@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Zap, Search } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { format } from "date-fns";
+import useSheetBack from "@/lib/useSheetBack";
 
 const MEAL_TIMES = ["breakfast", "lunch", "dinner", "snack", "pre_workout", "post_workout"];
 
@@ -29,6 +30,8 @@ export default function AddMealModal({ onClose, onSaved, athleteId, logId }) {
   });
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  // Dock hides while this sheet owns the screen; back gesture closes the sheet
+  useSheetBack(true, onClose);
 
   const filtered = search.length > 0
     ? QUICK_FOODS.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))

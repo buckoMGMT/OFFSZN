@@ -53,6 +53,7 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
         IN(athlete.height_inches),
         athlete.weight_lbs ? `${athlete.weight_lbs} lbs` : null,
         athlete.gpa ? `${athlete.gpa.toFixed(1)} GPA` : null,
+        athlete.hometown || null,
       ].filter(Boolean);
 
   // Performance grid — only stats that exist. A day-one athlete leads with STREAK + PTS.
@@ -67,10 +68,13 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
         { label: "Squat", value: athlete.squat_lbs, verified: verifiedFlags.squat_lbs },
         { label: "Deadlift", value: athlete.deadlift_lbs, verified: verifiedFlags.deadlift_lbs },
         { label: "Mile", value: MILE(athlete.mile_time_seconds), verified: verifiedFlags.mile_time_seconds },
+        // Combine-style recruiting metrics — what NCAA recruiters actually scan for
+        { label: "40 YD", value: athlete.forty_yd_seconds ? `${athlete.forty_yd_seconds}s` : null },
+        { label: "Vert", value: athlete.vertical_jump_inches ? `${athlete.vertical_jump_inches}"` : null },
         // Streak & points are system-logged data — always verified.
         { label: "Streak", value: streak > 0 ? streak : null, verified: streak > 0 },
         { label: "Pts", value: points > 0 ? points.toLocaleString() : null, verified: points > 0 },
-      ].filter((s) => s.value);
+      ].filter((s) => s.value).slice(0, 6);
 
   const cols = Math.min(Math.max(stats.length, 1), 3);
   const big = stats.length <= 3;

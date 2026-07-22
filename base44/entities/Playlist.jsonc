@@ -11,6 +11,10 @@
     "athlete_id": {
       "type": "string"
     },
+    "icon": {
+      "type": "string",
+      "description": "Playlist icon key (dumbbell, zap, flame, timer, run, trophy, bike, heart). Rendered via the shared lucide icon map."
+    },
     "program_ids": {
       "type": "array",
       "items": {
