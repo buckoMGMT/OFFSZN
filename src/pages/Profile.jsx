@@ -22,6 +22,7 @@ import ManageSubscription from "@/components/profile/ManageSubscription";
 import CurrentStats from "@/components/profile/CurrentStats";
 import PageHero from "@/components/ui/PageHero";
 import StatRing from "@/components/ui/StatRing";
+import StatRingsCard from "@/components/profile/StatRingsCard";
 import FriendsSheet from "@/components/profile/FriendsSheet";
 import BecomeCoachSheet from "@/components/profile/BecomeCoachSheet";
 import GuardianPanel from "@/components/profile/GuardianPanel";
@@ -341,34 +342,14 @@ export default function Profile() {
 
         {activeSection === "stats" &&
         <div className="space-y-3 mt-3">
-            {/* Ring gauges — the two numbers that matter most:
-                1) Today's fuel: calories consumed vs their daily goal.
-                2) The goal they set: weight moving from start toward target
-                   (minors have no goal weight → streak-toward-a-month instead). */}
-            {(() => {
-              const goalCals = athlete.goal_calories || 0;
-              const eaten = todayLog?.calories_consumed || 0;
-              const showGoalWeight = !isCoach && !isMinorUser && athlete.goal_weight_lbs > 0
-                && (athlete.weight_lbs > 0) && startWeight != null;
-              // Long-term goal-weight progress: how far from start toward target.
-              let goalPct = 0, goalVal = 0, goalMax = 100;
-              if (showGoalWeight) {
-                const total = Math.abs(athlete.goal_weight_lbs - startWeight);
-                const done = Math.abs(athlete.weight_lbs - startWeight);
-                goalPct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
-                goalVal = goalPct; goalMax = 100;
-              }
-              return (
-                <div className="card-base p-4 flex items-center justify-around">
-                  {goalCals > 0
-                    ? <StatRing value={eaten} max={goalCals} label="Today's Calories" size={88} />
-                    : <StatRing value={athlete.current_streak_days || 0} max={30} label="SZN Streak" size={88} />}
-                  {showGoalWeight
-                    ? <StatRing value={goalVal} max={goalMax} label="Goal Weight" size={88} />
-                    : <StatRing value={athlete.current_streak_days || 0} max={30} label="SZN Streak" size={88} />}
-                </div>
-              );
-            })()}
+            {/* Customizable progress rings — gear opens a picker (StatRingsCard). */}
+            <StatRingsCard
+              athlete={athlete}
+              todayLog={todayLog}
+              startWeight={startWeight}
+              isMinorUser={isMinorUser}
+              isCoach={isCoach}
+            />
             {/* Shareable recruiting card — the viral loop. Real data only. */}
             <RecruitingCard athlete={athlete} verifiedFlags={{ weight_lbs: weightVerified, ...maxFlags }} />
             <HighlightReel athlete={athlete} onUpdate={reload} />
