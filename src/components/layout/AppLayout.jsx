@@ -5,7 +5,6 @@ import EnvironmentLayer from "@/components/environment/EnvironmentLayer";
 import CoachSubSuccessToast from "@/components/monetization/CoachSubSuccessToast";
 import PastDueBanner from "@/components/monetization/PastDueBanner";
 import ConsentBanner from "@/components/ConsentBanner";
-import ReviewAlertBanner from "@/components/review/ReviewAlertBanner";
 
 export default function AppLayout() {
   /* iOS-native shell: full-bleed surface, content constrained to phone width,
@@ -34,7 +33,6 @@ export default function AppLayout() {
         }}
       >
         <PastDueBanner />
-        <ReviewAlertBanner />
         <KeepAliveOutlet />
       </div>
       <BottomNav />
