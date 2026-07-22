@@ -22,11 +22,12 @@ export default function BecomeCoachSheet({ open, onClose, athlete, isMinor, onBe
     setWorking(true);
     setError("");
     try {
-      const updated = await base44.entities.Athlete.update(athlete.id, { role: "coach" });
-      onBecame(updated);
+      // Server-side gate — live 18+ age check happens in the becomeCoach function.
+      const res = await base44.functions.invoke("becomeCoach", {});
+      onBecame(res.data.athlete);
       onClose();
-    } catch {
-      setError("Couldn't switch you over — try again.");
+    } catch (e) {
+      setError(e?.response?.data?.message || "Couldn't switch you over — try again.");
       setWorking(false);
     }
   };

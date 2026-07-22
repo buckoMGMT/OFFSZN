@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Mail, Lock, Loader2 } from "lucide-react";
@@ -32,6 +32,14 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Already signed in (e.g. returning from an OAuth callback)? Go straight in —
+  // never strand a live session on the login page.
+  useEffect(() => {
+    base44.auth.isAuthenticated().then((ok) => {
+      if (ok) window.location.href = "/";
+    }).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

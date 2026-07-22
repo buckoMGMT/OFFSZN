@@ -22,6 +22,7 @@ import ManageSubscription from "@/components/profile/ManageSubscription";
 import CurrentStats from "@/components/profile/CurrentStats";
 import FriendsSheet from "@/components/profile/FriendsSheet";
 import BecomeCoachSheet from "@/components/profile/BecomeCoachSheet";
+import GuardianPanel from "@/components/profile/GuardianPanel";
 import DeleteAccountSection from "@/components/profile/DeleteAccountSection";
 import { Link } from "react-router-dom";
 import { ageFromDob } from "@/lib/macroEngine";
@@ -497,6 +498,9 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+
+            {/* Guardian Center — renders only when this user is a linked guardian */}
+            <GuardianPanel />
 
             {/* Become a Coach — entry point for athletes (18+, enforced in the sheet + server gates) */}
             {!isCoach &&

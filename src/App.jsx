@@ -45,6 +45,8 @@ const AuthRoutes = () => (
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      {/* OAuth/auth callback paths must never 404 — funnel them to login */}
+      <Route path="/auth/*" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   </Suspense>
@@ -123,6 +125,8 @@ const AuthenticatedApp = () => {
           <Route path="/studio" element={<Studio />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
+        {/* OAuth/auth callback paths must never 404 with a live session — go home */}
+        <Route path="/auth/*" element={<Navigate to="/" replace />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Suspense>

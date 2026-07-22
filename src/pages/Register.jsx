@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Mail, Lock, Loader2 } from "lucide-react";
@@ -56,6 +56,13 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+
+  // Already signed in? Straight into the app — never strand a live session here.
+  useEffect(() => {
+    base44.auth.isAuthenticated().then((ok) => {
+      if (ok) window.location.href = "/";
+    }).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -194,7 +201,7 @@ export default function Register() {
         <label className="flex items-start gap-3 cursor-pointer">
           <Checkbox checked={agreed} onToggle={() => setAgreed(a => !a)} />
           <span className="text-xs leading-snug" style={{ color: 'var(--text-tertiary)' }}>
-            I am at least <span style={{ color: 'var(--text-secondary)' }}>18 years old</span> and agree to the{" "}
+            I am at least <span style={{ color: 'var(--text-secondary)' }}>13 years old</span> and agree to the{" "}
             <span style={{ color: 'var(--text-secondary)' }}>Terms of Service</span> and{" "}
             <span style={{ color: 'var(--text-secondary)' }}>Privacy Policy</span>.
             This app is for athletic performance tracking only — not medical advice.

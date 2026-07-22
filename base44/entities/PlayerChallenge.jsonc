@@ -1,7 +1,7 @@
 {
   "name": "PlayerChallenge",
   "type": "object",
-  "description": "1v1 athlete challenge. Score = points earned during the window (current total_points minus the baseline snapshot at start). Resolves lazily when end_date passes. Mirrors ClanChallenge mechanics.",
+  "description": "1v1 athlete challenge. Score = points earned during the window (current total_points minus the baseline snapshot at start). Created and resolved ONLY server-side by the pvpChallenge function \u2014 client writes are blocked by RLS so baselines and final scores can't be tampered with.",
   "properties": {
     "challenger_athlete_id": {
       "type": "string"
@@ -66,5 +66,13 @@
     "challenger_athlete_id",
     "opponent_athlete_id",
     "duration_days"
-  ]
+  ],
+  "rls": {
+    "read": true,
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
