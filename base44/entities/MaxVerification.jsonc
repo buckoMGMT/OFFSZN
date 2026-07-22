@@ -1,0 +1,48 @@
+{
+  "name": "MaxVerification",
+  "type": "object",
+  "description": "A verified coach vouching for an athlete's max. Written ONLY server-side by the verifyMaxes function (coach must be identity-verified AND have an active paid CoachSubscription from the athlete). The stored value snapshots the max at verification time \u2014 if the athlete later edits that max, the shield no longer applies (value mismatch).",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "coach_athlete_id": {
+      "type": "string"
+    },
+    "coach_name": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string",
+      "enum": [
+        "bench_press_lbs",
+        "squat_lbs",
+        "deadlift_lbs",
+        "mile_time_seconds",
+        "forty_yd_seconds",
+        "vertical_jump_inches"
+      ]
+    },
+    "value": {
+      "type": "number",
+      "description": "The athlete's value for this field at the moment the coach verified it."
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "athlete_id",
+    "coach_athlete_id",
+    "field"
+  ],
+  "rls": {
+    "read": true,
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

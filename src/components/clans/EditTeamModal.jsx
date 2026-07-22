@@ -12,10 +12,12 @@ export default function EditTeamModal({ clan, onClose, onSaved }) {
   const [form, setForm] = useState({
     name: clan.name || "",
     school_name: clan.school_name || "",
+    location: clan.location || "",
     type: clan.type || "high_school",
     sport: clan.sport || "football",
     description: clan.description || "",
     emblem_url: clan.emblem_url || "",
+    banner_url: clan.banner_url || "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -28,10 +30,12 @@ export default function EditTeamModal({ clan, onClose, onSaved }) {
       const updated = await base44.entities.Clan.update(clan.id, {
         name: form.name.trim(),
         school_name: form.school_name.trim(),
+        location: form.location.trim(),
         type: form.type,
         sport: form.sport,
         description: form.description.trim(),
         emblem_url: form.emblem_url,
+        banner_url: form.banner_url,
       });
       onSaved(updated);
     } catch {
@@ -52,9 +56,11 @@ export default function EditTeamModal({ clan, onClose, onSaved }) {
         </div>
         <div className="space-y-4">
           <TeamEmblemUpload emblemUrl={form.emblem_url} onUploaded={(url) => setForm(p => ({ ...p, emblem_url: url }))} />
+          <TeamEmblemUpload aspect="banner" label="Team Banner" emblemUrl={form.banner_url} onUploaded={(url) => setForm(p => ({ ...p, banner_url: url }))} />
           {[
             { placeholder: "Team name *", field: "name" },
             { placeholder: "School / Organization", field: "school_name" },
+            { placeholder: "Location (City, ST)", field: "location" },
           ].map(({ placeholder, field }) => (
             <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
               style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}

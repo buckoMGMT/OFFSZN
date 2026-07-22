@@ -69,8 +69,8 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
         { label: "Deadlift", value: athlete.deadlift_lbs, verified: verifiedFlags.deadlift_lbs },
         { label: "Mile", value: MILE(athlete.mile_time_seconds), verified: verifiedFlags.mile_time_seconds },
         // Combine-style recruiting metrics — what NCAA recruiters actually scan for
-        { label: "40 YD", value: athlete.forty_yd_seconds ? `${athlete.forty_yd_seconds}s` : null },
-        { label: "Vert", value: athlete.vertical_jump_inches ? `${athlete.vertical_jump_inches}"` : null },
+        { label: "40 YD", value: athlete.forty_yd_seconds ? `${athlete.forty_yd_seconds}s` : null, verified: verifiedFlags.forty_yd_seconds },
+        { label: "Vert", value: athlete.vertical_jump_inches ? `${athlete.vertical_jump_inches}"` : null, verified: verifiedFlags.vertical_jump_inches },
         // Streak & points are system-logged data — always verified.
         { label: "Streak", value: streak > 0 ? streak : null, verified: streak > 0 },
         { label: "Pts", value: points > 0 ? points.toLocaleString() : null, verified: points > 0 },

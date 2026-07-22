@@ -28,7 +28,7 @@ export default function ClanCard({ clan, onClick, isJoined }) {
           {isJoined && <span className="ink-stamp" style={{ fontSize: 8 }}>Joined</span>}
         </div>
         <p className="text-xs font-barlow uppercase tracking-wide mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-          {typeLabel[clan.type]} {clan.sport ? `· ${clan.sport}` : ""}
+          {typeLabel[clan.type]} {clan.sport ? `· ${clan.sport}` : ""}{clan.location ? ` · ${clan.location}` : ""}
         </p>
         <div className="flex items-center gap-3 mt-1.5">
           <div className="flex items-center gap-1" style={{ color: 'var(--text-tertiary)' }}>

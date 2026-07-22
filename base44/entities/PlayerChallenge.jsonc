@@ -1,0 +1,70 @@
+{
+  "name": "PlayerChallenge",
+  "type": "object",
+  "description": "1v1 athlete challenge. Score = points earned during the window (current total_points minus the baseline snapshot at start). Resolves lazily when end_date passes. Mirrors ClanChallenge mechanics.",
+  "properties": {
+    "challenger_athlete_id": {
+      "type": "string"
+    },
+    "challenger_name": {
+      "type": "string"
+    },
+    "opponent_athlete_id": {
+      "type": "string"
+    },
+    "opponent_name": {
+      "type": "string"
+    },
+    "metric": {
+      "type": "string",
+      "enum": [
+        "points"
+      ],
+      "default": "points"
+    },
+    "duration_days": {
+      "type": "number"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "challenger_baseline": {
+      "type": "number",
+      "default": 0
+    },
+    "opponent_baseline": {
+      "type": "number",
+      "default": 0
+    },
+    "challenger_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Frozen final score, written on resolution."
+    },
+    "opponent_score": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed"
+      ],
+      "default": "active"
+    },
+    "winner_athlete_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "challenger_athlete_id",
+    "opponent_athlete_id",
+    "duration_days"
+  ]
+}

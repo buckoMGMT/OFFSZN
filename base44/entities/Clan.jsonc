@@ -20,6 +20,10 @@
     "school_name": {
       "type": "string"
     },
+    "location": {
+      "type": "string",
+      "description": "City, ST \u2014 where the team plays. Shown on team cards."
+    },
     "admin_id": {
       "type": "string"
     },
@@ -44,6 +48,10 @@
     },
     "emblem_url": {
       "type": "string"
+    },
+    "banner_url": {
+      "type": "string",
+      "description": "Wide banner image shown across the top of the team card."
     },
     "total_points": {
       "type": "number",

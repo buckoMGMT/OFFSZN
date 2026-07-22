@@ -38,6 +38,11 @@
     "verified_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "public_exposure_approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Guardian opt-in for the minor to appear on public surfaces (leaderboards, discoverable recruiting). Checked server-side by the leaderboard function. Default false \u2014 minors are hidden from public boards until a verified guardian approves."
     }
   },
   "required": [

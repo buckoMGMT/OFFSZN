@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Users, ShieldCheck, ShieldAlert, Clock } from "lucide-react";
 import CoachChatSheet from "@/components/messaging/CoachChatSheet";
+import VerifyMaxesSheet from "@/components/studio/VerifyMaxesSheet";
 
 export default function StudioSubscribersTab({ athlete }) {
   const [data, setData] = useState(null);
   const [active, setActive] = useState(null);
+  const [verifyTarget, setVerifyTarget] = useState(null);
 
   useEffect(() => {
     base44.functions.invoke("studioSubscribers", {})
@@ -37,7 +39,7 @@ export default function StudioSubscribersTab({ athlete }) {
       )}
 
       {subs.map(s => (
-        <button key={s.athlete_id} onClick={() => setActive(s)}
+        <div key={s.athlete_id} onClick={() => setActive(s)} role="button" tabIndex={0}
           className="card-tappable w-full p-3 flex items-center gap-3 text-left">
           <img src={s.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" style={{ border: "1px solid var(--border-strong)", background: "var(--surface-2)" }} />
           <div className="min-w-0 flex-1">
@@ -62,8 +64,16 @@ export default function StudioSubscribersTab({ athlete }) {
           ) : s.awaiting_reply ? (
             <span className="font-elite text-[9px] uppercase tracking-wide flex-shrink-0" style={{ color: "var(--text-secondary)" }}>Awaiting reply</span>
           ) : null}
-        </button>
+          {/* Vouch for maxes you've personally seen this athlete hit */}
+          <button onClick={(e) => { e.stopPropagation(); setVerifyTarget(s); }}
+            aria-label={`Verify ${s.display_name}'s maxes`}
+            className="p-2 rounded flex-shrink-0" style={{ background: "var(--surface-2)", border: "1px solid var(--border-subtle)" }}>
+            <ShieldCheck size={14} style={{ color: "var(--positive)" }} />
+          </button>
+        </div>
       ))}
+
+      <VerifyMaxesSheet open={!!verifyTarget} onClose={() => setVerifyTarget(null)} subscriber={verifyTarget} />
 
       <CoachChatSheet
         open={!!active}

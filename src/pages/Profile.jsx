@@ -21,6 +21,7 @@ import MacroRecompute from "@/components/profile/MacroRecompute";
 import ManageSubscription from "@/components/profile/ManageSubscription";
 import CurrentStats from "@/components/profile/CurrentStats";
 import FriendsSheet from "@/components/profile/FriendsSheet";
+import BecomeCoachSheet from "@/components/profile/BecomeCoachSheet";
 import DeleteAccountSection from "@/components/profile/DeleteAccountSection";
 import { Link } from "react-router-dom";
 import { ageFromDob } from "@/lib/macroEngine";
@@ -55,7 +56,11 @@ export default function Profile() {
   const [privacy, setPrivacy] = useState(() => localStorage.getItem('pb_privacy') || 'public');
   const [showPaywall, setShowPaywall] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
+  const [showBecomeCoach, setShowBecomeCoach] = useState(false);
   const [isMinorUser, setIsMinorUser] = useState(false);
+  // Coach-verified maxes — a shield applies only while the stored verified
+  // value still matches the athlete's current number.
+  const [maxFlags, setMaxFlags] = useState({});
   // Weight is "verified" when it came from a logged DailyLog (not just typed on the card).
   const [weightVerified, setWeightVerified] = useState(false);
   // Athlete's clan — shown as a tappable badge in the header.
@@ -78,6 +83,14 @@ export default function Profile() {
         // A logged weight (from a DailyLog) is verified data vs a self-typed number.
         base44.entities.DailyLog.filter({ athlete_id: a.id, weight_lbs: { $gt: 0 } }, "-date", 1)
           .then((logs) => setWeightVerified(logs.length > 0))
+          .catch(() => {});
+        // Coach verifications — only count when the verified value still matches
+        base44.entities.MaxVerification.filter({ athlete_id: a.id })
+          .then((vs) => {
+            const flags = {};
+            vs.forEach((v) => { if (v.value != null && v.value === a[v.field]) flags[v.field] = true; });
+            setMaxFlags(flags);
+          })
           .catch(() => {});
         if (a.clan_id) {
           base44.entities.Clan.filter({ id: a.clan_id }, "-created_date", 1)
@@ -306,7 +319,7 @@ export default function Profile() {
         {activeSection === "stats" &&
         <div className="space-y-3 mt-3">
             {/* Shareable recruiting card — the viral loop. Real data only. */}
-            <RecruitingCard athlete={athlete} verifiedFlags={{ weight_lbs: weightVerified }} />
+            <RecruitingCard athlete={athlete} verifiedFlags={{ weight_lbs: weightVerified, ...maxFlags }} />
             <HighlightReel athlete={athlete} onUpdate={reload} />
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -485,6 +498,21 @@ export default function Profile() {
               </div>
             </div>
 
+            {/* Become a Coach — entry point for athletes (18+, enforced in the sheet + server gates) */}
+            {!isCoach &&
+            <button onClick={() => setShowBecomeCoach(true)} className="w-full rounded border flex items-center justify-between px-4 py-3 text-left"
+              style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
+              <div className="flex items-center gap-3">
+                <ShieldCheck size={15} style={{ color: 'var(--accent)' }} />
+                <div>
+                  <span className="font-elite text-xs uppercase tracking-widest block" style={{ color: 'var(--theme-ink)' }}>Become a Coach</span>
+                  <span className="font-work text-[10px]" style={{ color: 'var(--theme-ink-soft)' }}>Sell programs, coach athletes, get paid</span>
+                </div>
+              </div>
+              <ChevronRight size={14} style={{ color: 'var(--theme-ink-soft)' }} />
+            </button>
+            }
+
             {/* Manage active subscription — plan, portal, cancel */}
             <ManageSubscription />
 
@@ -570,6 +598,8 @@ export default function Profile() {
       </div>
 
       <FriendsSheet open={showFriends} onClose={() => setShowFriends(false)} athlete={athlete} onUpdated={(a) => {setAthlete(a);setForm(a);}} />
+      <BecomeCoachSheet open={showBecomeCoach} onClose={() => setShowBecomeCoach(false)} athlete={athlete} isMinor={isMinorUser}
+        onBecame={(a) => {setAthlete(a);setForm(a);setActiveSection("coach");}} />
       <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>);
 

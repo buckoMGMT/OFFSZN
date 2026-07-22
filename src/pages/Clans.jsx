@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Shield, Trophy, Users, X, Pencil, Trash2, Settings } from "lucide-react";
+import { Plus, Search, Shield, Trophy, Users, X, Pencil, Trash2, Settings, MapPin } from "lucide-react";
 import ClanCard from "@/components/clans/ClanCard";
+import Leaderboard from "@/components/clans/Leaderboard";
 import TeamEmblemUpload from "@/components/clans/TeamEmblemUpload";
 import EditTeamModal from "@/components/clans/EditTeamModal";
 import ChallengesTab from "@/components/clans/ChallengesTab";
@@ -32,7 +33,7 @@ export default function Clans() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [createForm, setCreateForm] = useState({ name: "", type: "high_school", sport: "football", school_name: "", description: "", emblem_url: "" });
+  const [createForm, setCreateForm] = useState({ name: "", type: "high_school", sport: "football", school_name: "", location: "", description: "", emblem_url: "", banner_url: "" });
   const [creating, setCreating] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [tab, setTab] = useTabState("clans.tab", "discover");
@@ -145,6 +146,7 @@ export default function Clans() {
             { id: "discover", label: "Discover" },
             { id: "leaderboard", label: "Roster" },
             { id: "challenges", label: "Challenges" },
+            { id: "ranks", label: "Ranks" },
           ].map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex-1 py-2 font-elite text-xs uppercase tracking-widest"
@@ -162,9 +164,13 @@ export default function Clans() {
       <div className="px-4 py-4">
         {/* My Clan Banner */}
         {myClan && (
-          <div className="card-base p-4 mb-4 relative overflow-hidden">
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: 'var(--accent)' }} />
-            <div className="flex items-center gap-3">
+          <div className="card-base mb-4 relative overflow-hidden p-4" style={myClan.banner_url ? { paddingTop: 0, paddingLeft: 0, paddingRight: 0 } : undefined}>
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: 'var(--accent)', zIndex: 1 }} />
+            {/* Team banner */}
+            {myClan.banner_url && (
+              <img src={myClan.banner_url} alt="" className="w-full h-24 object-cover mb-3" />
+            )}
+            <div className="flex items-center gap-3" style={myClan.banner_url ? { padding: '0 16px 16px' } : undefined}>
               <div className="w-11 h-11 rounded flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
                 {myClan.emblem_url ? (
                   <img src={myClan.emblem_url} alt="" className="w-full h-full object-cover" />
@@ -175,9 +181,10 @@ export default function Clans() {
               <div className="flex-1">
                 <p className="eyebrow">My Team</p>
                 <h3 className="font-anton text-lg uppercase" style={{ color: 'var(--text-primary)' }}>{myClan.name}</h3>
-                <div className="flex items-center gap-3 mt-0.5">
+                <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                   <span className="font-elite text-[9px]" style={{ color: 'var(--text-tertiary)' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length}{myClan.unlimited_roster ? "" : `/${myClan.roster_cap ?? DEFAULT_ROSTER_CAP}`} members</span>
                   <span className="font-elite text-[9px]" style={{ color: 'var(--accent)' }}><Trophy size={9} className="inline mr-0.5" />{(myClan.total_points || 0).toLocaleString()} pts</span>
+                  {myClan.location && <span className="font-elite text-[9px]" style={{ color: 'var(--text-tertiary)' }}><MapPin size={9} className="inline mr-0.5" />{myClan.location}</span>}
                 </div>
               </div>
               {isTeamAdmin && (
@@ -288,6 +295,11 @@ export default function Clans() {
         {tab === "challenges" && (
           <ChallengesTab myClan={myClan} allClans={clans} />
         )}
+
+        {/* Full athlete leaderboard — minor exposure enforced server-side */}
+        {tab === "ranks" && (
+          <Leaderboard athlete={athlete} />
+        )}
       </div>
       </PullToRefresh>
 
@@ -304,9 +316,11 @@ export default function Clans() {
             </div>
             <div className="space-y-3">
               <TeamEmblemUpload emblemUrl={createForm.emblem_url} onUploaded={(url) => setCreateForm(p => ({ ...p, emblem_url: url }))} />
+              <TeamEmblemUpload aspect="banner" label="Team Banner" emblemUrl={createForm.banner_url} onUploaded={(url) => setCreateForm(p => ({ ...p, banner_url: url }))} />
               {[
                 { placeholder: "Team name *", field: "name", type: "text" },
                 { placeholder: "School / Organization", field: "school_name", type: "text" },
+                { placeholder: "Location (City, ST)", field: "location", type: "text" },
               ].map(({ placeholder, field }) => (
                 <input key={field} className="w-full rounded px-4 py-3 text-sm font-work outline-none"
                   style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
