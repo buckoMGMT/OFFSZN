@@ -1,18 +1,75 @@
-// base44/entities/SchoolOrg.jsonc
 {
   "name": "SchoolOrg",
   "type": "object",
   "title": "School Organization",
-  "description": "B2B school license, $500/yr. All students under a school must independently satisfy the 16+ platform minimum — a school license does not create an exception.",
+  "description": "B2B school license, $500/yr. All students under a school must independently satisfy the 16+ platform minimum \u2014 a school license does not create an exception.",
   "properties": {
-    "name": { "type": "string" },
-    "billing_status": { "type": "string", "enum": ["trial", "active", "past_due", "canceled"], "default": "trial" },
-    "stripe_subscription_id": { "type": "string" },
-    "seats_licensed": { "type": "integer", "default": 0 },
-    "admin_user_ids": { "type": "array", "items": { "type": "string" } },
-    "clan_ids": { "type": "array", "items": { "type": "string" } },
-    "curated_program_ids": { "type": "array", "items": { "type": "string" } },
-    "annual_price_cents": { "type": "integer", "default": 50000 }
+    "name": {
+      "type": "string"
+    },
+    "billing_status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "active",
+        "past_due",
+        "canceled"
+      ],
+      "default": "trial"
+    },
+    "stripe_subscription_id": {
+      "type": "string"
+    },
+    "seats_licensed": {
+      "type": "integer",
+      "default": 0
+    },
+    "admin_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "clan_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "curated_program_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "annual_price_cents": {
+      "type": "integer",
+      "default": 50000
+    }
   },
-  "required": ["name"]
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
