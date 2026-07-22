@@ -7,6 +7,7 @@ import { Shield, Camera, Loader2 } from "lucide-react";
 export default function TeamEmblemUpload({ emblemUrl, onUploaded, size = 72, label = "Team Emblem", aspect = "square" }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
 
   const pick = () => inputRef.current?.click();
 
@@ -14,9 +15,12 @@ export default function TeamEmblemUpload({ emblemUrl, onUploaded, size = 72, lab
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setError("");
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       onUploaded(file_url);
+    } catch {
+      setError("Upload failed — try again.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -41,6 +45,7 @@ export default function TeamEmblemUpload({ emblemUrl, onUploaded, size = 72, lab
           </span>
         </button>
         <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        {error && <p className="text-[10px] mt-1" style={{ color: 'var(--negative)' }}>{error}</p>}
       </div>
     );
   }
@@ -65,6 +70,7 @@ export default function TeamEmblemUpload({ emblemUrl, onUploaded, size = 72, lab
         <button type="button" onClick={pick} className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
           {emblemUrl ? "Change photo" : "Add photo"}
         </button>
+        {error && <p className="text-[10px] mt-1" style={{ color: 'var(--negative)' }}>{error}</p>}
       </div>
       <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
     </div>
