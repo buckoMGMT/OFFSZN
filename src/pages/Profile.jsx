@@ -69,6 +69,10 @@ export default function Profile() {
   const [weightVerified, setWeightVerified] = useState(false);
   // Athlete's clan — shown as a tappable badge in the header.
   const [clan, setClan] = useState(null);
+  // Today's log — drives the "today's progress" ring (calories consumed vs goal).
+  const [todayLog, setTodayLog] = useState(null);
+  // Earliest logged weight — baseline for the long-term goal-weight ring.
+  const [startWeight, setStartWeight] = useState(null);
 
   useEffect(() => {
     base44.auth.me().then((me) => {
@@ -87,6 +91,15 @@ export default function Profile() {
         // A logged weight (from a DailyLog) is verified data vs a self-typed number.
         base44.entities.DailyLog.filter({ athlete_id: a.id, weight_lbs: { $gt: 0 } }, "-date", 1)
           .then((logs) => setWeightVerified(logs.length > 0))
+          .catch(() => {});
+        // Today's log — powers today's-progress ring (calories toward goal).
+        const today = new Date().toISOString().split("T")[0];
+        base44.entities.DailyLog.filter({ athlete_id: a.id, date: today }, "-date", 1)
+          .then((logs) => setTodayLog(logs[0] || null))
+          .catch(() => {});
+        // Earliest logged weight = baseline for the goal-weight ring.
+        base44.entities.DailyLog.filter({ athlete_id: a.id, weight_lbs: { $gt: 0 } }, "date", 1)
+          .then((logs) => setStartWeight(logs[0]?.weight_lbs ?? null))
           .catch(() => {});
         // Coach verifications — only count when the verified value still matches
         base44.entities.MaxVerification.filter({ athlete_id: a.id })
@@ -328,12 +341,34 @@ export default function Profile() {
 
         {activeSection === "stats" &&
         <div className="space-y-3 mt-3">
-            {/* Ring gauges — ratio-style progress (streak toward a month, points toward next tier).
-                Absolute maxes (lifts/mile) stay big tabular numerals below. */}
-            <div className="card-base p-4 flex items-center justify-around">
-              <StatRing value={athlete.current_streak_days || 0} max={30} label="SZN Streak" size={88} />
-              <StatRing value={(athlete.total_points || 0) % 1000} max={1000} label="To Next Tier" size={88} />
-            </div>
+            {/* Ring gauges — the two numbers that matter most:
+                1) Today's fuel: calories consumed vs their daily goal.
+                2) The goal they set: weight moving from start toward target
+                   (minors have no goal weight → streak-toward-a-month instead). */}
+            {(() => {
+              const goalCals = athlete.goal_calories || 0;
+              const eaten = todayLog?.calories_consumed || 0;
+              const showGoalWeight = !isCoach && !isMinorUser && athlete.goal_weight_lbs > 0
+                && (athlete.weight_lbs > 0) && startWeight != null;
+              // Long-term goal-weight progress: how far from start toward target.
+              let goalPct = 0, goalVal = 0, goalMax = 100;
+              if (showGoalWeight) {
+                const total = Math.abs(athlete.goal_weight_lbs - startWeight);
+                const done = Math.abs(athlete.weight_lbs - startWeight);
+                goalPct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+                goalVal = goalPct; goalMax = 100;
+              }
+              return (
+                <div className="card-base p-4 flex items-center justify-around">
+                  {goalCals > 0
+                    ? <StatRing value={eaten} max={goalCals} label="Today's Calories" size={88} />
+                    : <StatRing value={athlete.current_streak_days || 0} max={30} label="SZN Streak" size={88} />}
+                  {showGoalWeight
+                    ? <StatRing value={goalVal} max={goalMax} label="Goal Weight" size={88} />
+                    : <StatRing value={athlete.current_streak_days || 0} max={30} label="SZN Streak" size={88} />}
+                </div>
+              );
+            })()}
             {/* Shareable recruiting card — the viral loop. Real data only. */}
             <RecruitingCard athlete={athlete} verifiedFlags={{ weight_lbs: weightVerified, ...maxFlags }} />
             <HighlightReel athlete={athlete} onUpdate={reload} />
