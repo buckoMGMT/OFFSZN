@@ -20,6 +20,8 @@ import AccentColorPicker from "@/components/profile/AccentColorPicker";
 import MacroRecompute from "@/components/profile/MacroRecompute";
 import ManageSubscription from "@/components/profile/ManageSubscription";
 import CurrentStats from "@/components/profile/CurrentStats";
+import PageHero from "@/components/ui/PageHero";
+import StatRing from "@/components/ui/StatRing";
 import FriendsSheet from "@/components/profile/FriendsSheet";
 import BecomeCoachSheet from "@/components/profile/BecomeCoachSheet";
 import GuardianPanel from "@/components/profile/GuardianPanel";
@@ -172,54 +174,59 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
-      {/* Player ID card header */}
-      <div className="px-5 pt-5 pb-5 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-1)' }}>
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-3">
-            {/* Avatar — camera badge appears in edit mode only */}
-            <AvatarUpload athlete={athlete} onUpdated={reload} editable={editing} />
-            <div>
-              <h1 className="font-anton text-xl uppercase leading-tight" style={{ color: 'var(--theme-ink)' }}>{athlete.display_name || "Athlete"}</h1>
-              {/* Role-aware meta — coaches show coaching identity, never grade/position */}
-              <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>
-                {isCoach
-                  ? [athlete.sport ? `${athlete.sport.replace(/_/g, " ")} coach` : "coach", athlete.coach_years_experience ? `${athlete.coach_years_experience} yrs` : null, ...(athlete.coach_levels_coached || []).slice(0, 2).map((l) => l.replace(/_/g, " "))].filter(Boolean).join(" · ")
-                  : [athlete.sport?.replace(/_/g, " "), athlete.position, athlete.grade].filter(Boolean).join(" · ")}
-              </p>
-              {athlete.school && <p className="font-work text-xs" style={{ color: 'var(--theme-ink-soft)' }}>{athlete.school}</p>}
+      {/* Player ID card header — photographic hero: athlete photo behind the name,
+          jersey number ghosted at 10% white (image-6 signature). */}
+      <div className="relative border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+        <div className="relative">
+          <PageHero
+            imageUrl={athlete.avatar_url}
+            ghost={!isCoach ? athlete.jersey_number : null}
+            height={190}
+          >
+            <h1 className="font-anton text-2xl uppercase leading-tight" style={{ color: '#fff' }}>{athlete.display_name || "Athlete"}</h1>
+            <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.8)' }}>
+              {isCoach
+                ? [athlete.sport ? `${athlete.sport.replace(/_/g, " ")} coach` : "coach", athlete.coach_years_experience ? `${athlete.coach_years_experience} yrs` : null, ...(athlete.coach_levels_coached || []).slice(0, 2).map((l) => l.replace(/_/g, " "))].filter(Boolean).join(" · ")
+                : [athlete.sport?.replace(/_/g, " "), athlete.position, athlete.grade].filter(Boolean).join(" · ")}
+            </p>
+            {athlete.school && <p className="font-work text-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>{athlete.school}</p>}
+            <div className="flex items-center gap-1.5 mt-1.5">
               {isCoach && athlete.is_coach_verified &&
-                <span className="inline-flex items-center gap-1 mt-1.5 mr-1.5 px-2 py-1 rounded-full" style={{ background: 'rgba(47,191,113,0.12)', border: '1px solid var(--positive)' }}>
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full" style={{ background: 'rgba(47,191,113,0.2)', border: '1px solid var(--positive)' }}>
                   <ShieldCheck size={10} style={{ color: 'var(--positive)' }} />
                   <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--positive)' }}>Verified Coach</span>
                 </span>
               }
               {clan &&
-                <Link to="/clans" className="inline-flex items-center gap-1 mt-1.5 px-2 py-1 rounded-full"
-                  style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                <Link to="/clans" className="inline-flex items-center gap-1 px-2 py-1 rounded-full"
+                  style={{ background: 'rgba(255,90,31,0.2)', border: '1px solid var(--accent)' }}>
                   <Shield size={10} style={{ color: 'var(--accent)' }} />
                   <span className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>{clan.name}</span>
                 </Link>
               }
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Settings lives behind the gear — not a tab */}
-            <button onClick={() => setActiveSection("settings")} aria-label="Settings" className="p-2 rounded"
-            style={{
-              background: activeSection === "settings" ? 'var(--accent-subtle)' : 'var(--theme-bg)',
-              border: `1px solid ${activeSection === "settings" ? 'var(--accent)' : 'var(--theme-border)'}`
-            }}>
-              <SettingsIcon size={14} style={{ color: activeSection === "settings" ? 'var(--accent)' : 'var(--theme-ink-soft)' }} />
+          </PageHero>
+          {/* Header actions float top-right over the hero */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button onClick={() => setActiveSection("settings")} aria-label="Settings" className="p-2 rounded-full"
+              style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${activeSection === "settings" ? 'var(--accent)' : 'rgba(255,255,255,0.2)'}` }}>
+              <SettingsIcon size={14} style={{ color: activeSection === "settings" ? 'var(--accent)' : '#fff' }} />
             </button>
-            <button onClick={() => setEditing(!editing)} className="flex items-center gap-1 px-2.5 py-1.5 rounded font-elite text-[9px] uppercase tracking-widest"
-            style={{ background: editing ? 'var(--accent-subtle)' : 'var(--theme-bg)', border: `1px solid ${editing ? 'var(--accent)' : 'var(--theme-border)'}`, color: editing ? 'var(--accent)' : 'var(--theme-ink-soft)' }}>
+            <button onClick={() => setEditing(!editing)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-full font-elite text-[9px] uppercase tracking-widest"
+              style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${editing ? 'var(--accent)' : 'rgba(255,255,255,0.2)'}`, color: editing ? 'var(--accent)' : '#fff' }}>
               <Edit2 size={10} /> Edit
             </button>
           </div>
+          {/* Avatar edit affordance — camera badge in edit mode, bottom-left over hero */}
+          {editing && (
+            <div className="absolute bottom-3 left-4">
+              <AvatarUpload athlete={athlete} onUpdated={reload} editable />
+            </div>
+          )}
         </div>
 
         {/* Stats strip — icon, number, and chip centered on one axis */}
-        <div className="flex items-center gap-4 mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+        <div className="flex items-center gap-4 px-5 py-3" style={{ background: 'var(--surface-1)' }}>
           {/* Points → tap into the Locker Room (rewards) */}
           <Link to="/rewards" className="flex items-center gap-1.5" style={{ lineHeight: 1 }}>
             <Trophy size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} />
@@ -320,6 +327,12 @@ export default function Profile() {
 
         {activeSection === "stats" &&
         <div className="space-y-3 mt-3">
+            {/* Ring gauges — ratio-style progress (streak toward a month, points toward next tier).
+                Absolute maxes (lifts/mile) stay big tabular numerals below. */}
+            <div className="card-base p-4 flex items-center justify-around">
+              <StatRing value={athlete.current_streak_days || 0} max={30} label="SZN Streak" size={88} />
+              <StatRing value={(athlete.total_points || 0) % 1000} max={1000} label="To Next Tier" size={88} />
+            </div>
             {/* Shareable recruiting card — the viral loop. Real data only. */}
             <RecruitingCard athlete={athlete} verifiedFlags={{ weight_lbs: weightVerified, ...maxFlags }} />
             <HighlightReel athlete={athlete} onUpdate={reload} />

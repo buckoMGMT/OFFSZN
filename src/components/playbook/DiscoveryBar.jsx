@@ -6,6 +6,8 @@ import SortFilterSheet from "@/components/playbook/SortFilterSheet";
 import CoachProfileSheet from "@/components/playbook/CoachProfileSheet";
 import CoachPurchaseSheet from "@/components/monetization/CoachPurchaseSheet";
 import ExploreVideoSheet from "@/components/playbook/ExploreVideoSheet";
+import CoachesForYou from "@/components/playbook/CoachesForYou";
+import isCoachDiscoverable from "@/lib/coachGate";
 import useSubscriptions from "@/lib/useSubscriptions";
 
 export default function DiscoveryBar({ athlete, programs, onSelectProgram, sortBy, setSortBy, priceFilter, setPriceFilter, difficultyFilter, setDifficultyFilter }) {
@@ -135,6 +137,18 @@ export default function DiscoveryBar({ athlete, programs, onSelectProgram, sortB
               </p>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Coaches for you — deterministic match, only when not actively searching */}
+      {!searching && (
+        <div className="mt-4">
+          <CoachesForYou
+            athlete={athlete}
+            coaches={athletes.filter(a => a.role === "coach" && isCoachDiscoverable(a))}
+            subscribedIds={subscribedIds}
+            onOpen={setProfileCoach}
+          />
         </div>
       )}
 

@@ -17,6 +17,8 @@ import AppScroll from '@/components/layout/AppScroll';
 import { initAccent } from '@/lib/accentColor';
 import AppErrorBoundary from '@/components/AppErrorBoundary';
 import { DockProvider } from '@/lib/DockContext';
+import { MiniPlayerProvider } from '@/lib/MiniPlayerContext';
+import GlobalVideoPlayer from '@/components/feed/GlobalVideoPlayer';
 
 // Lazy page routes — nothing heavy loads on first paint (Lighthouse §6)
 const Feed = lazy(() => import('@/pages/Feed'));
@@ -146,9 +148,13 @@ function App() {
           <Router>
             <AppErrorBoundary>
               <DockProvider>
-                <AppScroll>
-                  <AuthenticatedApp />
-                </AppScroll>
+                <MiniPlayerProvider>
+                  <AppScroll>
+                    <AuthenticatedApp />
+                  </AppScroll>
+                  {/* Single app-wide video surface — full-screen + draggable mini-player */}
+                  <GlobalVideoPlayer />
+                </MiniPlayerProvider>
               </DockProvider>
             </AppErrorBoundary>
           </Router>

@@ -7,6 +7,7 @@ import TeamEmblemUpload from "@/components/clans/TeamEmblemUpload";
 import EditTeamModal from "@/components/clans/EditTeamModal";
 import ChallengesTab from "@/components/clans/ChallengesTab";
 import PageLabel from "@/components/ui/PageLabel";
+import PageHero from "@/components/ui/PageHero";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import TeamRoster from "@/components/clans/TeamRoster";
@@ -162,80 +163,80 @@ export default function Clans() {
 
       <PullToRefresh onRefresh={load}>
       <div className="px-4 py-4">
-        {/* My Clan Banner */}
+        {/* My Clan — photographic hero band: team banner behind the name */}
         {myClan && (
-          <div className="card-base mb-4 relative overflow-hidden p-4" style={myClan.banner_url ? { paddingTop: 0, paddingLeft: 0, paddingRight: 0 } : undefined}>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: 'var(--accent)', zIndex: 1 }} />
-            {/* Team banner */}
-            {myClan.banner_url && (
-              <img src={myClan.banner_url} alt="" className="w-full h-24 object-cover mb-3" />
-            )}
-            <div className="flex items-center gap-3" style={myClan.banner_url ? { padding: '0 16px 16px' } : undefined}>
-              <div className="w-11 h-11 rounded flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
-                {myClan.emblem_url ? (
-                  <img src={myClan.emblem_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <Shield size={18} style={{ color: 'var(--accent)' }} />
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="eyebrow">My Team</p>
-                <h3 className="font-anton text-lg uppercase" style={{ color: 'var(--text-primary)' }}>{myClan.name}</h3>
-                <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                  <span className="font-elite text-[9px]" style={{ color: 'var(--text-tertiary)' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length}{myClan.unlimited_roster ? "" : `/${myClan.roster_cap ?? DEFAULT_ROSTER_CAP}`} members</span>
-                  <span className="font-elite text-[9px]" style={{ color: 'var(--accent)' }}><Trophy size={9} className="inline mr-0.5" />{(myClan.total_points || 0).toLocaleString()} pts</span>
-                  {myClan.location && <span className="font-elite text-[9px]" style={{ color: 'var(--text-tertiary)' }}><MapPin size={9} className="inline mr-0.5" />{myClan.location}</span>}
+          <div className="card-base mb-4 relative overflow-hidden">
+            <div className="relative">
+              <PageHero imageUrl={myClan.banner_url} height={140}>
+                <div className="flex items-end gap-3">
+                  <div className="w-12 h-12 rounded flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)' }}>
+                    {myClan.emblem_url ? <img src={myClan.emblem_url} alt="" className="w-full h-full object-cover" /> : <Shield size={20} style={{ color: 'var(--accent)' }} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>My Team</p>
+                    <h3 className="font-anton text-xl uppercase leading-tight" style={{ color: '#fff' }}>{myClan.name}</h3>
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      <span className="font-elite text-[9px]" style={{ color: 'rgba(255,255,255,0.75)' }}><Users size={9} className="inline mr-0.5" />{(myClan.member_ids || []).length}{myClan.unlimited_roster ? "" : `/${myClan.roster_cap ?? DEFAULT_ROSTER_CAP}`} members</span>
+                      <span className="font-elite text-[9px]" style={{ color: 'var(--accent)' }}><Trophy size={9} className="inline mr-0.5" />{(myClan.total_points || 0).toLocaleString()} pts</span>
+                      {myClan.location && <span className="font-elite text-[9px]" style={{ color: 'rgba(255,255,255,0.75)' }}><MapPin size={9} className="inline mr-0.5" />{myClan.location}</span>}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              {isTeamAdmin && (
-                <button onClick={() => setShowEdit(true)} className="p-1.5 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
-                  <Settings size={14} style={{ color: 'var(--text-secondary)' }} />
-                </button>
-              )}
-              <button onClick={leaveClan} className="p-1.5 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
-                <X size={14} style={{ color: 'var(--text-secondary)' }} />
-              </button>
-            </div>
-            {myClan.description && (
-              <p className="font-work text-xs mt-2 pt-2 border-t leading-relaxed" style={{ color: 'var(--theme-ink-soft)', borderColor: 'var(--theme-border)' }}>{myClan.description}</p>
-            )}
-            {(myClan.announcement || isTeamAdmin) && (
-              <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-                {editingAnn ? (
-                  <div className="space-y-2">
-                    <textarea className="w-full rounded px-3 py-2 text-sm font-work outline-none resize-none h-16"
-                      style={{ background: 'var(--surface-0)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
-                      maxLength={300} placeholder="Team announcement…" value={annDraft}
-                      onChange={e => setAnnDraft(e.target.value)} autoFocus />
-                    <div className="flex gap-2 justify-end">
-                      <button onClick={() => setEditingAnn(false)} className="px-3 py-1.5 rounded font-elite text-[9px] uppercase tracking-widest"
-                        style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>Cancel</button>
-                      <StampButton onClick={saveAnnouncement} className="text-[10px] px-3 py-1">Save</StampButton>
-                    </div>
-                  </div>
-                ) : myClan.announcement ? (
-                  <div>
-                    <div className="flex items-start gap-2">
-                      <p className="font-marker text-sm flex-1" style={{ color: 'var(--theme-ink)', transform: 'rotate(-0.5deg)' }}>{myClan.announcement}</p>
-                      {isTeamAdmin && (
-                        <>
-                          <button onClick={() => { setAnnDraft(myClan.announcement); setEditingAnn(true); setConfirmDeleteAnn(false); }} className="p-1 rounded">
-                            <Pencil size={12} style={{ color: 'var(--text-tertiary)' }} />
-                          </button>
-                          <button onClick={() => confirmDeleteAnn ? deleteAnnouncement() : setConfirmDeleteAnn(true)} className="p-1 rounded">
-                            <Trash2 size={12} style={{ color: confirmDeleteAnn ? 'var(--negative)' : 'var(--text-tertiary)' }} />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                    {confirmDeleteAnn && <p className="text-[10px] mt-1 text-right" style={{ color: 'var(--negative)' }}>Tap the trash again to confirm delete</p>}
-                  </div>
-                ) : (
-                  <button onClick={() => { setAnnDraft(""); setEditingAnn(true); }}
-                    className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>+ Add Announcement</button>
+              </PageHero>
+              <div className="absolute top-3 right-3 flex items-center gap-2">
+                {isTeamAdmin && (
+                  <button onClick={() => setShowEdit(true)} className="p-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <Settings size={14} style={{ color: '#fff' }} />
+                  </button>
                 )}
+                <button onClick={leaveClan} className="p-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <X size={14} style={{ color: '#fff' }} />
+                </button>
               </div>
-            )}
+            </div>
+
+            <div className="px-4 pt-3 pb-4">
+              {myClan.description && (
+                <p className="font-work text-xs pb-2 leading-relaxed" style={{ color: 'var(--theme-ink-soft)' }}>{myClan.description}</p>
+              )}
+              {(myClan.announcement || isTeamAdmin) && (
+                <div className="mt-1 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+                  {editingAnn ? (
+                    <div className="space-y-2">
+                      <textarea className="w-full rounded px-3 py-2 text-sm font-work outline-none resize-none h-16"
+                        style={{ background: 'var(--surface-0)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}
+                        maxLength={300} placeholder="Team announcement…" value={annDraft}
+                        onChange={e => setAnnDraft(e.target.value)} autoFocus />
+                      <div className="flex gap-2 justify-end">
+                        <button onClick={() => setEditingAnn(false)} className="px-3 py-1.5 rounded font-elite text-[9px] uppercase tracking-widest"
+                          style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>Cancel</button>
+                        <StampButton onClick={saveAnnouncement} className="text-[10px] px-3 py-1">Save</StampButton>
+                      </div>
+                    </div>
+                  ) : myClan.announcement ? (
+                    <div>
+                      <div className="flex items-start gap-2">
+                        <p className="font-marker text-sm flex-1" style={{ color: 'var(--theme-ink)', transform: 'rotate(-0.5deg)' }}>{myClan.announcement}</p>
+                        {isTeamAdmin && (
+                          <>
+                            <button onClick={() => { setAnnDraft(myClan.announcement); setEditingAnn(true); setConfirmDeleteAnn(false); }} className="p-1 rounded">
+                              <Pencil size={12} style={{ color: 'var(--text-tertiary)' }} />
+                            </button>
+                            <button onClick={() => confirmDeleteAnn ? deleteAnnouncement() : setConfirmDeleteAnn(true)} className="p-1 rounded">
+                              <Trash2 size={12} style={{ color: confirmDeleteAnn ? 'var(--negative)' : 'var(--text-tertiary)' }} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      {confirmDeleteAnn && <p className="text-[10px] mt-1 text-right" style={{ color: 'var(--negative)' }}>Tap the trash again to confirm delete</p>}
+                    </div>
+                  ) : (
+                    <button onClick={() => { setAnnDraft(""); setEditingAnn(true); }}
+                      className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>+ Add Announcement</button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -328,7 +329,7 @@ export default function Clans() {
                   value={createForm[field]}
                   onChange={e => setCreateForm(p => ({ ...p, [field]: e.target.value }))} />
               ))}
-              {/* §5 — app-styled pickers, never native <select> */}
+              {/* App-styled pickers, never native <select> */}
               <div>
                 <p className="eyebrow mb-2">Team Type</p>
                 <div className="flex flex-wrap gap-2">

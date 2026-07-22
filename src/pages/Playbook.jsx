@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Lock, Play, Clock, Target, Bookmark, BookmarkCheck, Plus, X, ListVideo } from "lucide-react";
+import { Lock, Play, Clock, Target, Bookmark, BookmarkCheck, Plus, X, ListVideo, Dumbbell, TrendingUp, ChevronLeft, Share2 } from "lucide-react";
+import PageHero from "@/components/ui/PageHero";
 import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
 import PremiumGate from "@/components/ui/PremiumGate";
 import PageLabel from "@/components/ui/PageLabel";
@@ -8,6 +9,7 @@ import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
 import ExploreGrid from "@/components/playbook/ExploreGrid";
 import DiscoveryBar from "@/components/playbook/DiscoveryBar";
+import ForYouRow from "@/components/playbook/ForYouRow";
 import SubscriptionsTab from "@/components/playbook/SubscriptionsTab";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
@@ -19,6 +21,8 @@ import PlaylistDetail from "@/components/playbook/PlaylistDetail";
 import { PLAYLIST_ICONS, PlaylistIcon, DEFAULT_PLAYLIST_ICON } from "@/components/playbook/playlistIcons";
 import useSheetBack from "@/lib/useSheetBack";
 import { buildStepsFromProgram, buildStepsFromPlaylist } from "@/lib/workoutSteps";
+import { useMiniPlayer } from "@/lib/MiniPlayerContext";
+import CoachProfileSheet from "@/components/playbook/CoachProfileSheet";
 
 const SPORT_FILTERS = ["All", "Football", "Basketball", "Baseball", "Soccer", "Track", "Volleyball", "Wrestling", "Boxing", "MMA", "Swimming", "Lacrosse"];
 
@@ -86,6 +90,8 @@ export default function Playbook() {
   useSheetBack(showCreatePlaylist, () => setShowCreatePlaylist(false));
   const [showPaywall, setShowPaywall] = useState(false);
   const [runner, setRunner] = useState(null); // { title, steps, duration } — active workout session
+  const { openPlayer } = useMiniPlayer();
+  const [coachProfile, setCoachProfile] = useState(null); // coach attribution chip → profile sheet
   const [sortBy, setSortBy] = useState("featured");
   const [priceFilter, setPriceFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
@@ -150,61 +156,50 @@ export default function Playbook() {
     const locked = selected.isPremium && !isPremium;
     return (
       <div className="min-h-screen" style={{ background: 'transparent', color: 'var(--theme-ink)' }}>
-        <div className="relative h-52 w-full overflow-hidden">
-          <img src={selected.cover} alt={selected.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, var(--theme-bg) 10%, transparent 80%)' }} />
-          <button onClick={() => setSelected(null)}
-            className="absolute top-4 left-4 font-elite text-xs uppercase tracking-widest px-3 py-1.5 rounded"
-            style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}>
-            ← Back
-          </button>
-          {isPremium && (
-            <button onClick={(e) => toggleSave(selected, e)}
-              className="absolute top-4 right-4 p-2 rounded"
-              style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)' }}>
-              {isSaved ?               <BookmarkCheck size={16} style={{ color: 'var(--accent)' }} /> : <Bookmark size={16} style={{ color: '#5A5D63' }} />}
-            </button>
-          )}
-        </div>
-
-        <div className="px-4 -mt-6 relative z-10 pb-8">
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <h1 className="font-anton text-2xl uppercase leading-tight" style={{ color: locked ? 'var(--text-tertiary)' : 'var(--text-primary)' }}>
+        {/* Hero — drill thumbnail scrimmed to tokens, title + meta over it */}
+        <div className="relative">
+          <PageHero imageUrl={locked ? undefined : selected.cover} height={220}>
+            <p className="font-elite text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--accent)' }}>{selected.category} · {selected.sport}</p>
+            <h1 className="font-anton text-2xl uppercase leading-tight" style={{ color: '#fff' }}>
               {locked ? "All-SZN Program" : selected.title}
             </h1>
-            <span className="ink-stamp mt-1.5 flex-shrink-0">LVL {difficultyNum(selected.difficulty)}</span>
-          </div>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.85)' }}>{locked ? "Unlock with the All-SZN Pass." : selected.aim}</p>
+          </PageHero>
+          <button onClick={() => setSelected(null)}
+            className="absolute top-4 left-4 p-2 rounded-full" style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <ChevronLeft size={18} style={{ color: '#fff' }} />
+          </button>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-3 mb-4" style={{ color: 'var(--text-tertiary)' }}>
-            <span className="font-elite text-[10px] uppercase flex items-center gap-1"><Clock size={10} /> {selected.duration} min</span>
-            <span className="font-elite text-[10px] uppercase">{selected.timing}</span>
-            {selected.positions && <span className="font-elite text-[10px] uppercase">{selected.positions}</span>}
-          </div>
-
-          <div className="card-base p-3 mb-3 flex items-start gap-2">
-            <Target size={13} style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }} />
-            <div>
-              <p className="eyebrow mb-0.5">Aim</p>
-              <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{locked ? "Premium access required" : selected.aim}</p>
-            </div>
-          </div>
-
-          <div className="card-base p-3 mb-4">
-            <p className="eyebrow mb-2">Targeted Areas</p>
-            <div className="flex flex-wrap gap-1.5">
-              {selected.targeted_areas.map(area => (
-                <span key={area} className="px-2 py-1 rounded font-elite text-[10px] uppercase" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>{area}</span>
-              ))}
-            </div>
-          </div>
-
-          <p className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{selected.description}</p>
-
-          {selected.video_url && !locked && (
-            <div className="mb-6">
-              <ProtectedVideoPlayer url={selected.video_url} />
-            </div>
+        <div className="px-4 pt-4 pb-8">
+          {/* Coach attribution chip → opens their profile */}
+          {selected.coach && (
+            <button onClick={() => setCoachProfile(selected.coach)}
+              className="inline-flex items-center gap-2 mb-4 pl-1 pr-3 py-1 rounded-full"
+              style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+              {selected.coach.avatar_url
+                ? <img src={selected.coach.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                : <div className="w-6 h-6 rounded-full flex items-center justify-center font-work text-[10px]" style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)' }}>{(selected.coach.display_name || "C")[0]}</div>}
+              <span className="font-work text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{selected.coach.display_name}</span>
+            </button>
           )}
+
+          {/* Meta rows — EQUIPMENT / DURATION / DIFFICULTY */}
+          <div className="card-base divide-y mb-4" style={{ borderColor: 'var(--border-subtle)' }}>
+            {[
+              { icon: Dumbbell, label: "Equipment", value: (selected.targeted_areas || []).join(", ") || "None" },
+              { icon: Clock, label: "Duration", value: `${selected.duration} min` },
+              { icon: TrendingUp, label: "Difficulty", value: selected.difficulty },
+            ].map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-center gap-3 px-4 py-3" style={{ borderColor: 'var(--border-subtle)' }}>
+                <Icon size={15} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+                <span className="eyebrow flex-1">{label}</span>
+                <span className="font-work text-sm font-semibold text-right" style={{ color: 'var(--text-primary)' }}>{value}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{selected.description}</p>
 
           {locked ? (
             <PremiumGate
@@ -213,10 +208,20 @@ export default function Playbook() {
               onUpgrade={() => setShowPaywall(true)}
             />
           ) : (
-            <div className="flex justify-center">
-              <button className="btn-primary" style={{ fontSize: 'var(--text-base)', padding: '12px 40px' }}
-                onClick={() => setRunner({ title: selected.title, steps: buildStepsFromProgram(selected), duration: selected.duration })}>
-                <Play size={14} fill="currentColor" /> Start Program
+            <div className="space-y-2">
+              {/* START DRILL — enters the shared player/runner */}
+              <button className="btn-primary w-full"
+                onClick={() => {
+                  if (selected.video_url) openPlayer({ url: selected.video_url, title: selected.title, author: selected.coach?.display_name });
+                  else setRunner({ title: selected.title, steps: buildStepsFromProgram(selected), duration: selected.duration });
+                }}>
+                <Play size={14} fill="currentColor" /> Start Drill
+              </button>
+              {/* SAVE TO LIBRARY — ghost */}
+              <button onClick={(e) => isPremium ? toggleSave(selected, e) : setShowPaywall(true)}
+                className="btn-secondary w-full">
+                {isSaved ? <BookmarkCheck size={14} style={{ color: 'var(--accent)' }} /> : <Bookmark size={14} />}
+                {isSaved ? "Saved to Library" : "Save to Library"}
               </button>
             </div>
           )}
@@ -224,6 +229,7 @@ export default function Playbook() {
         {runner && athlete && (
           <WorkoutRunner title={runner.title} steps={runner.steps} athlete={athlete} durationMinutes={runner.duration} onClose={() => setRunner(null)} />
         )}
+        <CoachProfileSheet open={!!coachProfile} onClose={() => setCoachProfile(null)} coach={coachProfile} videos={[]} />
         <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
       </div>
     );
@@ -290,6 +296,8 @@ export default function Playbook() {
               priceFilter={priceFilter} setPriceFilter={setPriceFilter}
               difficultyFilter={difficultyFilter} setDifficultyFilter={setDifficultyFilter}
             />
+            {/* Picked for your SZN — deterministic, instant, refreshed daily */}
+            {sportFilter === "All" && <ForYouRow athlete={athlete} programs={PROGRAMS} onSelect={setSelected} />}
             <ExploreGrid
               programs={filtered}
               sportFilter={sportFilter}
