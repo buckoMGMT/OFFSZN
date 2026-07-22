@@ -69,10 +69,19 @@ export default function StrengthMaxes({ athlete, onUpdate }) {
             {editing ? (
               <input
                 type={isTime ? "text" : "number"}
+                inputMode={isTime ? "numeric" : "decimal"}
                 placeholder={isTime ? "5:30" : "0"}
                 className="w-full bg-transparent text-lg font-bold text-foreground outline-none"
                 value={form[key]}
-                onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
+                onChange={e => {
+                  let v = e.target.value;
+                  if (isTime) {
+                    // Auto-format: digits only, colon inserted before the last two (530 → 5:30)
+                    const digits = v.replace(/\D/g, "").slice(0, 4);
+                    v = digits.length > 2 ? `${digits.slice(0, -2)}:${digits.slice(-2)}` : digits;
+                  }
+                  setForm(p => ({ ...p, [key]: v }));
+                }}
               />
             ) : (
               <p className="text-lg font-bold text-foreground">

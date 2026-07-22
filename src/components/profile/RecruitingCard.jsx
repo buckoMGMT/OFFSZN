@@ -52,6 +52,7 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
         athlete.grade,
         IN(athlete.height_inches),
         athlete.weight_lbs ? `${athlete.weight_lbs} lbs` : null,
+        athlete.gpa ? `${athlete.gpa.toFixed(1)} GPA` : null,
       ].filter(Boolean);
 
   // Performance grid — only stats that exist. A day-one athlete leads with STREAK + PTS.

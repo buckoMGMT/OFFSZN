@@ -13,12 +13,29 @@ export default function HighlightReel({ athlete, onUpdate }) {
   const [saving, setSaving] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [fileError, setFileError] = useState(null);
   const fileRef = useRef(null);
+
+  // Highlights are capped at 30 seconds — checked before upload
+  const getVideoDuration = (file) => new Promise((resolve) => {
+    const v = document.createElement("video");
+    v.preload = "metadata";
+    v.onloadedmetadata = () => { URL.revokeObjectURL(v.src); resolve(v.duration); };
+    v.onerror = () => { URL.revokeObjectURL(v.src); resolve(null); };
+    v.src = URL.createObjectURL(file);
+  });
 
   // Upload a clip from the device camera roll (native permission prompt on mobile)
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setFileError(null);
+    const duration = await getVideoDuration(file);
+    if (duration && duration > 30) {
+      setFileError(`That clip is ${Math.round(duration)}s — highlights max out at 30 seconds. Trim it in your camera roll and re-upload.`);
+      e.target.value = "";
+      return;
+    }
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     await base44.entities.Athlete.update(athlete.id, { highlight_url: file_url });
@@ -63,6 +80,8 @@ export default function HighlightReel({ athlete, onUpdate }) {
             {uploading ? "Uploading…" : "Upload from camera roll"}
           </button>
           <input ref={fileRef} type="file" accept="video/*" className="hidden" onChange={handleFile} />
+          {fileError && <p className="text-xs" style={{ color: 'var(--negative)' }}>{fileError}</p>}
+          <p className="text-center text-[10px] text-muted-foreground">Max 30 seconds — make it your best play.</p>
           <p className="text-center text-xs text-muted-foreground">— or —</p>
           <input
             type="text"

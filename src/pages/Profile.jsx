@@ -264,6 +264,15 @@ export default function Profile() {
           value={form[field] || ""}
           onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))} />
           )}
+            {/* GPA — recruiting signal. Coerced to number so the schema accepts it. */}
+            {!isCoach &&
+            <input className="w-full rounded px-4 py-3 text-sm font-work outline-none"
+            style={{ background: 'var(--theme-bg)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
+            placeholder="GPA (optional — e.g. 3.7)"
+            type="number" step="0.1" min="0" max="5" inputMode="decimal"
+            value={form.gpa ?? ""}
+            onChange={(e) => setForm((p) => ({ ...p, gpa: e.target.value === "" ? null : Math.min(5, Math.max(0, Number(e.target.value))) }))} />
+            }
             {/* App-styled pickers — never native <select> */}
             <ChipSelect label="Sport" options={SPORTS} value={form.sport || ""}
             onChange={(v) => setForm((p) => ({ ...p, sport: v }))} />
@@ -351,8 +360,7 @@ export default function Profile() {
               <p className="font-elite text-xs uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>Body Goals</p>
               {[
             // No goal-weight field for minors — performance framing only.
-            ...(isMinorUser ? [] : [{ label: "Target Weight", field: "goal_weight_lbs", unit: "lbs" }]),
-            { label: "Weekly Budget", field: "weekly_budget_usd", unit: "$" }].
+            ...(isMinorUser ? [] : [{ label: "Target Weight", field: "goal_weight_lbs", unit: "lbs" }])].
             map(({ label, field, unit }) =>
             <div key={field} className="flex items-center justify-between">
                   <span className="font-elite text-[10px] uppercase tracking-widest" style={{ color: 'var(--theme-ink-soft)' }}>{label}</span>
@@ -367,7 +375,14 @@ export default function Profile() {
                   </div>
                 </div>
             )}
+            {isMinorUser &&
+            <p className="font-work text-xs leading-relaxed" style={{ color: 'var(--theme-ink-soft)' }}>
+                Body-weight targets unlock at 18. Right now it's about getting stronger and faster — chase the maxes below.
+              </p>
+            }
             </div>
+            {/* Weight-room goals — edit your maxes right from the Goals tab */}
+            {!isCoach && <StrengthMaxes athlete={athlete} onUpdate={reload} />}
           </div>
         }
 

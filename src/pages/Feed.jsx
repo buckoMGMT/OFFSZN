@@ -11,6 +11,7 @@ import StampButton from "@/components/ui/StampButton";
 import GameDayHero from "@/components/feed/GameDayHero";
 import SocialProofLine from "@/components/feed/SocialProofLine";
 import PullToRefresh from "@/components/layout/PullToRefresh";
+import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import { StaggerList } from "@/lib/motion.jsx";
 import { track } from "@/lib/analytics";
 import { validate, postSchema } from "@/lib/validators";
@@ -33,6 +34,8 @@ export default function Feed() {
   const [feedFilter, setFeedFilter] = useTabState("feed.filter", "all");
   const [showSearch, setShowSearch] = useState(false);
   const [profileAthlete, setProfileAthlete] = useState(null);
+  const [postType, setPostType] = useState("achievement");
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const load = useCallback(async () => {
     const [athleteList, postList] = await Promise.all([
@@ -66,7 +69,7 @@ export default function Feed() {
       athlete_id: athlete.id,
       athlete_name: athlete.display_name,
       athlete_avatar: athlete.avatar_url,
-      type: "achievement",
+      type: postType,
       content: r.value.content,
       image_url: postImageUrl || undefined,
       likes: 0,
@@ -74,8 +77,8 @@ export default function Feed() {
       comments: [],
       status: postImageUrl && PRE_MODERATE_MEDIA ? "pending" : "approved",
     });
-    track.postCreated({ type: "achievement" });
-    setNewPost(""); setPostImageUrl(""); setShowCompose(false); setPosting(false);
+    track.postCreated({ type: postType });
+    setNewPost(""); setPostImageUrl(""); setPostType("achievement"); setShowCompose(false); setPosting(false);
     load();
   };
 
@@ -169,12 +172,39 @@ export default function Feed() {
                   onChange={e => { setNewPost(e.target.value); setComposeError(null); }}
                   autoFocus
                 />
+                {/* Post type — pick the heading: PR / Fuel / Win */}
+                <div className="flex gap-1.5">
+                  {[
+                    { id: "achievement", label: "New PR" },
+                    { id: "macro_log", label: "Fuel" },
+                    { id: "workout_complete", label: "Win" },
+                  ].map(t => (
+                    <button key={t.id} onClick={() => setPostType(t.id)}
+                      className="px-3 py-1.5 rounded font-elite text-[10px] uppercase tracking-widest"
+                      style={{
+                        background: postType === t.id ? 'var(--accent-subtle)' : 'var(--surface-2)',
+                        border: postType === t.id ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
+                        color: postType === t.id ? 'var(--accent)' : 'var(--text-secondary)',
+                      }}>
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
                 <div className="flex gap-2">
-                  <label className="flex items-center gap-1.5 px-3 py-2 rounded cursor-pointer text-xs font-elite" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
-                    <Image size={13} />
-                    {uploading ? "Uploading…" : postImageUrl ? "✓ Photo" : "Photo"}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-                  </label>
+                  {athlete.subscription_tier === "premium" ? (
+                    <label className="flex items-center gap-1.5 px-3 py-2 rounded cursor-pointer text-xs font-elite" style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink-soft)' }}>
+                      <Image size={13} />
+                      {uploading ? "Uploading…" : postImageUrl ? "✓ Photo" : "Photo"}
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                    </label>
+                  ) : (
+                    /* Walk-On tier: photo posting is an ALL-SZN Pass feature — tap opens the paywall, never a dead tap */
+                    <button onClick={() => setShowPaywall(true)}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded text-xs font-elite"
+                      style={{ background: 'var(--theme-surface-alt)', border: '1px solid var(--theme-border)', color: 'var(--text-tertiary)' }}>
+                      <Image size={13} /> Photo — All-SZN
+                    </button>
+                  )}
                 </div>
                 {postImageUrl && <img src={postImageUrl} alt="preview" className="w-full rounded object-cover max-h-40" />}
                 {composeError && <p className="text-xs" style={{ color: 'var(--negative)' }}>{composeError}</p>}
@@ -273,6 +303,7 @@ export default function Feed() {
       </div>
       </PullToRefresh>
 
+      <PassPaywallSheet open={showPaywall} onClose={() => setShowPaywall(false)} />
       <SearchSheet open={showSearch} onClose={() => setShowSearch(false)} onSelect={a => setProfileAthlete(a)} />
       <AthleteProfileSheet
         open={!!profileAthlete}

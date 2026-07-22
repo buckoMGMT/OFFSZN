@@ -62,7 +62,14 @@ export default function Playbook() {
   // §4 — the open drill detail survives tab swaps: persist the id, resolve the object
   const [selectedId, setSelectedId] = useTabState("playbook.selected", "");
   const selected = selectedId ? PROGRAMS.find(p => String(p.id) === selectedId) || null : null;
-  const setSelected = (p) => setSelectedId(p ? String(p.id) : "");
+  const setSelected = (p) => {
+    setSelectedId(p ? String(p.id) : "");
+    // Track recently watched — feeds playlist suggestions
+    if (p) {
+      const recent = JSON.parse(localStorage.getItem("pb_recent_programs") || "[]").filter(id => id !== p.id);
+      localStorage.setItem("pb_recent_programs", JSON.stringify([p.id, ...recent].slice(0, 10)));
+    }
+  };
   const [savedIds, setSavedIds] = useState([]);
   const [playlists, setPlaylists] = useState([]);
   const [tab, setTab] = useTabState("playbook.tab", "explore");
@@ -264,7 +271,7 @@ export default function Playbook() {
       </div>
 
       <PullToRefresh onRefresh={load}>
-      <div className="px-4 py-4">
+      <div className="px-4 py-4" style={{ paddingBottom: 'calc(var(--bottomnav-h) + 24px)' }}>
         {tab === "explore" && (
           <>
             <DiscoveryBar
@@ -383,9 +390,16 @@ export default function Playbook() {
               style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)', color: 'var(--theme-ink)' }}
               placeholder="Playlist name"
               value={playlistName} onChange={e => setPlaylistName(e.target.value)} />
-            <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Add Programs</p>
+            <p className="font-elite text-[9px] uppercase tracking-widest mb-2" style={{ color: 'var(--theme-ink-soft)' }}>Add Programs — recently watched first</p>
             <div className="space-y-2 mb-5">
-              {PROGRAMS.map(p => {
+              {(() => {
+                // Recently watched programs float to the top as suggestions
+                const recent = JSON.parse(localStorage.getItem("pb_recent_programs") || "[]");
+                return [...PROGRAMS].sort((a, b) => {
+                  const ai = recent.indexOf(a.id), bi = recent.indexOf(b.id);
+                  return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+                });
+              })().map(p => {
                 const included = playlistPrograms.includes(p.id);
                 return (
                   <button key={p.id} onClick={() => setPlaylistPrograms(prev => included ? prev.filter(id => id !== p.id) : [...prev, p.id])}

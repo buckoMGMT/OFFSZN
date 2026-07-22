@@ -67,13 +67,14 @@ export default function AddMealModal({ onClose, onSaved, athleteId, logId }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-card rounded-t-3xl border-t border-border p-6 animate-slide-up max-h-[92vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
+      <div className="w-full max-w-lg bg-card rounded-t-3xl border-t border-border animate-slide-up flex flex-col" style={{ height: '92dvh' }}>
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
           <h2 className="text-2xl font-barlow font-bold text-foreground uppercase tracking-wide">Log Meal</h2>
           <button onClick={onClose} className="p-2 rounded-xl bg-secondary text-muted-foreground">
             <X size={18} />
           </button>
         </div>
+        <div className="flex-1 overflow-y-auto px-6 pb-4">
 
         {/* Quick Search */}
         <div className="mb-4">
@@ -119,15 +120,24 @@ export default function AddMealModal({ onClose, onSaved, athleteId, logId }) {
             value={form.name}
             onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
           />
-          <select
-            className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-sm text-foreground outline-none"
-            value={form.meal_time}
-            onChange={e => setForm(p => ({ ...p, meal_time: e.target.value }))}
-          >
+          {/* Meal-time chips — matches the app's chip language instead of a raw <select> */}
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
             {MEAL_TIMES.map(t => (
-              <option key={t} value={t}>{t.replace(/_/g, " ").toUpperCase()}</option>
+              <button
+                key={t}
+                type="button"
+                onClick={() => setForm(p => ({ ...p, meal_time: t }))}
+                className="flex-shrink-0 px-3 py-2 rounded-full font-elite text-[10px] uppercase tracking-widest transition-all"
+                style={{
+                  background: form.meal_time === t ? 'var(--accent-subtle)' : 'var(--surface-2)',
+                  border: form.meal_time === t ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
+                  color: form.meal_time === t ? 'var(--accent)' : 'var(--text-secondary)',
+                }}
+              >
+                {t.replace(/_/g, " ")}
+              </button>
             ))}
-          </select>
+          </div>
 
           {/* Macro Grid */}
           <div className="grid grid-cols-2 gap-2">
@@ -154,13 +164,17 @@ export default function AddMealModal({ onClose, onSaved, athleteId, logId }) {
           </div>
         </div>
 
-        <button
-          onClick={save}
-          disabled={saving || !form.name || !form.calories}
-          className="w-full mt-5 gradient-gold text-primary-foreground py-4 rounded-2xl font-barlow font-bold uppercase text-lg tracking-widest gold-glow disabled:opacity-40 transition-all"
-        >
-          {saving ? "Logging…" : "Log Meal"}
-        </button>
+        </div>
+        {/* Sticky confirm — always visible, never scrolled out of reach */}
+        <div className="flex-shrink-0 px-6 pt-3 border-t" style={{ borderColor: 'var(--border-subtle)', paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))', background: 'var(--surface-1)' }}>
+          <button
+            onClick={save}
+            disabled={saving || !form.name || !form.calories}
+            className="btn-primary w-full"
+          >
+            {saving ? "Logging…" : "Log Meal"}
+          </button>
+        </div>
       </div>
     </div>
   );

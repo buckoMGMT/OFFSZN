@@ -128,6 +128,9 @@ export default function Rewards() {
   const [tab, setTab] = useTabState("rewards.tab", "store");
   const [filter, setFilter] = useState("all");
   const [redeemTarget, setRedeemTarget] = useState(null);
+  // Athlete-picked reward goal — progress bar + copy track THEIR target
+  const [goalItemId, setGoalItemId] = useState(() => localStorage.getItem("pb_reward_goal") || "");
+  const [showGoalPicker, setShowGoalPicker] = useState(false);
 
   const load = useCallback(async () => {
     const [athletes, rewardItems] = await Promise.all([
@@ -207,17 +210,24 @@ export default function Rewards() {
           </div>
         </div>
 
-        {/* Progress to next gift card — target pulled from live store data, never hardcoded */}
+        {/* Progress to YOUR goal — athlete picks the target; falls back to the cheapest gift card */}
         {(() => {
-          const cheapestCard = items
-            .filter(i => i.type === "gift_card")
-            .sort((a, b) => a.points_required - b.points_required)[0];
-          return cheapestCard ? (
+          const sortedItems = [...items].sort((a, b) => a.points_required - b.points_required);
+          const goalItem = sortedItems.find(i => i.id === goalItemId)
+            || sortedItems.filter(i => i.type === "gift_card")[0]
+            || sortedItems[0];
+          return goalItem ? (
             <div className="mb-3">
-              <PointsBar current={points} target={cheapestCard.points_required} label={`Progress to ${cheapestCard.name.match(/\$\d+/)?.[0] || "$5"} Gift Card`} />
-              {points < cheapestCard.points_required && (
+              <button onClick={() => setShowGoalPicker(true)} className="w-full text-left" style={{ background: 'transparent', border: 'none', padding: 0 }}>
+                <PointsBar current={points} target={goalItem.points_required} label={`Your Goal: ${goalItem.name} — tap to change`} />
+              </button>
+              {points < goalItem.points_required ? (
                 <p className="font-work text-[10px] mt-1" style={{ color: 'var(--text-secondary)' }}>
-                  You're {Math.max(1, Math.ceil((cheapestCard.points_required - points) / 300)).toLocaleString()} max-effort days from your first reward. Keep stacking.
+                  {(goalItem.points_required - points).toLocaleString()} pts to go — about {Math.max(1, Math.ceil((goalItem.points_required - points) / 300)).toLocaleString()} max-effort days. Keep stacking.
+                </p>
+              ) : (
+                <p className="font-work text-[10px] mt-1" style={{ color: 'var(--positive)' }}>
+                  Goal hit — you've got the points for {goalItem.name}.
                 </p>
               )}
             </div>
@@ -366,6 +376,45 @@ export default function Rewards() {
 
       {redeemTarget && (
         <RedeemModal item={redeemTarget} onClose={() => setRedeemTarget(null)} onConfirm={onRedeemed} />
+      )}
+
+      {/* Goal picker sheet — pick which reward the progress bar chases */}
+      {showGoalPicker && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowGoalPicker(false)}>
+          <div className="w-full max-w-lg rounded-t-2xl border-t border-l border-r animate-slide-up max-h-[70vh] overflow-y-auto p-5"
+            style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-anton text-lg uppercase" style={{ color: 'var(--text-primary)' }}>Pick Your Goal</h2>
+              <button onClick={() => setShowGoalPicker(false)} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+                <X size={16} style={{ color: 'var(--text-secondary)' }} />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {[...items].sort((a, b) => a.points_required - b.points_required).map(item => (
+                <button key={item.id}
+                  onClick={() => { setGoalItemId(item.id); localStorage.setItem("pb_reward_goal", item.id); setShowGoalPicker(false); }}
+                  className="w-full flex items-center justify-between rounded border p-3 text-left"
+                  style={{
+                    background: 'var(--surface-1)',
+                    borderColor: goalItemId === item.id ? 'var(--accent)' : 'var(--border-subtle)',
+                  }}>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-work text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{item.name}</p>
+                    <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>{item.type === "merch" ? "Merch" : "Gift Card"}</p>
+                  </div>
+                  <div className="flex items-center gap-1 ml-3 flex-shrink-0">
+                    <Zap size={11} style={{ color: 'var(--accent)' }} />
+                    <span className="tabular-nums text-sm font-semibold" style={{ color: 'var(--accent)' }}>{item.points_required.toLocaleString()}</span>
+                  </div>
+                </button>
+              ))}
+              {items.length === 0 && (
+                <p className="font-work text-sm text-center py-8" style={{ color: 'var(--text-secondary)' }}>Rewards are being stocked — check back soon.</p>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

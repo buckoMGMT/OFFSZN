@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Trophy, Flame, Dumbbell, Zap, MoreHorizontal, Flag } from "lucide-react";
+import { Heart, MessageCircle, Trophy, Flame, Dumbbell, Zap, MoreHorizontal, Flag, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { formatDistanceToNow } from "date-fns";
 import VideoPlayer from "@/components/feed/VideoPlayer";
@@ -49,9 +49,29 @@ export default function PostCard({ post, currentAthleteId, currentAthleteName, o
   const liked = optimisticLike ? optimisticLike.liked : (post.liked_by || []).includes(currentAthleteId);
   const likeCount = optimisticLike ? optimisticLike.count : (post.likes || 0);
   const commentCount = (post.comments || []).length;
-  const timeAgo = post.created_date
-    ? formatDistanceToNow(new Date(post.created_date), { addSuffix: true })
+  // Server timestamps are UTC — force a Z suffix when missing so devices
+  // don't misparse them as local time (fixes inconsistent post times).
+  const parseServerDate = (d) => {
+    if (!d) return null;
+    return new Date(/Z|[+-]\d{2}:?\d{2}$/.test(d) ? d : d + "Z");
+  };
+  const postDate = parseServerDate(post.created_date);
+  const timeAgo = postDate && postDate <= new Date()
+    ? formatDistanceToNow(postDate, { addSuffix: true })
     : "just now";
+  const isMine = post.athlete_id === currentAthleteId;
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setMenuOpen(false);
+    setDeleting(true);
+    try {
+      await base44.entities.SocialPost.delete(post.id);
+      onUpdate?.();
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const isPR = post.type === "achievement";
   const isFuel = post.type === "macro_log";
@@ -145,11 +165,19 @@ export default function PostCard({ post, currentAthleteId, currentAthleteName, o
               <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-7 z-20 rounded overflow-hidden overlay-shadow"
                 style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', minWidth: 130 }}>
-                <button onClick={() => { setMenuOpen(false); setReport({ type: "post" }); }}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left"
-                  style={{ color: 'var(--negative)' }}>
-                  <Flag size={11} /> Report post
-                </button>
+                {isMine ? (
+                  <button onClick={handleDelete} disabled={deleting}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left"
+                    style={{ color: 'var(--negative)' }}>
+                    <Trash2 size={11} /> {deleting ? "Deleting…" : "Delete post"}
+                  </button>
+                ) : (
+                  <button onClick={() => { setMenuOpen(false); setReport({ type: "post" }); }}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left"
+                    style={{ color: 'var(--negative)' }}>
+                    <Flag size={11} /> Report post
+                  </button>
+                )}
               </div>
             </>
           )}
