@@ -39,17 +39,28 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'INSUFFICIENT_POINTS', message: 'Not enough points for this reward.' }, { status: 400 });
     }
 
-    const redemption = await base44.asServiceRole.entities.Redemption.create({
-      athlete_id: athlete.id,
-      reward_item_id: item.id,
-      reward_name: item.name,
-      reward_type: item.type,
-      points_spent: item.points_required,
-      shipping_address: shippingAddress || '',
-      status: 'pending',
-    });
+    // Deduct points FIRST so a failure between the two writes can never leave a
+    // reward record without a matching deduction (CWE-362). If the redemption
+    // record then fails to create, we roll the points back.
     const newBalance = balance - item.points_required;
     await base44.asServiceRole.entities.Athlete.update(athlete.id, { total_points: newBalance });
+
+    let redemption;
+    try {
+      redemption = await base44.asServiceRole.entities.Redemption.create({
+        athlete_id: athlete.id,
+        reward_item_id: item.id,
+        reward_name: item.name,
+        reward_type: item.type,
+        points_spent: item.points_required,
+        shipping_address: shippingAddress || '',
+        status: 'pending',
+      });
+    } catch (createErr) {
+      // Compensating action — restore the balance we just deducted.
+      await base44.asServiceRole.entities.Athlete.update(athlete.id, { total_points: balance }).catch(() => {});
+      throw createErr;
+    }
 
     console.log(JSON.stringify({ fn: 'redeemReward', caller, outcome: 'ok', item: item.id, points: item.points_required, ms: Date.now() - started }));
     return Response.json({ success: true, redemption_id: redemption.id, new_balance: newBalance });
