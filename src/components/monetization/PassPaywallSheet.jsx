@@ -1,11 +1,12 @@
 // All-SZN Pass paywall sheet — the canonical Pass surface.
 // Golden Rule: the Pass unlocks the platform, never coach-priced content.
 // Confirmed benefits only — do not add rows without owner sign-off.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import PricingFAQ from "@/components/monetization/PricingFAQ";
 import { base44 } from "@/api/base44Client";
 import useSheetBack from "@/lib/useSheetBack";
+import { track } from "@/lib/analytics";
 
 const ROWS = [
   { label: "Daily tracker — macros, calories, weight", free: true },
@@ -34,6 +35,10 @@ export default function PassPaywallSheet({ open, onClose }) {
   const [error, setError] = useState("");
   const [restoreMsg, setRestoreMsg] = useState("");
 
+  // Money-screen funnel (3.2): view on open, dismissed on any close path.
+  useEffect(() => { if (open) track.paywallViewed(); }, [open]);
+  const dismiss = () => { track.paywallDismissed(); onClose?.(); };
+
   // Purchases are account-bound (Stripe subscription on the athlete record) —
   // "restore" re-checks the account's live tier instead of being a dead tap.
   const handleRestore = async () => {
@@ -48,7 +53,7 @@ export default function PassPaywallSheet({ open, onClose }) {
     }
   };
   // §4 — back gesture / hardware back dismisses this sheet first
-  useSheetBack(open, onClose);
+  useSheetBack(open, dismiss);
 
   const handleBuy = async () => {
     if (window.self !== window.top) {
@@ -57,6 +62,7 @@ export default function PassPaywallSheet({ open, onClose }) {
     }
     setBuying(true);
     setError("");
+    track.paywallSubscribeClicked();
     // Session check FIRST — an expired/missing session routes to the branded
     // login instead of surfacing a raw authentication error on the buy button.
     const authed = await base44.auth.isAuthenticated().catch(() => false);
@@ -81,19 +87,19 @@ export default function PassPaywallSheet({ open, onClose }) {
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={dismiss}>
       <div
-        className="w-full max-w-lg rounded-t-2xl border-t border-l border-r animate-slide-up max-h-[88vh] overflow-y-auto"
-        style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+        className="glass-sheet w-full max-w-lg rounded-t-2xl animate-slide-up max-h-[88vh] overflow-y-auto"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
         onClick={e => e.stopPropagation()}
       >
-        <div className="sticky top-0 flex items-start justify-between p-5 pb-3" style={{ background: 'var(--surface-0)' }}>
+        <div className="sticky top-0 z-10 flex items-start justify-between p-5 pb-3 glass-sheet" style={{ border: 'none' }}>
           <div>
             <h2 className="font-anton text-2xl uppercase" style={{ color: 'var(--text-primary)' }}>ALL-SZN Pass</h2>
             <p className="tabular-nums text-lg font-semibold" style={{ color: 'var(--accent)' }}>$9.99<span className="text-xs" style={{ color: 'var(--text-secondary)' }}>/mo</span></p>
             <p className="font-elite text-[10px] uppercase tracking-widest mt-0.5" style={{ color: 'var(--text-secondary)' }}>Unlock the platform.</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={dismiss} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>
@@ -137,7 +143,7 @@ export default function PassPaywallSheet({ open, onClose }) {
             {buying ? "Opening checkout…" : "Get the All-SZN Pass"}
           </button>
           {/* Frictionless exit — declining is always as easy as buying */}
-          <button className="w-full py-3 mb-4 text-sm font-medium" style={{ color: 'var(--text-secondary)' }} onClick={onClose}>
+          <button className="w-full py-3 mb-4 text-sm font-medium" style={{ color: 'var(--text-secondary)' }} onClick={dismiss}>
             Not now
           </button>
 

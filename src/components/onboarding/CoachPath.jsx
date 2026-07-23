@@ -1,9 +1,11 @@
 // Coach onboarding path (§4): a coach is a seller, not a trainee.
 // Credibility → storefront → services → rate → minor conduct (required) →
 // identity → payouts → GET DISCOVERABLE checklist.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { readDraft, saveDraft, clearDraft } from "@/lib/onboardingDraft";
+import { track } from "@/lib/analytics";
 import { ProgressBar, StepShell, PrimaryButton, SkipButton, Chip, Field } from "@/components/onboarding/OnboardingUI";
 import CoachChecklist from "@/components/onboarding/CoachChecklist";
 
@@ -27,14 +29,24 @@ function suggestedBand(years) {
 
 export default function CoachPath() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const draft = readDraft();
+  const [step, setStep] = useState(draft.coachStep ?? 0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [athlete, setAthlete] = useState(null);
   const [f, setF] = useState({
     display_name: "", sports: [], specialties: [], years: "", levels: [], certifications: "",
     bio: "", avatar_url: "", services: ["messaging"], sla: 48, price: "", conductAgreed: false,
+    ...(draft.coachForm || {}),
   });
+
+  // Draft mirror (2.1) — steps after profile creation aren't resumed.
+  useEffect(() => {
+    if (!athlete) saveDraft({ coachStep: step, coachForm: f });
+  }, [step, f, athlete]);
+
+  // Funnel: step views (3.1)
+  useEffect(() => { track.onboardingStepViewed({ path: "coach", step }); }, [step]);
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
   const toggleIn = (k, v) => set(k, f[k].includes(v) ? f[k].filter((x) => x !== v) : [...f[k], v]);
 
@@ -81,6 +93,7 @@ export default function CoachPath() {
         ? await base44.entities.Athlete.update(existing[0].id, payload)
         : await base44.entities.Athlete.create(payload);
       setAthlete(rec);
+      clearDraft(); // profile saved — the draft has done its job
       base44.analytics.track({ eventName: "onboarding_completed", properties: {
         role: "coach", sport: payload.sport, is_minor: false, training_days: 0, season_status: "off_season",
       }});
@@ -115,7 +128,7 @@ export default function CoachPath() {
 
   return (
     <>
-      <div className="px-5 pt-5" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
+      <div className="px-5" style={{ maxWidth: 480, margin: "0 auto", width: "100%", paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}>
         <ProgressBar filled={3 + step} total={TOTAL} />
       </div>
 
@@ -249,7 +262,7 @@ export default function CoachPath() {
           {error && <p className="text-sm mb-4" style={{ color: "var(--negative)" }}>{error}</p>}
           <div className="mt-auto flex flex-col gap-2">
             <PrimaryButton onClick={startIdentity} disabled={saving}>{saving ? "Opening…" : "Verify my identity"}</PrimaryButton>
-            <SkipButton onClick={next} />
+            <SkipButton onClick={() => { track.onboardingStepSkipped({ path: "coach", step }); next(); }} />
           </div>
         </StepShell>
       )}
@@ -262,7 +275,7 @@ export default function CoachPath() {
           {error && <p className="text-sm mb-4" style={{ color: "var(--negative)" }}>{error}</p>}
           <div className="mt-auto flex flex-col gap-2">
             <PrimaryButton onClick={startPayouts} disabled={saving}>{saving ? "Opening Stripe…" : "Set up payouts"}</PrimaryButton>
-            <SkipButton onClick={next} />
+            <SkipButton onClick={() => { track.onboardingStepSkipped({ path: "coach", step }); next(); }} />
           </div>
         </StepShell>
       )}
@@ -275,7 +288,7 @@ export default function CoachPath() {
           <div className="mb-6"><CoachChecklist athlete={athlete || {}} /></div>
           <div className="mt-auto flex flex-col gap-2">
             <PrimaryButton onClick={() => navigate("/profile", { replace: true })}>Open Coach Studio</PrimaryButton>
-            <SkipButton onClick={() => navigate("/", { replace: true })} children="Enter OFFSZN — I'll upload later" />
+            <SkipButton onClick={() => { track.onboardingStepSkipped({ path: "coach", step }); navigate("/", { replace: true }); }} children="Enter OFFSZN — I'll upload later" />
           </div>
         </StepShell>
       )}

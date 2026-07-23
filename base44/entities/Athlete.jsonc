@@ -46,6 +46,11 @@
     "school": {
       "type": "string"
     },
+    "public_exposure_approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Mirror of GuardianLink.public_exposure_approved, written ONLY by the guardianConsent function. Lets public surfaces gate a minor's school/hometown without reading GuardianLink. Meaningless for adults."
+    },
     "grade": {
       "type": "string",
       "enum": [

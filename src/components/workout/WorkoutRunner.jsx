@@ -51,7 +51,7 @@ export default function WorkoutRunner({ title, steps, athlete, durationMinutes, 
       <div className="px-5 pt-4 pb-3">
         <div className="flex items-center justify-between mb-3">
           <p className="eyebrow">{phase === "done" || phase === "saving" ? "Session Complete" : `Step ${index + 1} of ${steps.length}`}</p>
-          <button onClick={onClose} className="p-2 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-2 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

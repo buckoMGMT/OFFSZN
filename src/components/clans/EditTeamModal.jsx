@@ -50,7 +50,7 @@ export default function EditTeamModal({ clan, onClose, onSaved }) {
         style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }} onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-anton text-2xl uppercase" style={{ color: 'var(--theme-ink)' }}>Edit Team</h2>
-          <button onClick={onClose} className="p-2 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }}>
+          <button onClick={onClose} className="p-2 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }} aria-label="Close">
             <X size={18} style={{ color: 'var(--theme-ink-soft)' }} />
           </button>
         </div>

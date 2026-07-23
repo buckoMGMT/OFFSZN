@@ -30,7 +30,7 @@ export default function BuildMoment({ targets, isMinor, sport, trainingDays, onD
   }
 
   return (
-    <div className="flex flex-col flex-1 px-5 pt-6 pb-8" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
+    <div className="flex flex-col flex-1 px-5 pb-8" style={{ maxWidth: 480, margin: "0 auto", width: "100%", paddingTop: "calc(1.5rem + env(safe-area-inset-top))" }}>
       <span className="eyebrow" style={{ color: "var(--accent)" }}>Built for you</span>
       <h1 className="font-display text-2xl text-tx-primary mt-2 mb-4">YOUR NUMBERS.</h1>
 

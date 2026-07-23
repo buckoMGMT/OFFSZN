@@ -4,6 +4,7 @@ import { Gift, Shirt, Trophy, Users, Star, ChevronRight, X, Copy, Check, Lock, Z
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
+import EmptyState from "@/components/ui/EmptyState";
 import RedeemModal from "@/components/rewards/RedeemModal";
 import ReferralPanel from "@/components/rewards/ReferralPanel";
 import useTabState from "@/lib/useTabState";
@@ -281,11 +282,7 @@ export default function Rewards() {
         {tab === "history" && (
           <div>
             {redemptions.length === 0 ? (
-              <div className="text-center py-16">
-                <Package size={40} style={{ color: 'var(--text-tertiary)' }} className="mx-auto mb-4" />
-                <h3 className="font-anton text-xl uppercase mb-2" style={{ color: 'var(--text-primary)' }}>No Orders Yet</h3>
-                <p className="font-work text-sm" style={{ color: 'var(--text-secondary)' }}>Keep earning and redeem your first reward.</p>
-              </div>
+              <EmptyState icon={Package} title="No Orders Yet" body="Keep earning and redeem your first reward." />
             ) : (
               <div className="space-y-3">
                 {redemptions.map(r => (
@@ -391,7 +388,7 @@ export default function Rewards() {
             onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-anton text-lg uppercase" style={{ color: 'var(--text-primary)' }}>Pick Your Goal</h2>
-              <button onClick={() => setShowGoalPicker(false)} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+              <button onClick={() => setShowGoalPicker(false)} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
                 <X size={16} style={{ color: 'var(--text-secondary)' }} />
               </button>
             </div>
@@ -415,7 +412,7 @@ export default function Rewards() {
                 </button>
               ))}
               {items.length === 0 && (
-                <p className="font-work text-sm text-center py-8" style={{ color: 'var(--text-secondary)' }}>Rewards are being stocked — check back soon.</p>
+                <EmptyState title="Stocking The Shelves." body="Rewards are being stocked — check back soon." />
               )}
             </div>
           </div>

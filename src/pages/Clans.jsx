@@ -10,6 +10,7 @@ import PageLabel from "@/components/ui/PageLabel";
 import PageHero from "@/components/ui/PageHero";
 import StampButton from "@/components/ui/StampButton";
 import PlayDiagram from "@/components/ui/PlayDiagram";
+import EmptyState from "@/components/ui/EmptyState";
 import TeamRoster from "@/components/clans/TeamRoster";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
 import PullToRefresh from "@/components/layout/PullToRefresh";
@@ -189,7 +190,7 @@ export default function Clans() {
                     <Settings size={14} style={{ color: '#fff' }} />
                   </button>
                 )}
-                <button onClick={leaveClan} className="p-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <button onClick={leaveClan} aria-label="Leave team" className="p-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)' }}>
                   <X size={14} style={{ color: '#fff' }} />
                 </button>
               </div>
@@ -249,11 +250,7 @@ export default function Clans() {
                 value={search} onChange={e => setSearch(e.target.value)} />
             </div>
             {filtered.length === 0 ? (
-              <div className="text-center py-16">
-                <PlayDiagram size={140} />
-                <h3 className="font-anton text-xl uppercase mt-4 mb-2" style={{ color: 'var(--theme-ink)' }}>No Teams Found</h3>
-                <p className="font-work text-sm" style={{ color: 'var(--theme-ink-soft)' }}>Be the first to create a team.</p>
-              </div>
+              <EmptyState title="No Teams Found" body="Be the first to create a team." />
             ) : (
               <div className="space-y-3">
                 {filtered.map(clan => {
@@ -311,7 +308,7 @@ export default function Clans() {
             style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)' }}>
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-anton text-2xl uppercase" style={{ color: 'var(--theme-ink)' }}>Create Team</h2>
-              <button onClick={() => setShowCreate(false)} className="p-2 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }}>
+              <button onClick={() => setShowCreate(false)} aria-label="Close" className="p-2 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }}>
                 <X size={18} style={{ color: 'var(--theme-ink-soft)' }} />
               </button>
             </div>

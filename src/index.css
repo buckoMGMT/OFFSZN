@@ -66,6 +66,15 @@ html {
     --r-xl:   24px;
     --r-full: 9999px;
 
+    /* ── Liquid glass — translucent panel material (sheets, docks, overlays).
+       Blur + saturate lifts color from content beneath; hairline top edge
+       catches "light". Solid fallback via @supports below. ── */
+    --glass-bg:        rgba(18,20,23,0.72);
+    --glass-bg-raised: rgba(26,29,33,0.68);
+    --glass-border:    rgba(245,245,240,0.10);
+    --glass-edge:      rgba(245,245,240,0.18);
+    --glass-blur:      blur(24px) saturate(180%);
+
     /* Motion tokens */
     --dur-fast: 150ms;
     --dur-base: 250ms;
@@ -127,6 +136,11 @@ html {
     --text-secondary: rgba(20,21,23,0.64);
     --text-tertiary:  rgba(20,21,23,0.40);
     --on-accent:      #141517;
+
+    --glass-bg:        rgba(255,255,255,0.72);
+    --glass-bg-raised: rgba(255,255,255,0.80);
+    --glass-border:    rgba(20,21,23,0.10);
+    --glass-edge:      rgba(255,255,255,0.85);
 
     --theme-bg:          var(--surface-0);
     --theme-surface:     var(--surface-1);
@@ -431,6 +445,40 @@ html {
   /* ── Accent subtle background — selected states, active rows ── */
   .accent-bg {
     background: var(--accent-subtle);
+  }
+
+  /* ── Liquid glass materials ──
+     .glass-sheet  — bottom sheets & modals rising over content
+     .glass-panel  — raised in-page panels (toasts, floating cards)
+     .glass-chip   — small floating pills/badges over media
+     Hairline top edge = simulated light catch. Content behind MUST be
+     visible (never place glass over an opaque same-color surface). */
+  .glass-sheet {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-top-color: var(--glass-edge);
+  }
+  .glass-panel {
+    background: var(--glass-bg-raised);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-top-color: var(--glass-edge);
+    border-radius: var(--r-lg);
+  }
+  .glass-chip {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(8px) saturate(160%);
+    backdrop-filter: blur(8px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-full);
+  }
+  /* Solid fallback for browsers without backdrop-filter */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-sheet, .glass-panel { background: var(--surface-1); }
+    .glass-chip { background: var(--surface-2); }
   }
 
   /* ── Overlay shadow — ONLY for true overlays (modals, sheets) ── */

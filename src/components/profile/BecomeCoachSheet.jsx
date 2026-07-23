@@ -40,7 +40,7 @@ export default function BecomeCoachSheet({ open, onClose, athlete, isMinor, onBe
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-anton text-xl uppercase" style={{ color: 'var(--text-primary)' }}>Become a Coach</h2>
-          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

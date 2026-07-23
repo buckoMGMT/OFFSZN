@@ -53,7 +53,7 @@ export default function SortFilterSheet({ open, onClose, sortBy, setSortBy, pric
               style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
               <RotateCcw size={10} /> Reset
             </button>
-            <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+            <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
               <X size={16} style={{ color: 'var(--text-secondary)' }} />
             </button>
           </div>

@@ -65,7 +65,7 @@ export default function ImageCropModal({ file, onCropped, onClose }) {
       <div className="w-full max-w-sm rounded-xl p-4 overlay-shadow" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)' }} onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-3">
           <p className="font-anton text-sm uppercase" style={{ color: 'var(--text-primary)' }}>Crop Photo</p>
-          <button onClick={onClose} className="p-1 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-1 rounded" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={14} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

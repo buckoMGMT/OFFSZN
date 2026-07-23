@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from '@/App.jsx'
 import '@/index.css'
+import { initNativeShell } from '@/lib/native'
 
 // Sentry — initialized only when a DSN is provided (VITE_SENTRY_DSN).
 // Without a DSN, init is skipped and the ErrorBoundary still catches crashes.
@@ -11,6 +12,10 @@ if (dsn) {
   Sentry.init({
     dsn,
     environment: import.meta.env.MODE,
+    // Release tagging (3.3) — set VITE_SENTRY_RELEASE in the build env
+    // (e.g. `offszn@<git sha>`); falls back to package version so events
+    // are always grouped under SOME release.
+    release: import.meta.env.VITE_SENTRY_RELEASE || `offszn@${import.meta.env.VITE_APP_VERSION || "2"}`,
     tracesSampleRate: 0.1,
   });
 }
@@ -42,8 +47,13 @@ const CrashFallback = () => (
   </div>
 );
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <Sentry.ErrorBoundary fallback={<CrashFallback />}>
-    <App />
-  </Sentry.ErrorBoundary>
-)
+// Native shell boot (instant no-op on web): status bar, splash hide, and
+// onboarding-draft hydration — awaited so a resumed draft is readable the
+// moment Onboarding mounts. Renders regardless of shell-boot failures.
+initNativeShell().finally(() => {
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <Sentry.ErrorBoundary fallback={<CrashFallback />}>
+      <App />
+    </Sentry.ErrorBoundary>
+  )
+})

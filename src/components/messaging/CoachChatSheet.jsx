@@ -82,7 +82,7 @@ export default function CoachChatSheet({ open, onClose, me, other }) {
               <p className="font-elite text-[9px] uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>Direct Message</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

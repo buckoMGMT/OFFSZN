@@ -29,7 +29,7 @@ export default function CoachSubSuccessToast() {
           You now have direct access to {info.name} — message anytime, replies within {info.sla}h.
         </p>
       </div>
-      <button onClick={() => setInfo(null)} className="p-1 flex-shrink-0">
+      <button onClick={() => setInfo(null)} aria-label="Dismiss" className="p-1 flex-shrink-0">
         <X size={14} style={{ color: 'var(--text-tertiary)' }} />
       </button>
     </div>

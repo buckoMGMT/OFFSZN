@@ -38,7 +38,7 @@ export default function PlaylistDetail({ playlist, allPrograms, onClose, onPlay,
     <div className="fixed inset-0 z-[100] flex flex-col" style={{ background: 'var(--surface-0)' }}>
       {/* Header bar */}
       <div className="flex items-center justify-between px-4 flex-shrink-0" style={{ paddingTop: 'calc(12px + env(safe-area-inset-top))', paddingBottom: 12 }}>
-        <button onClick={onClose} className="p-2 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+        <button onClick={onClose} className="p-2 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
           <X size={16} style={{ color: 'var(--text-secondary)' }} />
         </button>
         <div className="flex items-center gap-2">

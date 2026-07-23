@@ -20,7 +20,7 @@ export default function CoachPurchaseSheet({ open, onClose, item, needsGuardian 
               <BadgeCheck size={14} style={{ color: 'var(--accent)' }} />
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

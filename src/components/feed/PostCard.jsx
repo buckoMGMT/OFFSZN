@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Trophy, Flame, Dumbbell, Zap, MoreHorizontal, Flag, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Trophy, Flame, Dumbbell, Zap, MoreHorizontal, Flag, Trash2, Ban } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { formatDistanceToNow } from "date-fns";
 import VideoPlayer from "@/components/feed/VideoPlayer";
 import ReportSheet from "@/components/safety/ReportSheet";
+import { blockAthlete, isBlocked } from "@/lib/blocks";
 import { validate, commentSchema } from "@/lib/validators";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -156,7 +157,7 @@ export default function PostCard({ post, currentAthleteId, currentAthleteName, o
         )}
         {/* ⋯ menu — report intake on every post */}
         <div className="relative">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="p-1" style={{ color: 'var(--text-tertiary)' }}>
+          <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Post options" className="p-1" style={{ color: 'var(--text-tertiary)' }}>
             <MoreHorizontal size={16} />
           </button>
           {menuOpen && (
@@ -172,11 +173,26 @@ export default function PostCard({ post, currentAthleteId, currentAthleteName, o
                     <Trash2 size={11} /> {deleting ? "Deleting…" : "Delete post"}
                   </button>
                 ) : (
-                  <button onClick={() => { setMenuOpen(false); setReport({ type: "post" }); }}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left"
-                    style={{ color: 'var(--negative)' }}>
-                    <Flag size={11} /> Report post
-                  </button>
+                  <>
+                    <button onClick={() => { setMenuOpen(false); setReport({ type: "post" }); }}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left"
+                      style={{ color: 'var(--negative)' }}>
+                      <Flag size={11} /> Report post
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setMenuOpen(false);
+                        if (!window.confirm("Block this user? You won't see their posts and they can't message or follow you.")) return;
+                        try {
+                          await blockAthlete(post.athlete_id);
+                          onUpdate?.();
+                        } catch { /* server rejected — leave UI unchanged */ }
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 font-elite text-[9px] uppercase tracking-widest text-left border-t"
+                      style={{ color: 'var(--negative)', borderColor: 'var(--border-subtle)' }}>
+                      <Ban size={11} /> Block user
+                    </button>
+                  </>
                 )}
               </div>
             </>
@@ -249,11 +265,14 @@ export default function PostCard({ post, currentAthleteId, currentAthleteName, o
         </button>
       </div>
 
-      {/* Comments */}
+      {/* Comments — blocked authors filtered; realIndex kept for reporting */}
       {commentCount > 0 && (
         <div className="px-4 pb-3 space-y-1.5 border-t pt-3" style={{ borderColor: 'var(--border-subtle)' }}>
-          {post.comments.slice(-2).map((c, i) => {
-            const realIndex = post.comments.length - Math.min(2, post.comments.length) + i;
+          {post.comments
+            .map((c, realIndex) => ({ c, realIndex }))
+            .filter(({ c }) => !isBlocked(c.author_id))
+            .slice(-2)
+            .map(({ c, realIndex }, i) => {
             return (
               <div key={i} className="flex items-start gap-2 group">
                 <p className="text-xs font-work flex-1" style={{ color: 'var(--text-secondary)' }}>

@@ -161,6 +161,7 @@ module.exports = {
     'btn-primary', 'btn-stamp', 'btn-secondary',
     'card-base', 'card-tappable',
     'skeleton', 'eyebrow', 'stat-number', 'ink-stamp',
+    'glass-sheet', 'glass-panel', 'glass-chip',
     'text-positive', 'text-warning', 'text-negative',
     'bg-positive', 'bg-warning', 'bg-negative',
     'accent-bg', 'turf-texture', 'field-lines', 'stadium-header',

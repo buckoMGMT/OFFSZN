@@ -7,6 +7,8 @@ import { useState, useRef } from "react";
 import html2canvas from "html2canvas";
 import { Share2, Download, Lock, ShieldCheck } from "lucide-react";
 import PassPaywallSheet from "@/components/monetization/PassPaywallSheet";
+import { publicSchool, publicHometown } from "@/lib/privacy";
+import { shareFallback } from "@/lib/native";
 
 const IN = (n) => (n ? `${Math.floor(n / 12)}'${n % 12}"` : null);
 const MILE = (s) => (s ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : null);
@@ -53,7 +55,7 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
         IN(athlete.height_inches),
         athlete.weight_lbs ? `${athlete.weight_lbs} lbs` : null,
         athlete.gpa ? `${athlete.gpa.toFixed(1)} GPA` : null,
-        athlete.hometown || null,
+        publicHometown(athlete),
       ].filter(Boolean);
 
   // Performance grid — only stats that exist. A day-one athlete leads with STREAK + PTS.
@@ -97,6 +99,8 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
       const file = new File([blob], `${athlete.display_name || "athlete"}-offszn-card.png`, { type: "image/png" });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: "My OFFSZN card", text: "Built on OFFSZN — offsznapp.com" });
+      } else if (await shareFallback({ title: "My OFFSZN card", text: "Built on OFFSZN", url: "https://offsznapp.com" })) {
+        // Native share sheet (text + link) — WKWebView without file-share support
       } else {
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
@@ -168,7 +172,7 @@ export default function RecruitingCard({ athlete, verifiedFlags = {} }) {
                   ? <ShieldCheck size={9} style={{ color: "#2FBF71", display: "inline", marginLeft: 3, verticalAlign: "-1px" }} />
                   : null}
               </p>
-              {athlete.school && <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{athlete.school}</p>}
+              {publicSchool(athlete) && <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 2 }}>{publicSchool(athlete)}</p>}
             </div>
           </div>
 

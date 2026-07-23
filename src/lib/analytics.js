@@ -13,6 +13,15 @@ const t = (eventName, properties = {}) => {
 export const track = {
   signupCompleted: () => t("signup_completed"),
   onboardingCompleted: (p = {}) => t("onboarding_completed", p),
+  // Funnel events (3.1): a step_viewed with no later step_viewed/completion IS
+  // the drop-off signal — no separate drop-off event needed.
+  onboardingStepViewed: (p = {}) => t("onboarding_step_viewed", p),
+  onboardingStepSkipped: (p = {}) => t("onboarding_step_skipped", p),
+  onboardingBlocked: () => t("onboarding_blocked"),
+  // Money-screen funnel (3.2)
+  paywallViewed: (p = {}) => t("paywall_viewed", p),
+  paywallDismissed: (p = {}) => t("paywall_dismissed", p),
+  paywallSubscribeClicked: (p = {}) => t("paywall_subscribe_clicked", p),
   firstDailyLog: () => t("first_daily_log"), // activation event
   dailyLogCompleted: (p = {}) => t("daily_log_completed", p),
   passSubscribed: () => t("pass_subscribed"),

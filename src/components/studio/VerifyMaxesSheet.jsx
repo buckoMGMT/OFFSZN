@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { X, ShieldCheck, Check } from "lucide-react";
 import useSheetBack from "@/lib/useSheetBack";
+import { hapticSuccess } from "@/lib/native";
 
 const FIELDS = [
   { key: "bench_press_lbs", label: "Bench Press", fmt: v => `${v} lbs` },
@@ -36,6 +37,7 @@ export default function VerifyMaxesSheet({ open, onClose, subscriber }) {
     try {
       const res = await base44.functions.invoke("verifyMaxes", { athleteId: subscriber.athlete_id, fields: selected });
       const n = (res.data?.verified || []).length;
+      if (n > 0) hapticSuccess();
       setMessage(n > 0 ? `Verified ${n} max${n === 1 ? "" : "es"} — the shield is live on their card.` : "Nothing to verify — those fields have no logged values.");
       setSelected([]);
     } catch (e) {
@@ -55,7 +57,7 @@ export default function VerifyMaxesSheet({ open, onClose, subscriber }) {
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-1">
           <h2 className="font-anton text-lg uppercase" style={{ color: 'var(--text-primary)' }}>Verify Maxes</h2>
-          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>
