@@ -151,6 +151,12 @@ Deno.serve(async (req) => {
       const updated = await svc.GuardianLink.update(link.id, {
         public_exposure_approved: !!approved,
       });
+      // Mirror onto the minor's Athlete record — public surfaces gate the
+      // minor's school/hometown on this without ever reading GuardianLink.
+      const minorAthletes = await svc.Athlete.filter({ created_by_id: link.minor_user_id });
+      if (minorAthletes[0]) {
+        await svc.Athlete.update(minorAthletes[0].id, { public_exposure_approved: !!approved });
+      }
       return Response.json({ ok: true, public_exposure_approved: !!updated.public_exposure_approved });
     }
 

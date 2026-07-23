@@ -78,7 +78,7 @@ export default function PlaybookFilters({ filters, onFilterChange, resultCount }
                 {activeCount > 0 && (
                   <button onClick={clearAll} className="text-xs text-primary font-semibold">Clear All</button>
                 )}
-                <button onClick={() => setShowDrawer(false)} className="p-1.5 rounded-lg bg-secondary text-muted-foreground">
+                <button onClick={() => setShowDrawer(false)} className="p-1.5 rounded-lg bg-secondary text-muted-foreground" aria-label="Close">
                   <X size={16} />
                 </button>
               </div>

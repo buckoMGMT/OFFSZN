@@ -1,23 +1,32 @@
 // OFFSZN onboarding v2 — role-split flow. Welcome → age gate → athlete/coach
 // split (segment by role FIRST), then two completely different paths.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { ProgressBar, StepShell, PrimaryButton, Chip, Field } from "@/components/onboarding/OnboardingUI";
 import AthletePath from "@/components/onboarding/AthletePath";
 import CoachPath from "@/components/onboarding/CoachPath";
+import { readDraft, saveDraft } from "@/lib/onboardingDraft";
+import { track } from "@/lib/analytics";
 
 const TOTAL = 12;
 
 export default function Onboarding() {
   const reduced = useReducedMotion();
-  const [phase, setPhase] = useState(0); // 0 welcome · 1 dob · 2 role · 3 path
-  const [role, setRole] = useState(null); // "athlete" | "coach"
-  const [dob, setDob] = useState("");
-  const [isMinor, setIsMinor] = useState(null);
+  // Restore a mid-flow draft — a refresh must never wipe typed answers (2.1).
+  const draft = readDraft();
+  const [phase, setPhase] = useState(draft.phase ?? 0); // 0 welcome · 1 dob · 2 role · 3 path
+  const [role, setRole] = useState(draft.role ?? null); // "athlete" | "coach"
+  const [dob, setDob] = useState(draft.dob ?? "");
+  const [isMinor, setIsMinor] = useState(draft.isMinor ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [blocked, setBlocked] = useState(false);
+
+  useEffect(() => { saveDraft({ phase, role, dob, isMinor }); }, [phase, role, dob, isMinor]);
+
+  // Funnel: every step view (3.1). Drop-off = last step_viewed with no successor.
+  useEffect(() => { track.onboardingStepViewed({ path: "shared", phase }); }, [phase]);
 
   const anim = reduced
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
@@ -32,14 +41,15 @@ export default function Onboarding() {
       base44.analytics.track({ eventName: "onboarding_step_completed", properties: { path: "shared", step: "dob" } });
       setPhase(2);
     } catch (err) {
-      if (err?.response?.status === 403) setBlocked(true);
+      if (err?.response?.status === 403) { setBlocked(true); track.onboardingBlocked(); }
       else setError("Couldn't verify your date of birth. Check it and try again.");
     } finally { setSaving(false); }
   }
 
   if (blocked) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-5" style={{ background: "var(--surface-0)" }}>
+      <div className="min-h-screen flex items-center justify-center px-5"
+           style={{ background: "var(--surface-0)", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
         <div className="text-center" style={{ maxWidth: 420 }}>
           <h1 className="font-display text-2xl text-tx-primary mb-3">NOT YET — BUT SOON.</h1>
           <p className="text-tx-secondary text-base">
@@ -60,7 +70,7 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--surface-0)" }}>
-      <div className="px-5 pt-5" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
+      <div className="px-5" style={{ maxWidth: 480, margin: "0 auto", width: "100%", paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}>
         <ProgressBar filled={phase + 1} total={TOTAL} />
       </div>
 

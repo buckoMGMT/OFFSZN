@@ -17,11 +17,11 @@ export default function RedeemModal({ item, onClose, onConfirm }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.75)' }}>
-      <div className="w-full max-w-lg rounded-t-2xl border-t border-l border-r p-6 animate-slide-up"
-        style={{ background: 'var(--surface-1)', borderColor: 'var(--border-strong)', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
+      <div className="glass-sheet w-full max-w-lg rounded-t-2xl p-6 animate-slide-up"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
         <div className="flex items-center justify-between mb-5">
           <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-2xl)', color: 'var(--text-primary)', textTransform: 'uppercase' }}>Confirm Redemption</h2>
-          <button onClick={onClose} className="p-2 rounded-lg" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-2 rounded-lg" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

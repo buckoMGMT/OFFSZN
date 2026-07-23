@@ -1,6 +1,7 @@
 // Coach storefront sheet — verified coach identity, stats, and their video catalog.
 import { useState } from "react";
-import { X, BadgeCheck, Eye, Play, BellRing, BellPlus, Flag } from "lucide-react";
+import { X, BadgeCheck, Eye, Play, BellRing, BellPlus, Flag, Ban } from "lucide-react";
+import { blockAthlete } from "@/lib/blocks";
 import PricePill from "@/components/monetization/PricePill";
 import CoachServiceSection from "@/components/playbook/CoachServiceSection";
 import ReportSheet from "@/components/safety/ReportSheet";
@@ -38,7 +39,7 @@ export default function CoachProfileSheet({ open, onClose, coach, videos = [], o
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+            <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
               <X size={16} style={{ color: 'var(--text-secondary)' }} />
             </button>
           </div>
@@ -101,6 +102,15 @@ export default function CoachProfileSheet({ open, onClose, coach, videos = [], o
             className="w-full flex items-center justify-center gap-1.5 mt-5 py-2 font-elite text-[9px] uppercase tracking-widest"
             style={{ color: 'var(--text-tertiary)' }}>
             <Flag size={10} /> Report this coach
+          </button>
+          <button
+            onClick={async () => {
+              if (!window.confirm("Block this coach? You won't see their content and they can't message or follow you.")) return;
+              try { await blockAthlete(coach.id); onClose?.(); } catch { /* server rejected */ }
+            }}
+            className="w-full flex items-center justify-center gap-1.5 py-2 font-elite text-[9px] uppercase tracking-widest"
+            style={{ color: 'var(--negative)' }}>
+            <Ban size={10} /> Block this coach
           </button>
         </div>
         <ReportSheet open={showReport} onClose={() => setShowReport(false)} targetType="coach" targetId={coach.id} targetName={coach.display_name} />

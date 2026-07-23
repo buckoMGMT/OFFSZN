@@ -69,7 +69,7 @@ export default function ReportSheet({ open, onClose, targetType, targetId, targe
                   Report{targetName ? ` ${targetName}` : ""}
                 </h2>
               </div>
-              <button onClick={close} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+              <button onClick={close} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
                 <X size={16} style={{ color: 'var(--text-secondary)' }} />
               </button>
             </div>

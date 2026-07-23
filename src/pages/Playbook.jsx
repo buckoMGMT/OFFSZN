@@ -6,7 +6,7 @@ import ProtectedVideoPlayer from "@/components/feed/ProtectedVideoPlayer";
 import PremiumGate from "@/components/ui/PremiumGate";
 import PageLabel from "@/components/ui/PageLabel";
 import StampButton from "@/components/ui/StampButton";
-import PlayDiagram from "@/components/ui/PlayDiagram";
+import EmptyState from "@/components/ui/EmptyState";
 import ExploreGrid from "@/components/playbook/ExploreGrid";
 import DiscoveryBar from "@/components/playbook/DiscoveryBar";
 import ForYouRow from "@/components/playbook/ForYouRow";
@@ -321,10 +321,7 @@ export default function Playbook() {
                 <PremiumGate title="Saved Programs" subtitle="Save your favorite drills and build custom playlists with the All-SZN Pass." onUpgrade={() => setShowPaywall(true)} />
               </div>
             ) : savedPrograms.length === 0 ? (
-              <div className="text-center py-16">
-                <PlayDiagram size={130} />
-                <p className="font-work text-sm mt-4" style={{ color: 'var(--text-tertiary)' }}>Tap the bookmark icon on any program to save it.</p>
-              </div>
+              <EmptyState title="Nothing Saved Yet." body="Tap the bookmark icon on any program to save it." />
             ) : (
               <div className="space-y-3">
                 {savedPrograms.map(program => (
@@ -356,10 +353,7 @@ export default function Playbook() {
                   </StampButton>
                 </div>
                 {playlists.length === 0 ? (
-                  <div className="text-center py-12">
-                    <PlayDiagram size={120} />
-                    <p className="font-work text-sm mt-4" style={{ color: 'var(--text-tertiary)' }}>No playlists yet.</p>
-                  </div>
+                  <EmptyState title="No Playlists Yet." body="Build one from any drill and it lands here." />
                 ) : (
                   <div className="space-y-3">
                     {playlists.map(pl => (
@@ -400,7 +394,7 @@ export default function Playbook() {
             style={{ background: 'var(--theme-bg)', borderColor: 'var(--theme-border)', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-anton text-xl uppercase" style={{ color: 'var(--theme-ink)' }}>New Playlist</h3>
-              <button onClick={() => setShowCreatePlaylist(false)} className="p-1.5 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }}>
+              <button onClick={() => setShowCreatePlaylist(false)} className="p-1.5 rounded" style={{ background: 'var(--theme-surface)', border: '1px solid var(--theme-border)' }} aria-label="Close">
                 <X size={16} style={{ color: 'var(--theme-ink-soft)' }} />
               </button>
             </div>

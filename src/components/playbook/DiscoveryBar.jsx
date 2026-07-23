@@ -8,6 +8,7 @@ import CoachPurchaseSheet from "@/components/monetization/CoachPurchaseSheet";
 import ExploreVideoSheet from "@/components/playbook/ExploreVideoSheet";
 import CoachesForYou from "@/components/playbook/CoachesForYou";
 import isCoachDiscoverable from "@/lib/coachGate";
+import { publicSchool } from "@/lib/privacy";
 import useSubscriptions from "@/lib/useSubscriptions";
 
 export default function DiscoveryBar({ athlete, programs, onSelectProgram, sortBy, setSortBy, priceFilter, setPriceFilter, difficultyFilter, setDifficultyFilter }) {
@@ -32,7 +33,7 @@ export default function DiscoveryBar({ athlete, programs, onSelectProgram, sortB
   const term = q.trim().toLowerCase();
   const searching = term.length >= 2;
   const matchedPrograms = searching ? programs.filter(p => `${p.title} ${p.sport} ${p.category}`.toLowerCase().includes(term)).slice(0, 3) : [];
-  const matchedProfiles = searching ? athletes.filter(a => `${a.display_name} ${a.school || ""} ${a.sport || ""}`.toLowerCase().includes(term)).slice(0, 4) : [];
+  const matchedProfiles = searching ? athletes.filter(a => `${a.display_name} ${publicSchool(a) || ""} ${a.sport || ""}`.toLowerCase().includes(term)).slice(0, 4) : [];
   const matchedVideos = searching ? videos.filter(v => `${v.title} ${v.sport || ""}`.toLowerCase().includes(term)).slice(0, 3) : [];
   const noResults = searching && !matchedPrograms.length && !matchedProfiles.length && !matchedVideos.length;
 
@@ -56,7 +57,7 @@ export default function DiscoveryBar({ athlete, programs, onSelectProgram, sortB
             style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
           />
           {q && (
-            <button onClick={() => setQ("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+            <button onClick={() => setQ("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2">
               <X size={13} style={{ color: 'var(--text-tertiary)' }} />
             </button>
           )}
@@ -88,7 +89,7 @@ export default function DiscoveryBar({ athlete, programs, onSelectProgram, sortB
                         {a.is_coach_verified && <BadgeCheck size={11} style={{ color: 'var(--accent)', flexShrink: 0 }} />}
                       </span>
                       <span className="block font-elite text-[8px] uppercase tracking-widest truncate" style={{ color: 'var(--text-tertiary)' }}>
-                        {a.is_coach_verified ? "Verified Coach" : "Athlete"}{a.school ? ` · ${a.school}` : ""}
+                        {a.is_coach_verified ? "Verified Coach" : "Athlete"}{publicSchool(a) ? ` · ${publicSchool(a)}` : ""}
                       </span>
                     </div>
                   </button>

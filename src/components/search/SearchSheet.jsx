@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { X, Search } from "lucide-react";
 import useSheetBack from "@/lib/useSheetBack";
+import { publicSchool } from "@/lib/privacy";
 
 export default function SearchSheet({ open, onClose, onSelect }) {
   useSheetBack(open, onClose);
@@ -21,7 +22,7 @@ export default function SearchSheet({ open, onClose, onSelect }) {
   const results = all === null ? null : query.length >= 2
     ? all.filter(a =>
         (a.display_name || "").toLowerCase().includes(query) ||
-        (a.school || "").toLowerCase().includes(query) ||
+        (publicSchool(a) || "").toLowerCase().includes(query) ||
         (a.sport || "").toLowerCase().includes(query))
     : all.slice(0, 20);
 
@@ -62,7 +63,7 @@ export default function SearchSheet({ open, onClose, onSelect }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{a.display_name}</p>
                   <p className="font-elite text-[9px] uppercase tracking-widest truncate mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-                    {[a.role === "coach" ? "Coach" : a.sport, a.school].filter(Boolean).join(" · ") || "Athlete"}
+                    {[a.role === "coach" ? "Coach" : a.sport, publicSchool(a)].filter(Boolean).join(" · ") || "Athlete"}
                   </p>
                 </div>
                 <span className="stat-number text-sm" style={{ color: 'var(--accent)' }}>{a.total_points || 0}</span>

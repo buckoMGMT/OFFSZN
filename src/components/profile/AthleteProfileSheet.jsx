@@ -5,6 +5,9 @@ import { base44 } from "@/api/base44Client";
 import { X, Flame, Zap } from "lucide-react";
 import useSheetBack from "@/lib/useSheetBack";
 import FollowButton from "@/components/profile/FollowButton";
+import { publicSchool } from "@/lib/privacy";
+import { blockAthlete } from "@/lib/blocks";
+import { Ban } from "lucide-react";
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, " ") : "");
 
@@ -22,7 +25,7 @@ export default function AthleteProfileSheet({ open, onClose, athlete, me, onFoll
   const isCoach = athlete.role === "coach";
   const chips = isCoach
     ? ["Coach", ...(athlete.coach_specialties || []).slice(0, 2)]
-    : [cap(athlete.sport), athlete.position, athlete.school, cap(athlete.grade)].filter(Boolean);
+    : [cap(athlete.sport), athlete.position, publicSchool(athlete), cap(athlete.grade)].filter(Boolean);
 
   return (
     <div className="fixed inset-0 z-[120] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
@@ -69,6 +72,17 @@ export default function AthleteProfileSheet({ open, onClose, athlete, me, onFoll
 
         <div className="px-6 mb-5">
           <FollowButton me={me} targetId={athlete.id} onChange={onFollowChange} />
+          {me && me.id !== athlete.id && (
+            <button
+              onClick={async () => {
+                if (!window.confirm(`Block ${athlete.display_name || "this user"}? You won't see their posts and they can't message or follow you.`)) return;
+                try { await blockAthlete(athlete.id); onClose?.(); } catch { /* server rejected */ }
+              }}
+              className="w-full flex items-center justify-center gap-1.5 mt-2 py-2 font-elite text-[9px] uppercase tracking-widest"
+              style={{ color: 'var(--negative)' }}>
+              <Ban size={10} /> Block user
+            </button>
+          )}
         </div>
 
         {/* Recent wins */}

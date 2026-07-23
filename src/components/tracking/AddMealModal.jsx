@@ -73,7 +73,7 @@ export default function AddMealModal({ onClose, onSaved, athleteId, logId }) {
       <div className="w-full max-w-lg bg-card rounded-t-3xl border-t border-border animate-slide-up flex flex-col" style={{ height: '92dvh' }}>
         <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
           <h2 className="text-2xl font-barlow font-bold text-foreground uppercase tracking-wide">Log Meal</h2>
-          <button onClick={onClose} className="p-2 rounded-xl bg-secondary text-muted-foreground">
+          <button onClick={onClose} className="p-2 rounded-xl bg-secondary text-muted-foreground" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -90,7 +90,7 @@ export default function AddMealModal({ onClose, onSaved, athleteId, logId }) {
               onChange={e => setSearch(e.target.value)}
             />
             {search && (
-              <button onClick={() => setSearch("")} className="text-muted-foreground">
+              <button onClick={() => setSearch("")} className="text-muted-foreground" aria-label="Close">
                 <X size={12} />
               </button>
             )}

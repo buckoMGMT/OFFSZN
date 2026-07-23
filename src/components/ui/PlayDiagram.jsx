@@ -10,7 +10,7 @@ export default function PlayDiagram({ size = 180, className = "" }) {
     <svg width={size} height={size} viewBox="0 0 180 180" fill="none" className={className}>
       {/* Line of scrimmage */}
       <line x1="20" y1="110" x2="160" y2="110" stroke="#9BA3AC" strokeWidth="1.5" strokeDasharray="4 3" />
-      <text x="162" y="113" fontSize="7" fill="#9BA3AC" fontFamily="Special Elite, cursive">LOS</text>
+      <text x="162" y="113" fontSize="7" fill="#9BA3AC" fontFamily="Inter, sans-serif">LOS</text>
 
       {/* O's — offensive line (steel grey) */}
       {[38, 62, 90, 118, 142].map((cx, i) => (

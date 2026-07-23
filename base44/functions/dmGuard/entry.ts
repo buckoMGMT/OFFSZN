@@ -38,6 +38,13 @@ function ageFromDob(dob) {
 // { allowed: false, reason } — reasons: no_channel, no_subscription,
 // coach_not_verified, needs_guardian.
 async function assertDmAllowed(base44, me, other) {
+  // A block in EITHER direction kills the channel — checked before anything else.
+  const [iBlocked, theyBlocked] = await Promise.all([
+    base44.asServiceRole.entities.Block.filter({ blocker_athlete_id: me.id, blocked_athlete_id: other.id }),
+    base44.asServiceRole.entities.Block.filter({ blocker_athlete_id: other.id, blocked_athlete_id: me.id }),
+  ]);
+  if (iBlocked[0] || theyBlocked[0]) return { allowed: false, reason: 'no_channel' };
+
   // Identify the coach side — a 1-on-1 channel ONLY exists coach↔subscriber.
   // Two non-coaches (e.g. adult gym-goer → minor athlete) have NO channel, ever.
   let coach, member;

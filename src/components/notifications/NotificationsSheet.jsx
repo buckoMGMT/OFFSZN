@@ -20,12 +20,12 @@ export default function NotificationsSheet({ open, onClose, notifications }) {
   if (!open) return null;
   return createPortal(
     <div className="fixed inset-0 z-[120] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
-      <div className="w-full max-w-lg rounded-t-2xl border-t border-l border-r animate-slide-up max-h-[80vh] overflow-y-auto"
-        style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+      <div className="glass-sheet w-full max-w-lg rounded-t-2xl animate-slide-up max-h-[80vh] overflow-y-auto"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
         onClick={e => e.stopPropagation()}>
-        <div className="sticky top-0 flex items-center justify-between px-5 py-4 border-b" style={{ background: 'var(--surface-0)', borderColor: 'var(--border-subtle)' }}>
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b glass-sheet" style={{ borderColor: 'var(--border-subtle)', borderTop: 'none', borderLeft: 'none', borderRight: 'none' }}>
           <h2 className="font-anton text-lg uppercase" style={{ color: 'var(--text-primary)' }}>Notifications</h2>
-          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

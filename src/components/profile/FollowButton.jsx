@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { UserPlus, UserCheck } from "lucide-react";
+import { isBlocked } from "@/lib/blocks";
 
 export default function FollowButton({ me, targetId, onChange }) {
   const [friends, setFriends] = useState(me?.friends || []);
   const [busy, setBusy] = useState(false);
   if (!me || !targetId || me.id === targetId) return null;
+  // No follow relationship with a blocked user (server also severs on block).
+  if (isBlocked(targetId)) return null;
 
   const following = friends.includes(targetId);
 

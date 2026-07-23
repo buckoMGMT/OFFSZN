@@ -1,7 +1,9 @@
 // Athlete onboarding path (§3): name → sport → season → goals → numbers →
 // equipment → limitations → BUILD reveal → first action. ~90 seconds.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { readDraft, saveDraft, clearDraft } from "@/lib/onboardingDraft";
+import { track } from "@/lib/analytics";
 import { computeTargets, ageFromDob } from "@/lib/macroEngine";
 import { validate, onboardingSchema } from "@/lib/validators";
 import { ProgressBar, StepShell, PrimaryButton, SkipButton, Chip, Field } from "@/components/onboarding/OnboardingUI";
@@ -28,7 +30,8 @@ const SEXES = [["male", "Male"], ["female", "Female"], ["unspecified", "Prefer n
 const TOTAL = 12; // account✓ + dob + role + 9 athlete steps
 
 export default function AthletePath({ dob, isMinor }) {
-  const [step, setStep] = useState(0);
+  const draft = readDraft();
+  const [step, setStep] = useState(draft.athleteStep ?? 0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [athlete, setAthlete] = useState(null);
@@ -36,14 +39,23 @@ export default function AthletePath({ dob, isMinor }) {
   // §1b — "sport" = existing athlete flow · "self" = general-fitness flow.
   // SAFETY (§1c): mode changes content and copy ONLY — age gate, minor macro
   // floors, and guardian gates apply identically on both paths.
-  const [mode, setMode] = useState("sport");
+  const [mode, setMode] = useState(draft.athleteMode ?? "sport");
   const [f, setF] = useState({
     display_name: "", sport: "", position: "", grade: "",
     season_status: "", goals: [], experience_level: "",
     biological_sex: "", weight_lbs: "", height_ft: "", height_in: "", goal_weight_lbs: "",
     training_days: 5, equipment_access: "", has_limitations: null, limitations_note: "",
+    ...(draft.athleteForm || {}),
   });
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
+
+  // Steps 7–8 (reveal/first-action) run post-create — never resumed from draft.
+  useEffect(() => {
+    if (step < 7) saveDraft({ athleteStep: step, athleteMode: mode, athleteForm: f });
+  }, [step, mode, f]);
+
+  // Funnel: step views (3.1)
+  useEffect(() => { track.onboardingStepViewed({ path: "athlete", step, mode }); }, [step, mode]);
 
   const GOALS = [
     ["starting_spot", "Earn the starting spot"],
@@ -108,6 +120,7 @@ export default function AthletePath({ dob, isMinor }) {
         ? await base44.entities.Athlete.update(existing[0].id, payload)
         : await base44.entities.Athlete.create(payload);
       setAthlete(rec); setTargets(t);
+      clearDraft(); // profile saved — the draft has done its job
       base44.analytics.track({ eventName: "onboarding_completed", properties: {
         role: "athlete", sport: payload.sport, season_status: payload.season_status,
         is_minor: !!isMinor, training_days: f.training_days,
@@ -123,7 +136,7 @@ export default function AthletePath({ dob, isMinor }) {
 
   return (
     <>
-      <div className="px-5 pt-5" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
+      <div className="px-5" style={{ maxWidth: 480, margin: "0 auto", width: "100%", paddingTop: "calc(1.25rem + env(safe-area-inset-top))" }}>
         <ProgressBar filled={3 + step} total={TOTAL} />
       </div>
 
@@ -280,7 +293,7 @@ export default function AthletePath({ dob, isMinor }) {
             <PrimaryButton onClick={saveAndBuild} disabled={saving}>
               {saving ? "Building…" : "Build my OFFSZN"}
             </PrimaryButton>
-            <SkipButton onClick={() => { set("has_limitations", false); saveAndBuild(); }} />
+            <SkipButton onClick={() => { track.onboardingStepSkipped({ path: "athlete", step }); set("has_limitations", false); saveAndBuild(); }} />
           </div>
         </StepShell>
       )}

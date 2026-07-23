@@ -64,7 +64,7 @@ export default function FriendsSheet({ open, onClose, athlete, onUpdated }) {
               Friends {friends.length > 0 && `(${friends.length})`}
             </h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
+          <button onClick={onClose} className="p-1.5 rounded" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }} aria-label="Close">
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { Trophy, Zap, Flame, Star } from 'lucide-react';
+import { hapticSuccess } from '@/lib/native';
 
 const NotifierContext = createContext();
 
@@ -102,6 +103,7 @@ export function MilestoneNotifierProvider({ children }) {
 
     const notification = { id: Date.now() + Math.random(), ...getMilestoneMessage(type, value) };
     setQueue(q => [...q, notification]);
+    hapticSuccess(); // native success tap on every milestone (streak, points, PR)
 
     // Try browser notification too (bonus, non-blocking)
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {

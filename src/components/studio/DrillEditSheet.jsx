@@ -78,7 +78,7 @@ export default function DrillEditSheet({ open, onClose, drill, athlete, onSaved 
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-anton text-lg uppercase" style={{ color: "var(--text-primary)" }}>{isNew ? "New Drill" : "Edit Drill"}</h2>
-          <button onClick={onClose} className="p-1.5 rounded" style={{ background: "var(--surface-1)", border: "1px solid var(--border-subtle)" }}>
+          <button onClick={onClose} className="p-1.5 rounded" style={{ background: "var(--surface-1)", border: "1px solid var(--border-subtle)" }} aria-label="Close">
             <X size={16} style={{ color: "var(--text-secondary)" }} />
           </button>
         </div>

@@ -191,8 +191,12 @@ export default function Register() {
           <Checkbox checked={agreed} onToggle={() => setAgreed(a => !a)} />
           <span className="text-xs leading-snug" style={{ color: 'var(--text-tertiary)' }}>
             I am at least <span style={{ color: 'var(--text-secondary)' }}>13 years old</span> and agree to the{" "}
-            <span style={{ color: 'var(--text-secondary)' }}>Terms of Service</span> and{" "}
-            <span style={{ color: 'var(--text-secondary)' }}>Privacy Policy</span>.
+            <a href="https://offsznapp.com/terms" target="_blank" rel="noopener noreferrer"
+               onClick={e => e.stopPropagation()}
+               style={{ color: 'var(--text-secondary)', textDecoration: 'underline' }}>Terms of Service</a> and{" "}
+            <a href="https://offsznapp.com/privacy" target="_blank" rel="noopener noreferrer"
+               onClick={e => e.stopPropagation()}
+               style={{ color: 'var(--text-secondary)', textDecoration: 'underline' }}>Privacy Policy</a>.
             This app is for athletic performance tracking only — not medical advice.
           </span>
         </label>

@@ -6,7 +6,7 @@ import AthleteProfileSheet from "@/components/profile/AthleteProfileSheet";
 import PostCard from "@/components/feed/PostCard";
 import ClanFeed from "@/components/feed/ClanFeed";
 import PageLabel from "@/components/ui/PageLabel";
-import PlayDiagram from "@/components/ui/PlayDiagram";
+import EmptyState from "@/components/ui/EmptyState";
 import StampButton from "@/components/ui/StampButton";
 import SocialProofLine from "@/components/feed/SocialProofLine";
 import PullToRefresh from "@/components/layout/PullToRefresh";
@@ -15,6 +15,7 @@ import { StaggerList } from "@/lib/motion.jsx";
 import { track } from "@/lib/analytics";
 import { validate, postSchema } from "@/lib/validators";
 import useTabState from "@/lib/useTabState";
+import { loadBlockedIds, getBlockedIds, onBlocksChanged } from "@/lib/blocks";
 
 // Moderation decision (§3): media posts are held for review before public
 // visibility; text-only posts publish immediately with moderator post-review.
@@ -35,6 +36,13 @@ export default function Feed() {
   const [profileAthlete, setProfileAthlete] = useState(null);
   const [postType, setPostType] = useState("achievement");
   const [showPaywall, setShowPaywall] = useState(false);
+  const [blockedIds, setBlockedIds] = useState(() => getBlockedIds());
+
+  // Blocked-user filtering — load once, refilter live after a block.
+  useEffect(() => {
+    loadBlockedIds().then(setBlockedIds);
+    return onBlocksChanged(setBlockedIds);
+  }, []);
 
   const load = useCallback(async () => {
     const [athleteList, postList] = await Promise.all([
@@ -92,6 +100,7 @@ export default function Feed() {
   const visiblePosts = posts.filter(post => {
     // Pending/rejected posts are visible only to their author — never a scary error.
     const mine = post.athlete_id === athlete?.id;
+    if (blockedIds.has(post.athlete_id)) return false;
     if ((post.status || "approved") !== "approved" && !mine) return false;
     if (feedFilter === "friends") {
       return (athlete?.friends || []).includes(post.athlete_id) || mine;
@@ -250,33 +259,15 @@ export default function Feed() {
           </div>
         )}
 
-        {/* Empty */}
+        {/* Empty — §5 EmptyState + §7 Hick's: one clear action */}
         {feedFilter !== "clan" && !loading && posts.length === 0 && (
-          /* §5 EmptyState + §7 Hick's: one clear action */
-          <div className="flex flex-col items-center justify-center py-16 text-center px-5">
-            <PlayDiagram size={130} />
-            <p style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-xl)', color: 'var(--text-primary)', textTransform: 'uppercase', marginTop: 16, marginBottom: 8 }}>
-              The Field's Empty.
-            </p>
-            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', maxWidth: '32ch' }}>
-              Log your first win. The board doesn't fill itself.
-            </p>
-          </div>
+          <EmptyState title="The Field's Empty." body="Log your first win. The board doesn't fill itself." />
         )}
 
         {/* Friends tab, nobody followed yet — clear path, not a blank wall */}
         {feedFilter === "friends" && !loading && posts.length > 0 && visiblePosts.length === 0 && (
-          <div className="flex flex-col items-center text-center py-12 px-5">
-            <p style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 'var(--text-xl)', color: 'var(--text-primary)', textTransform: 'uppercase', marginBottom: 8 }}>
-              No Friends Yet.
-            </p>
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)', maxWidth: '32ch' }}>
-              Follow athletes and their wins land here.
-            </p>
-            <button onClick={() => setShowSearch(true)} className="btn-secondary">
-              <Search size={13} /> Find Athletes
-            </button>
-          </div>
+          <EmptyState title="No Friends Yet." body="Follow athletes and their wins land here."
+            action="Find Athletes" onAction={() => setShowSearch(true)} />
         )}
 
         {/* Posts */}
