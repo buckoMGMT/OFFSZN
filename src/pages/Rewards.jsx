@@ -130,7 +130,10 @@ export default function Rewards() {
   const [redemptions, setRedemptions] = useState([]);
   const [referrals, setReferrals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useTabState("rewards.tab", "store");
+  const [tab, setTab] = useTabState("rewards.tab", STORE_LIVE ? "store" : "howto");
+  // Store tab is fully hidden while STORE_LIVE is false — no "Coming Soon" surface.
+  // A stale persisted "store" selection falls back to Earn.
+  const activeTab = !STORE_LIVE && tab === "store" ? "howto" : tab;
   const [filter, setFilter] = useState("all");
   const [redeemTarget, setRedeemTarget] = useState(null);
   // Athlete-picked reward goal — progress bar + copy track THEIR target
@@ -243,7 +246,7 @@ export default function Rewards() {
         {/* Tabs */}
         <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
           {[
-            { id: "store", label: "Store" },
+            ...(STORE_LIVE ? [{ id: "store", label: "Store" }] : []),
             { id: "referrals", label: "Recruit" },
             { id: "history", label: "My Orders" },
             { id: "howto", label: "Earn" },
@@ -251,8 +254,8 @@ export default function Rewards() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex-1 py-2 font-elite text-[10px] uppercase tracking-widest"
               style={{
-                color: tab === t.id ? 'var(--accent)' : 'var(--text-tertiary)',
-                borderBottom: tab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
+                color: activeTab === t.id ? 'var(--accent)' : 'var(--text-tertiary)',
+                borderBottom: activeTab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
               }}>
               {t.label}
             </button>
@@ -262,24 +265,27 @@ export default function Rewards() {
 
       <div className="px-4 py-4">
 
-        {/* STORE TAB — hidden until merch & rewards are ready to fulfill */}
-        {tab === "store" && (
-          <div className="text-center py-16">
-            <Package size={40} style={{ color: 'var(--text-tertiary)' }} className="mx-auto mb-4" />
-            <h3 className="font-anton text-xl uppercase mb-2" style={{ color: 'var(--text-primary)' }}>Store Coming Soon</h3>
-            <p className="font-work text-sm max-w-xs mx-auto" style={{ color: 'var(--text-secondary)' }}>
-              We're building out real rewards worth stacking points for. Keep earning — your balance is safe and waiting.
-            </p>
+        {/* STORE TAB — tab itself is hidden until STORE_LIVE flips true */}
+        {STORE_LIVE && activeTab === "store" && (
+          <div className="grid grid-cols-2 gap-3">
+            {sorted.map(item => (
+              <RewardCard key={item.id} item={item} athletePoints={points} onRedeem={setRedeemTarget} />
+            ))}
+            {sorted.length === 0 && (
+              <div className="col-span-2">
+                <EmptyState icon={Package} title="Stocking The Shelves." body="Rewards are being stocked — check back soon." />
+              </div>
+            )}
           </div>
         )}
 
         {/* REFERRALS TAB */}
-        {tab === "referrals" && (
+        {activeTab === "referrals" && (
           <ReferralPanel athlete={athlete} referrals={referrals} onReferred={load} />
         )}
 
         {/* HISTORY TAB */}
-        {tab === "history" && (
+        {activeTab === "history" && (
           <div>
             {redemptions.length === 0 ? (
               <EmptyState icon={Package} title="No Orders Yet" body="Keep earning and redeem your first reward." />
@@ -310,7 +316,7 @@ export default function Rewards() {
         )}
 
         {/* HOW TO EARN TAB */}
-        {tab === "howto" && (
+        {activeTab === "howto" && (
           <div className="space-y-4">
             <div className="rounded border p-4" style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}>
               <h2 className="font-anton text-xl uppercase mb-1" style={{ color: 'var(--theme-ink)' }}>The Point Economy</h2>
