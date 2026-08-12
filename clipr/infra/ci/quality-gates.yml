@@ -82,6 +82,9 @@ jobs:
       - name: Eval harness must execute
         run: python -m packages.ai.cli_eval
 
+      - name: Queue load run — fails if work is lost, duplicated or stranded
+        run: python -m packages.pipeline.loadtest --jobs 1200 --workers 8 --seconds 120
+
       - name: Lint
         run: ruff check packages tests
 

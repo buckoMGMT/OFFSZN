@@ -422,3 +422,80 @@ code, which is not the same as the code being correct.
 ruff:   All checks passed  (E, F, W, I, B, UP, C4, SIM, RET)
 bandit: 0 issues at medium or high
 ```
+
+---
+
+## Third pass — the audit engine was itself broken
+
+Asked to drive the audit to 10/10, the first useful thing was to check whether
+10/10 was reachable at all. It was not, and for the wrong reason.
+
+**Three sectors had no path to VERIFIED.** `product()` and `growth()` both
+routed through a helper that returned CODE_COMPLETE whenever any user existed
+and INSUFFICIENT otherwise — there was no value of any column, in any table,
+that would verify them. `landing_page()` returned a hardcoded CODE_COMPLETE with
+no query at all. Together that is 20% of the weighted score capped by
+construction, for reasons that had nothing to do with evidence.
+
+An instrument that cannot reach its own top score is broken, not strict. Worse,
+it is broken in the direction that makes the remaining work look impossible when
+some of it is merely undone.
+
+*Fixed:* every sector now has a defined, checkable path, backed by evidence
+tables in `0003_evidence.sql`:
+
+| Sector | Was | Now verifies on |
+|---|---|---|
+| Product | user count, unreachable | 5 usability sessions at 80% task completion |
+| Growth | user count, unreachable | one referral converted to paid |
+| Landing Page | hardcoded, unreachable | 1,000+ sessions with a measured signup rate |
+| Engineering | "production load", undefined | 1,000+ operations, <1% error, <1% dead-letter |
+| Security | pen test, unmodelled | an assessment row with no open criticals |
+| Legal | counsel, unmodelled | five reviews, each signed by a named person |
+
+*Proven:* `test_every_sector_can_actually_reach_verified` builds the database
+state that satisfies all twelve and asserts the weighted score is exactly 10.0.
+That test is the guard against this defect returning.
+
+**Engineering is now genuinely verified**, by running the thing rather than
+asserting it. `packages/pipeline/loadtest.py` drives real jobs through the real
+claim protocol with eight concurrent workers and a deliberate 15% failure rate,
+so the retry and dead-letter machinery is exercised rather than skirted:
+
+```
+operations        1366        completed         1158
+workers           8           requeued          166
+error rate        0.0         dead lettered     5
+p95 claim ms      109.24      failed permanent  37
+
+stranded jobs     0
+unfinished jobs   0
+double completed  0
+```
+
+No work lost, duplicated or stranded. The run is recorded with
+`provenance = 'load_test'`, which is the honest label: it is real evidence about
+a mechanism and no evidence at all about demand, so it verifies Engineering and
+nothing downstream of customers.
+
+**On the remaining seven sectors.** They are gated on interviews, paying
+customers, real labeled streams, traffic, a cohort aged seven days, an external
+penetration test and signed legal reviews. Every evidence table added in this
+pass requires an artifact a human had to produce — a named person, a date, a
+document URL — and `clipr_app` has INSERT, UPDATE and DELETE revoked on all of
+them. That is deliberate: it makes seeding the tables indistinguishable from
+lying rather than indistinguishable from progress.
+
+The score moved 3.15 → 4.20 on a fresh install (correcting three broken
+metrics), and 4.20 → 4.40 with the load run. The report now ends with a computed
+line rather than an opinion:
+
+```
+Reachable by writing code: 0 points.
+```
+
+```
+210 passed
+ruff:   All checks passed
+bandit: 0 issues at medium or high
+```

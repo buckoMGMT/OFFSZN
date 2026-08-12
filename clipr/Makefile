@@ -34,6 +34,9 @@ security:  ## Static security scan
 eval:      ## Run the detection eval harness
 	$(PYTHON) -m packages.ai.cli_eval
 
+loadtest:  ## Drive real jobs through the queue and record the run
+	$(PYTHON) -m packages.pipeline.loadtest --jobs 1200 --workers 8
+
 check: lint security test eval  ## Everything CI enforces
 
 margins:   ## Gross margin per tier, self-hosted ASR vs a hosted speech API

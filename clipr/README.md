@@ -14,7 +14,7 @@ clipr/
 ├── STRATEGY.md                   market teardown, pricing rationale, app decision
 ├── REVIEW.md                     defect report on the previous build, with fixes
 ├── packages/
-│   ├── db/migrations/            schema; RLS is a separate, verified migration
+│   ├── db/migrations/            schema, RLS, and the evidence tables
 │   ├── auth/                     passwords, tokens, workspace context
 │   ├── ai/                       detector, eval harness, reframing, safety
 │   ├── billing/                  plans, entitlements, overage, margin model
@@ -22,7 +22,7 @@ clipr/
 │   ├── pipeline/                 job queue: leases, retries, dead-letter
 │   ├── observability/            unit economics + budget guard
 │   └── audit/                    readiness scoring from evidence
-├── tests/                        198 tests, ~5s
+├── tests/                        210 tests, ~5s
 └── infra/                        CI gates, backup + restore verification
 ```
 
@@ -61,9 +61,11 @@ workspace isolation, because a table owner bypasses RLS.
 | `alg=none` and refresh-as-access token forgeries are rejected | tested |
 | A demoted admin loses access immediately, not at token expiry | tested |
 | A fixture dataset cannot verify AI quality or gate a deploy | tested |
+| The queue loses, duplicates or strands no work under 8 concurrent workers | measured: 1,366 operations, 0 errors |
+| Every audit sector has a reachable path to verified | tested |
 
 ```
-198 passed in 5.34s
+210 passed in 5.31s
 ruff:   All checks passed
 bandit: 0 issues at medium or high
 ```
@@ -89,12 +91,33 @@ it, so neither is repeated here.
 
 ## Why the audit will not read 10/10
 
-Because it cannot, and a version that could would be worthless. Of the twelve
-weighted sectors, seven are gated on evidence no code produces: interviews,
-users, cohorts, revenue, counsel, a penetration test, real labeled streams.
-Every sector where writing code was the blocker is now built, tested and
-lint-clean — that is what moves a sector to 6. The last four points are earned
-by shipping to people.
+Because it cannot from here, and a version that could would be worthless.
+
+Every sector *can* reach 10 — `test_every_sector_can_actually_reach_verified`
+constructs the database state that verifies all twelve and asserts the score is
+exactly 10.0, so the bar is real rather than decorative. What it takes is:
+
+| Sector | Needs | Who |
+|---|---|---|
+| Problem & Market | 10 recorded interviews | founder |
+| Product | 5 usability sessions, 80% task completion | founder |
+| AI Quality | F1 ≥ 0.70 over 50+ moments labeled from real streams | labeling |
+| Offer & Business | one active paid subscription | market |
+| AI Economics | measured cost < $0.10 per monitored hour in production | market |
+| Analytics | 1,000+ events across 20+ types | market |
+| Landing Page | 1,000+ sessions with a measured signup rate | market |
+| Growth | one referral converted to paid | market |
+| Retention | a cohort of 20+ at D7 ≥ 40% | time |
+| Security | external penetration test, no open criticals | vendor |
+| Legal | five signed reviews | counsel |
+| Engineering | ✅ verified — 1,366 operations, 0 errors, 0.42% dead-letter | — |
+
+Seeding those tables to move the number would be fabricating interviews that
+never happened and subscriptions nobody paid for. The engine is built to make
+that indistinguishable from lying rather than indistinguishable from progress:
+every evidence table requires an artifact a human had to produce — a named
+person, a date, a document URL — and the application role cannot write to any
+of them.
 
 ## What cannot be known yet
 
@@ -112,8 +135,19 @@ These are not gaps in the code. No amount of building closes them.
 `make audit` computes a readiness score from evidence in the database. A
 code-complete sector scores 6 out of 10 and there is no writable score column
 anywhere in the schema, so the remaining 4 points cannot be argued into
-existence. On a fresh install it reports **3.15 / 10** with 0 of 12 sectors verified,
-which is the correct answer for a product with no users.
+existence.
+
+A fresh install reports **4.20 / 10**. After `make loadtest`, **4.40** — the
+queue run is real evidence about a mechanism, so it verifies Engineering and
+nothing downstream of customers. The report ends with the line that matters:
+
+```
+Reachable by writing code: 0 points.
+The rest needs people, money, time or counsel.
+```
+
+That number is computed, not asserted. When it is above zero, there is
+engineering left to do; it is currently zero.
 
 ## Two things worth knowing before changing anything
 
