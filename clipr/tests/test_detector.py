@@ -234,3 +234,63 @@ def test_sanitizer_leaves_ordinary_speech_alone():
 def test_empty_stream_returns_empty(duration):
     result = make_detector([]).detect("x", duration_seconds=duration)
     assert result.moments == [] and result.windows_examined == 0
+
+
+# --- bugs the end-to-end demo found that the unit tests could not -----------
+
+def realistic_envelope(seconds: int, per_second: int = 43,
+                       loud_at: tuple[int, ...] = ()) -> list[float]:
+    """An envelope shaped like real ffmpeg output.
+
+    astats `reset=N` counts audio *frames*, not seconds, so a real run returns
+    roughly 43 samples per second at 44.1 kHz. Every earlier test in this file
+    injected one sample per second -- which matched the code's assumption
+    instead of ffmpeg's behaviour, so the mismatch was invisible until the
+    pipeline ran on actual media.
+    """
+    out = []
+    for second in range(seconds):
+        level = -12.0 if any(abs(second - t) < 12 for t in loud_at) else -45.0
+        out.extend([level] * per_second)
+    return out
+
+
+def test_the_envelope_sample_rate_is_derived_not_assumed():
+    """The bug: with ~43 samples/second and a 1/second assumption, a 0-30s
+    window read the first 0.7 seconds of the stream. That is silent on almost
+    any source, so every window scored zero and the detector returned nothing
+    at all -- on a stream with three obvious moments in it."""
+    envelope = realistic_envelope(600, per_second=43, loud_at=(300,))
+    result = MomentDetector(loudness_provider=lambda _: envelope).detect(
+        "x", duration_seconds=600)
+    assert result.moments, "detector found nothing on a stream with a loud section"
+    top = result.moments[0]
+    assert top.start <= 300 <= top.end
+
+
+@pytest.mark.parametrize("per_second", [1, 10, 43, 100])
+def test_detection_is_stable_across_envelope_resolutions(per_second):
+    """Whatever ffmpeg's frame size works out to, the same moment must win."""
+    envelope = realistic_envelope(600, per_second=per_second, loud_at=(300,))
+    result = MomentDetector(loudness_provider=lambda _: envelope).detect(
+        "x", duration_seconds=600)
+    assert result.moments
+    assert result.moments[0].start <= 300 <= result.moments[0].end
+
+
+def test_a_silent_window_with_an_exploding_chat_is_not_discarded():
+    """The second bug the demo exposed. The silence gate returned 0.0 before
+    chat was ever considered, so a streamer reacting wordlessly -- reading a
+    donation, watching a play land -- was thrown away. Those are moments."""
+    quiet = realistic_envelope(600, per_second=43)          # nothing loud at all
+    chat = [{"t": 1.0}] * 10 + [{"t": 300.0 + i * 0.05} for i in range(300)]
+    result = MomentDetector(loudness_provider=lambda _: quiet).detect(
+        "x", duration_seconds=600, chat_events=chat)
+    assert result.moments, "silent window with a chat explosion was discarded"
+    assert result.moments[0].start <= 305 <= result.moments[0].end
+
+
+def test_a_silent_window_with_no_crowd_signal_is_still_discarded():
+    """The gate still has to do its job: dead air with a dead chat is dead air."""
+    d = MomentDetector(loudness_provider=lambda _: [])
+    assert d._cheap_score(Window(start=0, end=30, silence_ratio=0.95)) == 0.0

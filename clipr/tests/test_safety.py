@@ -86,12 +86,29 @@ def test_a_block_flag_stops_autopilot():
     assert result.blocks_autopilot
 
 
-def test_a_high_flag_does_not_stop_autopilot_by_itself():
+def test_a_high_copyright_flag_does_not_stop_autopilot_by_itself():
     """High means "a human should see this", not "we decide for you". We are not
     in a position to adjudicate fair use."""
     result = screen(music_matches=[{"title": "S", "confidence": 0.9}])
     assert not result.blocks_autopilot
     assert result.worst is Severity.HIGH
+
+
+def test_high_pii_does_stop_autopilot():
+    """The exception to the rule above, and the reason the rule cannot be
+    stated purely in terms of severity.
+
+    Holding a clean clip costs the creator a few minutes. Auto-posting their
+    phone number to three platforms cannot be undone by deleting the post.
+    """
+    result = screen(transcript_text="call me on 555-123-4567 any time")
+    assert result.of_type("pii")
+    assert result.blocks_autopilot
+
+
+def test_an_address_in_a_clip_is_not_published_unattended():
+    result = screen(transcript_text="come by 1247 Oakwood Avenue after the stream")
+    assert result.blocks_autopilot
 
 
 def test_clean_content_screens_clean():

@@ -33,6 +33,64 @@ from pathlib import Path
 IOU_MATCH_THRESHOLD = 0.5
 PUBLISHABLE_SCORE = 80.0
 
+# Publishable Rate: of every 100 clips generated, how many does the creator say
+# are worth posting. It is the single metric that decides whether this product
+# is worth using -- ahead of latency, cost, or anything on the readiness audit.
+# A tool that surfaces four good clips out of five replaces a job. One that
+# surfaces one out of five *is* the job, with extra steps.
+PUBLISHABLE_BANDS = (
+    (0.85, "killer", "Creators would stop reviewing and let it run."),
+    (0.70, "excellent", "Review becomes a formality."),
+    (0.50, "good", "Worth the subscription on its own."),
+    (0.30, "promising", "Useful, but the creator is still doing real work."),
+    (0.00, "bad", "The creator is sorting our mistakes. That is not a product."),
+)
+
+
+def publishable_band(rate: float) -> tuple[str, str]:
+    """Name the band a publishable rate falls into.
+
+    Bands rather than a single pass/fail threshold, because the interesting
+    question early is which direction it is moving, not whether it cleared a
+    line somebody picked.
+    """
+    for floor, name, meaning in PUBLISHABLE_BANDS:
+        if rate >= floor:
+            return name, meaning
+    return "bad", PUBLISHABLE_BANDS[-1][2]
+
+
+def review_efficiency(publishable_rate: float, clips_per_hour: float,
+                      seconds_per_review: float) -> dict:
+    """The number that actually describes the experience.
+
+    Publishable rate on its own can be gamed by generating fewer, safer clips.
+    What a creator feels is: how many keepers did I get, and how long did it
+    take to find them. Eight clips, six wanted, sixty seconds of reviewing is a
+    different product from two clips, two wanted, and nothing to choose from.
+    """
+    keepers = clips_per_hour * publishable_rate
+    review_seconds = clips_per_hour * seconds_per_review
+    return {
+        "keepers_per_stream_hour": round(keepers, 2),
+        "review_seconds_per_stream_hour": round(review_seconds, 1),
+        "seconds_of_review_per_keeper": (
+            round(review_seconds / keepers, 1) if keepers else None
+        ),
+        # Three conditions, because any one alone is gameable. Enough keepers
+        # to be worth opening; little enough reviewing to do after a stream;
+        # and a hit rate high enough that the creator is choosing rather than
+        # sorting. At 30% publishable they are still doing the job themselves,
+        # however few seconds it takes.
+        "verdict": (
+            "worth it"
+            if keepers >= 1.5 and review_seconds <= 90 and publishable_rate >= 0.5
+            else "creator is still doing the sorting"
+            if publishable_rate < 0.5
+            else "too much reviewing for what it returns"
+        ),
+    }
+
 # A regression gate that trips on noise gets switched off within a month.
 MAX_F1_DROP = 0.05
 MAX_PUBLISHABLE_DROP = 0.10

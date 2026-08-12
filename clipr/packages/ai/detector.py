@@ -215,7 +215,7 @@ class MomentDetector:
         if not windows:
             return DetectionResult([], 0, 0, 0.0, {})
 
-        self._apply_audio(windows, media_path)
+        self._apply_audio(windows, media_path, duration_seconds)
         self._apply_chat(windows, chat_events or [], duration_seconds)
         self._apply_native_clips(windows, native_clip_events or [])
         for w in windows:
@@ -256,7 +256,9 @@ class MomentDetector:
             t += HOP_SECONDS
         return out
 
-    def _apply_audio(self, windows: list[Window], media_path: str) -> None:
+    def _apply_audio(
+        self, windows: list[Window], media_path: str, duration_seconds: float
+    ) -> None:
         try:
             envelope = self.loudness_provider(media_path)
         except (RuntimeError, subprocess.TimeoutExpired, FileNotFoundError):
@@ -266,8 +268,21 @@ class MomentDetector:
         if not envelope:
             return
 
+        # Derive the sample rate rather than assuming one sample per second.
+        # astats `reset=N` counts audio *frames*, not seconds, so a real ffmpeg
+        # run returns ~43 samples/second at 44.1 kHz. Assuming 1/s made every
+        # window read the first fraction of a second of the stream, which is
+        # silent on almost any source -- so every window scored zero, nothing
+        # was promoted, and the detector found nothing at all. The unit tests
+        # missed it because the fake envelope matched the assumption instead of
+        # ffmpeg's behaviour.
+        per_second = len(envelope) / duration_seconds if duration_seconds > 0 else 1.0
+        if per_second <= 0:
+            return
+
         for w in windows:
-            lo, hi = int(w.start), max(int(w.start) + 1, int(w.end))
+            lo = int(w.start * per_second)
+            hi = max(lo + 1, int(w.end * per_second))
             slice_ = envelope[lo:hi]
             if not slice_:
                 continue
@@ -313,7 +328,12 @@ class MomentDetector:
         matter (a chat spike must outrank a quiet window) so a future tune has
         something to break.
         """
-        if w.silence_ratio > 0.8:
+        # A quiet stretch with chat going wild is a real moment -- the streamer
+        # reacting wordlessly, or reading something. Vetoing on silence alone
+        # discarded exactly those, so the gate now only applies when the free
+        # signals agree there is nothing there.
+        crowd = _chat_component(w.chat_velocity) + min(1.0, w.native_clips / 3.0)
+        if w.silence_ratio > 0.8 and crowd < 0.15:
             return 0.0
         score = (
             28 * min(1.0, w.loudness)

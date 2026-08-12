@@ -26,7 +26,6 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 BACKUP_BUCKET = os.environ.get("BACKUP_BUCKET", "clipr-backups")
@@ -45,18 +44,36 @@ class BackupRecord:
     created_at: str
 
 
+def _tool(name: str) -> str:
+    """Resolve a Postgres client binary to an absolute path.
+
+    Two reasons, and neither is ceremony. A bare name is resolved against
+    whatever PATH the process inherited, which on a backup host is an
+    unnecessary thing to trust. And a missing binary otherwise surfaces as a
+    bare FileNotFoundError from deep inside a pipe, at 3am, on the one night
+    the restore is being attempted for real.
+    """
+    path = shutil.which(name)
+    if path is None:
+        raise RuntimeError(
+            f"{name} not found on PATH. Backups need the Postgres client tools "
+            f"installed and matching the server's major version."
+        )
+    return path
+
+
 def _run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
     """Always a list, never shell=True. Arguments here include a DSN that can
     contain a password."""
     return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw)
 
 
-def daily_backup(dsn: str = "", *, out_dir: Optional[Path] = None) -> BackupRecord:
+def daily_backup(dsn: str = "", *, out_dir: Path | None = None) -> BackupRecord:
     dsn = dsn or DATABASE_URL
     if not dsn:
         raise RuntimeError("DATABASE_URL is not set")
 
-    stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.datetime.now(datetime.UTC).strftime("%Y%m%dT%H%M%SZ")
     out_dir = out_dir or Path(tempfile.gettempdir())
     path = out_dir / f"clipr_{stamp}.dump.gz"
 
@@ -66,7 +83,7 @@ def daily_backup(dsn: str = "", *, out_dir: Optional[Path] = None) -> BackupReco
     # zero-byte file that looks like a successful backup.
     with gzip.open(path, "wb") as fh:
         proc = subprocess.Popen(
-            ["pg_dump", "--format=custom", "--no-owner", "--no-privileges", dsn],
+            [_tool("pg_dump"), "--format=custom", "--no-owner", "--no-privileges", dsn],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
         shutil.copyfileobj(proc.stdout, fh)
@@ -86,7 +103,7 @@ def daily_backup(dsn: str = "", *, out_dir: Optional[Path] = None) -> BackupReco
         filename=path.name,
         sha256=digest.hexdigest(),
         size_bytes=path.stat().st_size,
-        created_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        created_at=datetime.datetime.now(datetime.UTC).isoformat(),
     )
 
 
@@ -104,14 +121,14 @@ def upload(record: BackupRecord, local_path: Path) -> None:
 def verify_restore(archive: Path, *, admin_dsn: str = "") -> dict:
     """Restore into a scratch database and check it actually contains data."""
     admin_dsn = admin_dsn or DATABASE_URL
-    scratch = "clipr_restore_" + datetime.datetime.now(datetime.timezone.utc).strftime("%H%M%S%f")
+    scratch = "clipr_restore_" + datetime.datetime.now(datetime.UTC).strftime("%H%M%S%f")
     base = admin_dsn.rsplit("/", 1)[0]
 
-    _run(["createdb", "-d", f"{base}/postgres", scratch])
+    _run([_tool("createdb"), "-d", f"{base}/postgres", scratch])
     try:
         with gzip.open(archive, "rb") as fh:
             proc = subprocess.Popen(
-                ["pg_restore", "--no-owner", "--no-privileges",
+                [_tool("pg_restore"), "--no-owner", "--no-privileges",
                  "--dbname", f"{base}/{scratch}"],
                 stdin=subprocess.PIPE, stderr=subprocess.PIPE,
             )
@@ -121,18 +138,18 @@ def verify_restore(archive: Path, *, admin_dsn: str = "") -> dict:
             code = proc.wait()
 
         tables = int(_run([
-            "psql", f"{base}/{scratch}", "-X", "-A", "-t", "-c",
+            _tool("psql"), f"{base}/{scratch}", "-X", "-A", "-t", "-c",
             "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'",
         ]).stdout.strip())
 
         present = _run([
-            "psql", f"{base}/{scratch}", "-X", "-A", "-t", "-c",
+            _tool("psql"), f"{base}/{scratch}", "-X", "-A", "-t", "-c",
             "SELECT string_agg(table_name, ',') FROM information_schema.tables "
             "WHERE table_schema='public'",
         ]).stdout.strip().split(",")
 
         plans = int(_run([
-            "psql", f"{base}/{scratch}", "-X", "-A", "-t", "-c",
+            _tool("psql"), f"{base}/{scratch}", "-X", "-A", "-t", "-c",
             "SELECT count(*) FROM plan_limits",
         ]).stdout.strip())
 
@@ -146,10 +163,10 @@ def verify_restore(archive: Path, *, admin_dsn: str = "") -> dict:
             "missing_required_tables": missing,
             "plan_rows": plans,
             "pg_restore_stderr": stderr.strip()[:2000],
-            "verified_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "verified_at": datetime.datetime.now(datetime.UTC).isoformat(),
         }
     finally:
-        _run(["dropdb", "--if-exists", "-d", f"{base}/postgres", scratch])
+        _run([_tool("dropdb"), "--if-exists", "-d", f"{base}/postgres", scratch])
 
 
 def policy() -> dict:

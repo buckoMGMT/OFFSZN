@@ -39,13 +39,34 @@ class Flag:
     detail: dict | None = None
 
 
+# Flag types that hold autopilot at HIGH, not only at BLOCK.
+#
+# The general rule is that HIGH means "a human should look at this" rather than
+# "we have decided for you" -- on a copyright match we are genuinely not in a
+# position to adjudicate fair use, and refusing to post is its own kind of
+# wrong answer.
+#
+# PII is not that kind of call, and treating it the same way was a mistake the
+# demo surfaced: a clip containing a phone number or a street address scored
+# HIGH and autopilot published it anyway. The asymmetry is that the two errors
+# are not comparable. Holding a clean clip for review costs the creator a few
+# minutes and they can post it themselves. Auto-posting someone's home address
+# to three platforms cannot be undone by deleting it, and the person harmed is
+# usually the customer.
+AUTOPILOT_HOLD_TYPES = frozenset({"pii"})
+
+
 @dataclass(frozen=True)
 class Screening:
     flags: list[Flag]
 
     @property
     def blocks_autopilot(self) -> bool:
-        return any(f.severity is Severity.BLOCK for f in self.flags)
+        return any(
+            f.severity is Severity.BLOCK
+            or (f.flag_type in AUTOPILOT_HOLD_TYPES and _ORDER[f.severity] >= _ORDER[Severity.HIGH])
+            for f in self.flags
+        )
 
     @property
     def worst(self) -> Severity | None:
