@@ -1,0 +1,450 @@
+<title>ClipR vs OpusClip</title>
+<style>
+/* Same broadcast-console identity as the ClipR pricing page. */
+:root{
+  --ground:#E8EAED; --panel:#F7F8F9; --raised:#FFFFFF; --sunken:#DDE0E4;
+  --line:#C6CBD1; --line-soft:#D8DCE1;
+  --tx:#12171D; --tx-2:#4A545F; --tx-3:#78838F;
+  --tally:#C6301B; --tally-glow:rgba(198,48,27,.16);
+  --signal:#0E7A8C; --signal-soft:rgba(14,122,140,.12);
+  --good:#1F7A4D; --warn:#9A6B00;
+  --them:#5B4A8A; --them-soft:rgba(91,74,138,.12);
+  --on-tally:#FFF6F4;
+  --shadow:0 1px 2px rgba(16,22,28,.08), 0 8px 24px -12px rgba(16,22,28,.22);
+  --grid:rgba(18,23,29,.05);
+  --f-display:"Helvetica Neue",Helvetica,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --f-body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:ui-monospace,"SF Mono","JetBrains Mono","Roboto Mono",Menlo,Consolas,monospace;
+  --w:1180px; --r:4px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A0D10; --panel:#11161B; --raised:#181F26; --sunken:#070A0C;
+    --line:#28323C; --line-soft:#1D252D;
+    --tx:#E7EBEF; --tx-2:#9AA6B2; --tx-3:#6B7883;
+    --tally:#FF4B32; --tally-glow:rgba(255,75,50,.22);
+    --signal:#3FC9DE; --signal-soft:rgba(63,201,222,.12);
+    --good:#4ADE9B; --warn:#E8B44A;
+    --them:#A995E8; --them-soft:rgba(169,149,232,.14);
+    --on-tally:#160604;
+    --shadow:0 1px 0 rgba(255,255,255,.03), 0 18px 40px -20px rgba(0,0,0,.9);
+    --grid:rgba(231,235,239,.045);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A0D10; --panel:#11161B; --raised:#181F26; --sunken:#070A0C;
+  --line:#28323C; --line-soft:#1D252D;
+  --tx:#E7EBEF; --tx-2:#9AA6B2; --tx-3:#6B7883;
+  --tally:#FF4B32; --tally-glow:rgba(255,75,50,.22);
+  --signal:#3FC9DE; --signal-soft:rgba(63,201,222,.12);
+  --good:#4ADE9B; --warn:#E8B44A;
+  --them:#A995E8; --them-soft:rgba(169,149,232,.14);
+  --on-tally:#160604;
+  --shadow:0 1px 0 rgba(255,255,255,.03), 0 18px 40px -20px rgba(0,0,0,.9);
+  --grid:rgba(231,235,239,.045);
+}
+
+*{box-sizing:border-box;}
+body{margin:0;background:var(--ground);color:var(--tx);font-family:var(--f-body);
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.03em;font-weight:700;}
+p{margin:0;}
+a{color:var(--signal);}
+:focus-visible{outline:2px solid var(--signal);outline-offset:3px;}
+.wrap{width:min(var(--w),calc(100% - 40px));margin-inline:auto;}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums;}
+
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--tx-3);display:flex;align-items:center;gap:8px;}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tally);
+  box-shadow:0 0 0 3px var(--tally-glow);flex:none;}
+
+header{padding:64px 0 34px;background:
+  linear-gradient(180deg,transparent,var(--ground) 88%),
+  repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 46px),
+  repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 46px);}
+h1{font-size:clamp(34px,5vw,54px);line-height:1.0;margin-top:18px;}
+.lede{margin-top:18px;color:var(--tx-2);font-size:17.5px;max-width:62ch;}
+
+section{padding:52px 0;border-top:1px solid var(--line-soft);}
+section h2{font-size:clamp(23px,3vw,31px);margin-top:12px;}
+section > .wrap > p{margin-top:14px;color:var(--tx-2);max-width:70ch;}
+
+/* callout */
+.note{border:1px solid var(--line);border-left:3px solid var(--warn);
+  background:var(--panel);border-radius:var(--r);padding:16px 18px;margin-top:22px;}
+.note strong{color:var(--tx);}
+.note p{color:var(--tx-2);font-size:14.5px;max-width:none;}
+.note p + p{margin-top:9px;}
+
+/* pipeline */
+.chain{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--line-soft);
+  border-radius:var(--r);overflow:hidden;margin-top:28px;}
+@media(max-width:1000px){.chain{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:620px){.chain{grid-template-columns:repeat(2,1fr);}}
+.node{padding:18px 15px 20px;background:var(--panel);border-right:1px solid var(--line-soft);}
+.node:last-child{border-right:none;}
+.node .n{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;
+  color:var(--signal);text-transform:uppercase;}
+.node h3{font-size:15px;margin-top:9px;letter-spacing:-.02em;}
+.node p{margin-top:6px;font-size:13px;color:var(--tx-2);line-height:1.45;}
+
+/* comparison table */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);margin-top:26px;
+  box-shadow:var(--shadow);}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:14.5px;}
+th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line-soft);
+  vertical-align:top;}
+thead th{background:var(--raised);font-family:var(--f-mono);font-size:10.5px;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--tx-3);font-weight:400;
+  position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line);}
+thead th.us{color:var(--tally);}
+thead th.them{color:var(--them);}
+tbody th{font-weight:600;color:var(--tx);width:24%;}
+td{color:var(--tx-2);width:38%;}
+td.us{background:var(--panel);color:var(--tx);}
+tbody tr.group th{background:var(--sunken);font-family:var(--f-mono);font-size:10.5px;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--tx-3);font-weight:400;}
+tbody tr.group td{background:var(--sunken);}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:none;}
+
+.tag{display:inline-block;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-right:6px;
+  vertical-align:1px;}
+.tag-win{background:var(--signal-soft);color:var(--signal);}
+.tag-them{background:var(--them-soft);color:var(--them);}
+.tag-src{background:transparent;border:1px solid var(--line);color:var(--tx-3);}
+
+/* honest columns */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:26px;}
+@media(max-width:860px){.cols{grid-template-columns:1fr;}}
+.card{background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r);
+  padding:20px;}
+.card.them-card{border-top:3px solid var(--them);}
+.card.us-card{border-top:3px solid var(--tally);}
+.card h3{font-size:17px;}
+.card ul{margin:14px 0 0;padding:0;display:grid;gap:10px;}
+.card li{list-style:none;padding-left:17px;position:relative;font-size:14px;color:var(--tx-2);
+  line-height:1.5;}
+.card li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;}
+.them-card li::before{background:var(--them);}
+.us-card li::before{background:var(--tally);}
+
+footer{padding:44px 0 56px;border-top:1px solid var(--line-soft);background:var(--panel);}
+.foot{font-family:var(--f-mono);font-size:11.5px;color:var(--tx-3);letter-spacing:.04em;
+  line-height:1.8;}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;}}
+</style>
+
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Rundown and comparison · August 2026</p>
+    <h1>ClipR, and where it actually<br>stands against OpusClip</h1>
+    <p class="lede">One is a shipping product used by iHeartMedia, Univision, Billboard and
+    HubSpot. The other is a production core with 265 passing tests and no users. This
+    compares them honestly, including the places the incumbent is simply further along.</p>
+  </div>
+</header>
+
+<!-- WHAT IT IS -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">What ClipR is</p>
+    <h2>An autonomous clip desk for live channels.</h2>
+    <p>It attaches to a stream the moment it goes live, ranks moments in real time, cuts
+    and captions the winners, and posts them to every account the creator owns — usually
+    before the stream has ended. The creator's involvement is optional and mobile: approve
+    or kill, on a phone, in the twenty minutes after they stop streaming.</p>
+
+    <p style="margin-top:16px;">The bet is narrow and specific. Clipping tools price by
+    the minute of source video you feed them, which suits a 40-minute podcast and punishes
+    a six-hour stream. ClipR meters monitored hours and published clips instead, so the
+    stream you threw away costs nothing and the clip you rejected is free.</p>
+
+    <div class="chain">
+      <div class="node"><span class="n">Ingest</span><h3>Watch live</h3>
+        <p>Attaches to the HLS feed and chat socket at go-live. Nothing to upload.</p></div>
+      <div class="node"><span class="n">Detect</span><h3>Find the spike</h3>
+        <p>Chat velocity, viewer clip presses and audio level fuse into one score — before
+        any transcription is paid for.</p></div>
+      <div class="node"><span class="n">Judge</span><h3>Rank the moment</h3>
+        <p>Only the top ~12% of windows reach transcription and the ranking model. Junk
+        never touches a GPU.</p></div>
+      <div class="node"><span class="n">Cut</span><h3>Frame and caption</h3>
+        <p>Speaker-tracked 9:16 reframe with a moving crop track, captions burned in the
+        same pass.</p></div>
+      <div class="node"><span class="n">Screen</span><h3>Check the rights</h3>
+        <p>Music, third-party footage, PII and duplicates flagged before publish. On every
+        plan, not just the top one.</p></div>
+      <div class="node"><span class="n">Publish</span><h3>Post, or hand off</h3>
+        <p>Native upload where the API allows it; a staged post and a push notification
+        where it doesn't.</p></div>
+    </div>
+
+    <div class="note">
+      <p><strong>What is actually built:</strong> the schema and workspace isolation, the
+      detection cascade, the eval harness and regression gate, plan and entitlement logic,
+      the job queue, publishing adapters, safety screening, the cost ledger, the analytics
+      taxonomy, and a readiness audit that computes itself from evidence. 265 tests,
+      including 23 that run against a live Postgres.</p>
+      <p><strong>What is not:</strong> the web app, the worker loop that ties the stages
+      together, the Twitch and TikTok integrations in production, and a single user. The
+      comparison below is a comparison of designs and prices, not of shipping products.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CORRECTIONS -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">First, two corrections</p>
+    <h2>Seeing the real pricing page made Opus look stronger, not weaker.</h2>
+    <p>The earlier teardown was built from third-party write-ups, because the session
+    could not reach opus.pro directly. Two claims in it were wrong, and both errors
+    flattered us.</p>
+
+    <div class="cols">
+      <div class="card them-card">
+        <h3>Auto-posting is not the upgrade lever</h3>
+        <p style="margin-top:10px;color:var(--tx-2);font-size:14px;">I wrote that Starter
+        withholds publishing, and that this does most of the $15 → $29 upgrade work. The
+        live page shows <strong>auto-post to YouTube Shorts, TikTok and IG Reels sitting in
+        the $15 Starter plan.</strong> What Pro adds is the <em>scheduler</em> — queueing a
+        month of posts — which is a far softer lever than I claimed.</p>
+      </div>
+      <div class="card them-card">
+        <h3>The API is not fully enterprise-gated</h3>
+        <p style="margin-top:10px;color:var(--tx-2);font-size:14px;">Pro carries
+        <strong>Limited API Access</strong>; Business carries full API and custom
+        integrations. They have also shipped an <strong>MCP server and an "Agent Opus"
+        product.</strong> The agentic surface is a place they are ahead of us, not behind.</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <p><strong>And they do target streamers.</strong> "Livestreamers" is one of ten
+      named verticals in their own Solutions nav. This is not a segment they overlooked —
+      it is one they serve with a meter built for somebody else. That is a narrower and
+      more honest version of the wedge than "nobody serves streamers."</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE CHART -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">The comparison</p>
+    <h2>Side by side, with sources marked.</h2>
+    <p>Everything in the OpusClip column marked <span class="tag tag-src">page</span> is
+    visible on their pricing page as of August 2026. Anything marked
+    <span class="tag tag-src">3rd-party</span> comes from external write-ups and is not
+    confirmed on the page itself — the credit definition in particular sits behind a
+    tooltip I could not open.</p>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">&nbsp;</th>
+            <th scope="col" class="them">OpusClip</th>
+            <th scope="col" class="us">ClipR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><th scope="row">Status</th><td colspan="2"></td></tr>
+          <tr>
+            <th scope="row">Maturity</th>
+            <td><span class="tag tag-them">Theirs</span>Shipping. Logos include iHeartMedia,
+              WildBrain, Billboard, Vox Media, Univision, Audacy, HubSpot.</td>
+            <td class="us">Production core only. 265 tests, no users, no shipped app.</td>
+          </tr>
+
+          <tr class="group"><th scope="row">Money</th><td colspan="2"></td></tr>
+          <tr>
+            <th scope="row">Billing meter</th>
+            <td><span class="tag tag-src">3rd-party</span>Credits, ~1 per minute of
+              <em>source</em> video, charged on ingest.</td>
+            <td class="us"><span class="tag tag-win">Ours</span>Monitored hours plus
+              published clips. Footage you discard costs nothing.</td>
+          </tr>
+          <tr>
+            <th scope="row">Entry tier</th>
+            <td><span class="tag tag-src">page</span>Starter — $15/mo, monthly only,
+              150 credits.</td>
+            <td class="us">Rail — $29/mo or $24 annual, 60 monitored hours, 80 clips.</td>
+          </tr>
+          <tr>
+            <th scope="row">Mid tier</th>
+            <td><span class="tag tag-src">page</span>Pro — $29/mo list, currently promoted
+              at <strong>$14.50/mo, $174 billed annually</strong>. 3,600 credits/yr granted
+              instantly. 2 seats, 6 social connections.</td>
+            <td class="us">Control Room — $79/mo, 200 hours, 400 clips, 4 seats,
+              unlimited connected accounts.</td>
+          </tr>
+          <tr>
+            <th scope="row">Top tier</th>
+            <td><span class="tag tag-src">page</span>Business — custom pricing and packs,
+              MSA, dedicated Slack, enterprise security.</td>
+            <td class="us">Network — $249/mo, 12 sources, 600 hours, 1,500 clips.</td>
+          </tr>
+          <tr>
+            <th scope="row">A six-hour stream</th>
+            <td><span class="tag tag-src">3rd-party</span>~360 credits — more than a
+              Starter month, for one night.</td>
+            <td class="us"><span class="tag tag-win">Ours</span>Six of your monitored
+              hours.</td>
+          </tr>
+          <tr>
+            <th scope="row">Rejected clips</th>
+            <td><span class="tag tag-src">3rd-party</span>Already paid for, since the
+              charge lands on ingest.</td>
+            <td class="us"><span class="tag tag-win">Ours</span>Free before the file
+              leaves our systems, capped at 3× the allowance to stop the obvious abuse.</td>
+          </tr>
+          <tr>
+            <th scope="row">Overage</th>
+            <td>Buy more credits.</td>
+            <td class="us">$0.35/clip, hard-capped at the next plan's price. No surprise
+              invoice, no dead pipeline.</td>
+          </tr>
+
+          <tr class="group"><th scope="row">Getting footage in</th><td colspan="2"></td></tr>
+          <tr>
+            <th scope="row">Source</th>
+            <td><span class="tag tag-src">page</span>Upload or link; "Input from 10+
+              sources" on Pro.</td>
+            <td class="us"><span class="tag tag-win">Ours</span>Attaches at go-live. There
+              is no upload step.</td>
+          </tr>
+          <tr>
+            <th scope="row">Moment detection</th>
+            <td>AI clipping with a Virality Score.</td>
+            <td class="us">Chat velocity, viewer clip presses and audio level first;
+              transcript and model only on the surviving ~12%.</td>
+          </tr>
+          <tr>
+            <th scope="row">Small channels</th>
+            <td>Not addressed on the page.</td>
+            <td class="us">Chat velocity normalised per channel, so 4× a small stream's
+              own baseline still registers.</td>
+          </tr>
+
+          <tr class="group"><th scope="row">Getting clips out</th><td colspan="2"></td></tr>
+          <tr>
+            <th scope="row">Auto-post</th>
+            <td><span class="tag tag-src">page</span>YouTube Shorts, TikTok, IG Reels —
+              <strong>included in the $15 Starter plan</strong>.</td>
+            <td class="us">Included on every paid plan.</td>
+          </tr>
+          <tr>
+            <th scope="row">Scheduler</th>
+            <td><span class="tag tag-src">page</span>Pro and above.</td>
+            <td class="us">All plans, with per-platform pacing.</td>
+          </tr>
+          <tr>
+            <th scope="row">Connected accounts</th>
+            <td><span class="tag tag-src">page</span>6 on Pro; customised on Business.</td>
+            <td class="us"><span class="tag tag-win">Ours</span>Unlimited from the first
+              paid plan — accounts cost nothing to add.</td>
+          </tr>
+          <tr>
+            <th scope="row">If a platform revokes API access</th>
+            <td>Not addressed on the page.</td>
+            <td class="us"><span class="tag tag-win">Ours</span>Falls back to a staged post
+              plus a push notification. The product degrades instead of stopping, and that
+              path runs by default in dev so it is exercised constantly.</td>
+          </tr>
+
+          <tr class="group"><th scope="row">Craft and features</th><td colspan="2"></td></tr>
+          <tr>
+            <th scope="row">Editing suite</th>
+            <td><span class="tag tag-them">Theirs</span><span class="tag tag-src">page</span>Full
+              editor, AI B-Roll, dubbing, speech enhancement, custom fonts, thumbnail
+              generator, XML export to Premiere and DaVinci.</td>
+            <td class="us">None of it. Reframe, captions and brand kit only.</td>
+          </tr>
+          <tr>
+            <th scope="row">Agentic surface</th>
+            <td><span class="tag tag-them">Theirs</span><span class="tag tag-src">page</span>Public
+              API, an MCP server, and "Agent Opus".</td>
+            <td class="us">Nothing shipped.</td>
+          </tr>
+          <tr>
+            <th scope="row">Rights and safety screening</th>
+            <td>Not shown on the pricing page.</td>
+            <td class="us"><span class="tag tag-win">Ours</span>Music, third-party footage,
+              PII and duplicate detection on <em>every</em> plan. A card number blocks
+              autopilot outright.</td>
+          </tr>
+          <tr>
+            <th scope="row">Learning from results</th>
+            <td>Not shown on the pricing page.</td>
+            <td class="us">Retention data feeds back into the ranker. Designed, not
+              shipped.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- HONEST READ -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">The honest read</p>
+    <h2>What each side would actually win on.</h2>
+    <div class="cols">
+      <div class="card them-card">
+        <h3>Where OpusClip wins today</h3>
+        <ul>
+          <li><strong>It exists.</strong> Real customers, real logos, real revenue. Every
+          row above is a design claim on our side and a shipped feature on theirs.</li>
+          <li><strong>Breadth.</strong> B-roll, dubbing, thumbnails, speech enhancement,
+          XML export. A creator who wants one tool for everything wants theirs.</li>
+          <li><strong>Price, right now.</strong> Pro at $14.50/mo undercuts our $29 entry
+          outright, and $15 Starter already auto-posts.</li>
+          <li><strong>The agentic bet.</strong> API, MCP and Agent Opus are live. We have
+          none of it.</li>
+          <li><strong>Distribution.</strong> They are buying the search term that brought
+          you to this comparison.</li>
+        </ul>
+      </div>
+      <div class="card us-card">
+        <h3>Where ClipR would win, if it shipped</h3>
+        <ul>
+          <li><strong>The meter.</strong> A streamer's cost stops scaling with hours of
+          footage they never wanted clipped. That is structural — Opus cannot copy it
+          without repricing every existing customer.</li>
+          <li><strong>Zero-touch.</strong> No upload step. If the creator has to remember
+          to do something, the product has already failed.</li>
+          <li><strong>"Rejected clips are free."</strong> It makes our ranker being wrong
+          our cost instead of theirs. It is also the single best line in the pricing.</li>
+          <li><strong>Unlimited destinations at entry.</strong> Streamers run a main, a
+          clips channel and a burner. Six connections is a ceiling; ours costs us nothing.</li>
+          <li><strong>Degrading instead of dying</strong> when a platform pulls API access —
+          the risk most likely to end either company.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note">
+      <p><strong>The one-line version:</strong> Opus is a better video tool. ClipR is a
+      better deal for someone who is live thirty hours a week — and that is the only
+      customer it should try to win. Competing on features would be losing on their
+      terms; the meter is the whole argument.</p>
+      <p>The unresolved question is price. Their $14.50 promo against our $29 entry means
+      the pitch has to be worth a 2× premium on day one, which it only is above roughly
+      15 streamed hours a month. Below that, they are simply cheaper and we should say so.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div>OpusClip figures read from the live pricing page, August 2026, plus third-party
+    write-ups where marked. Promotional pricing changes; verify before quoting.</div>
+    <div>ClipR figures from <span class="mono">packages/billing/plans.py</span>, which is
+    test-locked against the schema and the pricing page.</div>
+    <div>ClipR is pre-launch. No customers, no revenue, no shipped application.</div>
+  </div>
+</footer>

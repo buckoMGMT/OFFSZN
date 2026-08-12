@@ -9,20 +9,33 @@ each defect is now covered. Nothing here is wired to OFFSZN's app code.
 
 ## 1. What Opus Clip's pricing page is actually doing
 
-I could not fetch `opus.pro` directly — the session's egress proxy blocks that
-host — so the structure below comes from indexed third-party breakdowns
-(quso.ai, ssemble.com, eesel.ai, klap.app, dynalord.com, checkthat.ai) rather
-than from the live page. Treat the numbers as "as reported, mid-2026", not as a
-scrape.
+**Updated from screenshots of the live page (Aug 2026).** The first version of
+this section came from indexed third-party breakdowns, because the session's
+egress proxy blocks `opus.pro`. Seeing the actual page corrected two claims — both
+in the direction of Opus being *stronger* than I described. Corrections are
+marked below. Anything still sourced from third parties rather than the page
+itself is labelled `[3rd-party]`.
 
 **The plan ladder**
 
 | Plan | Price | Allowance | What unlocks |
 |---|---|---|---|
 | Free | $0 | 60 credits/mo | Watermarked, exports expire in 3 days |
-| Starter | $15/mo | 150 credits/mo | Watermark off, 20+ caption languages, 1 brand template. No annual option, **no scheduler** |
-| Pro | $29/mo | 300 credits/mo (annual: 3,600/yr upfront at $174 ≈ $14.50/mo) | AI B-roll, social scheduler, all aspect ratios, 2 seats, Premiere/CapCut export |
-| Business | Custom | — | API access, enterprise terms |
+| Starter | $15/mo, monthly only | 150 credits/mo | Watermark off, captions in 20+ languages, 1 brand template, powerful editor, filler/silence removal, **and auto-post to YouTube Shorts, TikTok and IG Reels** |
+| Pro | $29/mo, currently promoted at **$14.50/mo — $174 billed annually** | 3,600 credits/yr, granted instantly | AI B-Roll, social media *scheduler*, 10+ input sources, Premiere/DaVinci export, all aspect ratios, custom fonts, speech enhancement, dubbing, 2 seats, 6 social connections, **Limited API Access** |
+| Business | Custom pricing and packs | Custom | Priority processing, dedicated storage, full API and custom integrations, MSA, dedicated Slack, enterprise security |
+
+**Correction 1 — auto-posting is not the upgrade lever.** I previously wrote that
+Starter withholds publishing and that this does most of the $15 → $29 upgrade
+work. The live page shows auto-post to YouTube Shorts, TikTok and IG Reels
+sitting in Starter. What Pro adds is the *scheduler* — queueing a month of posts —
+which is a much softer lever than I claimed. The pricing wedge does not depend on
+this, but the teardown was wrong and the corrected version is less flattering to us.
+
+**Correction 2 — the API is not fully enterprise-gated.** Pro carries "Limited
+API Access"; Business carries full API and custom integrations. They have also
+shipped an MCP server and an "Agent Opus" product, so the agentic surface is
+further along than I gave them credit for.
 
 **The mechanics worth stealing**
 
@@ -37,10 +50,17 @@ scrape.
    churn feel wasteful.
 4. **The free tier is real but decays.** 3-day export expiry converts on
    urgency rather than on capability.
-5. **API is enterprise-gated**, which is the industry norm (Klap and Submagic
-   both meter it separately) and leaves an obvious opening.
+5. **The API ladder is real but partial.** Limited access on Pro, full access
+   plus custom integrations on Business — plus an MCP server and Agent Opus.
+   This is the part of their roadmap that is ahead of ours, not behind.
 
-**The exploitable flaw:** per-source-minute pricing is a podcast/webinar model.
+**They do target streamers, and the meter still fights them.** "Livestreamers"
+is one of ten named Solutions verticals on their own nav, so this is not a
+segment they have overlooked — it is one they serve with a meter built for
+someone else.
+
+**The exploitable flaw:** per-source-minute pricing `[3rd-party]` is a
+podcast/webinar model.
 It is actively hostile to the highest-volume video producers alive — live
 streamers. A single 6-hour Twitch session is 360 credits. That is more than the
 entire Pro monthly allowance, spent in one night, and Opus is charging for the
