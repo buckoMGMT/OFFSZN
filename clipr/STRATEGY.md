@@ -1,7 +1,9 @@
 # ClipR — teardown, product model, and self-audit
 
-Status: concept work. Nothing here is wired to OFFSZN's app code; `clipr/` is a
-self-contained landing page plus this document.
+Status: the pricing model, detection cascade, isolation layer and safety
+screening in this document are implemented and tested in `clipr/packages`
+(139 tests). `REVIEW.md` records what was wrong with the previous build and how
+each defect is now covered. Nothing here is wired to OFFSZN's app code.
 
 ---
 
@@ -75,8 +77,8 @@ Three things must be true or the product is just another clipper:
 | Monthly | $29 | $79 | $249 |
 | Annual (2 mo free) | $24/mo | $66/mo | $207/mo |
 | Live sources | 1 | 3 | 12 |
-| Monitored hours | 60/mo | 200/mo | Unmetered |
-| Published clips | 80/mo | 400/mo | 2,000/mo |
+| Monitored hours | 60/mo | 200/mo | 600/mo |
+| Published clips | 80/mo | 400/mo | 1,500/mo |
 | Connected accounts | Unlimited | Unlimited | Unlimited |
 | Seats | 1 | 4 | Unlimited |
 
@@ -103,22 +105,46 @@ Three things must be true or the product is just another clipper:
   the next plan up. Nobody's pipeline dies mid-stream, and nobody gets a $900
   invoice. The cap is effectively a self-service upsell.
 
-**Unit economics sanity check (per monitored hour)**
+**Unit economics — now measured, not estimated**
 
-| Cost | Estimate |
+The first pass at this section put Rail at ~48% gross margin and Control Room
+worse, and flagged the tier allowances as the biggest open question. That
+estimate was wrong in our favour on two counts: it priced ASR at hosted-API
+rates and carried a storage allowance about five times what clips actually use.
+The corrected model lives in `packages/billing/plans.py` and is enforced by a
+test, so it can no longer drift quietly.
+
+| Cost line | Per unit |
 |---|---|
-| Ingest + segment watch (CPU, chat socket) | ~$0.02 |
-| ASR on candidate windows only (~12% of stream, batched GPU) | ~$0.06 |
-| LLM ranking over candidate transcripts | ~$0.08 |
-| Render + upload, ~2.5 published clips/hr | ~$0.09 |
-| **Total** | **~$0.25/hr** |
+| Watch: HLS tail + chat socket (CPU container) | $0.020 / monitored hour |
+| ASR on candidate windows only, 12% of stream, self-hosted | $0.035 / audio hour |
+| LLM ranking, one batched call per ~12 windows | $0.020 / monitored hour |
+| Render, NVENC with captions burned in the same pass | $0.006 / clip |
+| Egress to each destination, ~15 MB | $0.006 / clip |
+| Storage, blended with lifecycle to infrequent access | $0.021 / GB-month |
 
-Rail at 60 hours ≈ $15 COGS against $29 — about 48% gross margin, which is
-*thin* and is the single biggest number to re-check before launch (see audit).
-Control Room at 200 hours ≈ $50 against $79 is worse. **These two tiers need
-either a monitored-hour trim (Rail 40h, Control Room 150h) or a materially
-cheaper detection path before the pricing is safe to ship.** The site currently
-publishes the optimistic version; that's a known, deliberate gap flagged here.
+At **100% allowance consumption** — the worst realistic case:
+
+| Plan | Price | COGS | Gross margin |
+|---|---|---|---|
+| Rail | $29 | $4.45 | 84.7% |
+| Control Room | $79 | $17.84 | 77.4% |
+| Network | $249 | $57.12 | 77.1% |
+
+`make margins` recomputes this, and
+`test_every_paid_tier_clears_the_margin_floor` fails the build if any tier drops
+under 70%.
+
+**The sensitivity is the real finding.** Swap self-hosted ASR for a hosted
+speech API (~$0.36 per audio-hour instead of ~$0.035) and the same plans run
+67–77%, with Control Room under the floor. Self-hosted ASR is not an
+optimisation here, it is the business model.
+
+Two allowances changed as a result. Network moved from "unmetered monitored
+hours" to 600/month: twelve sources against an unmetered watcher was the one
+shape in the plan table that could run a negative margin, and no test can catch
+it because "unlimited" has no worst case. Rail and Control Room kept the
+published 60 and 200 hours, which the corrected model comfortably supports.
 
 The key lever is the **cheap-first cascade**: chat velocity, emote bursts,
 native clip-button events and audio RMS are nearly free and run on 100% of the
@@ -195,18 +221,22 @@ visually distinct.
 
 Ranked by how likely each is to kill the product.
 
-**1. Platform API access is the existential risk.** TikTok's Content Posting
-API requires audit and approval; unattended multi-account posting is exactly
-the pattern platforms police. Instagram's Graph API reels publishing has rate
-limits and a business-account requirement. If auto-post gets revoked, the core
-promise evaporates. *Mitigation:* build a per-account fallback to a scheduled
-draft + one-tap push notification, so the product degrades to "one tap" rather
-than to nothing. Do this before launch, not after the first suspension.
+**1. Platform API access is the existential risk — mitigation built.** TikTok's
+Content Posting API requires audit and approval; unattended multi-account
+posting is exactly the pattern platforms police. Every adapter now has a third
+state, `manual_handoff`: the clip is rendered, captioned, staged and pushed to
+the creator's phone to post with one tap. Because dev environments have no
+credentials, that path is the one that runs by default, so it is exercised
+constantly rather than discovered on the worst day. Applying for approval is
+still the critical path.
 
-**2. Margins on the lower two tiers are too thin** (48% and 37% modeled). Either
-cut monitored hours, raise Rail to $39, or drive the candidate rate below 12%.
-The page as written publishes the optimistic allowances — that must be resolved
-before real billing.
+**2. Margins — resolved, and the earlier estimate here was wrong.** This
+document previously put Rail at 48% and Control Room at 37%, and called it the
+biggest open question. Both figures were too pessimistic: they priced ASR at
+hosted-API rates and carried roughly 5x the storage clips actually consume. The
+corrected model puts all three tiers at 77-85%, and a test now fails the build
+if any drops under 70%. What survives from the concern is the sensitivity: on
+hosted ASR, Control Room breaks the floor.
 
 **3. "Rejected clips are free" is gameable.** A user can auto-reject everything,
 pull the rendered file over the API, and pay for nothing. *Fix:* rejection only
@@ -221,17 +251,18 @@ rate or reframe the comparison generically ("credit-based tools") — the copy
 currently says "credit tool", which is the safer framing, and the competitor is
 not named in the calculator.
 
-**5. Moment detection on small channels degrades badly.** Chat velocity is the
-strongest signal and a 30-viewer stream barely has any. The cheap-first cascade
-quietly assumes an audience. *Fix:* fall back to audio energy + speech-rate +
-game-event detection when chat volume is below a threshold, and be honest that
-early-stage streamers get a weaker product.
+**5. Moment detection on small channels — addressed, not solved.** Chat velocity
+is normalised against each stream's own baseline rather than an absolute rate,
+so a 30-viewer channel going 4x its normal still registers
+(`test_chat_velocity_is_relative_to_the_channels_own_baseline`). The detector
+also degrades to audio-only when chat is absent. A very small channel still
+gets a weaker product, and we should say so rather than pretend otherwise.
 
-**6. Legal exposure on music and third-party footage.** We are automatically
-republishing live content that routinely contains copyrighted audio, reacted-to
-videos and other people's voices. Rights flagging is currently a Network-tier
-feature. That is backwards — detection should be on every tier, with only the
-bulk-management tooling gated.
+**6. Legal exposure on music and third-party footage — restructured.** Rights
+flagging was a Network-tier feature, which is backwards: the customer most
+likely to publish a claim unattended is the solo streamer on the cheapest plan
+with autopilot on. `packages/ai/safety.py` takes no plan argument at all, and a
+test asserts it never grows one. Upper tiers buy bulk tooling, not detection.
 
 **7. Brand and name.** "ClipR" is a crowded, near-generic name in a category
 that already contains Klap, Clipwise, Clips.ai and OpusClip. Trademark search

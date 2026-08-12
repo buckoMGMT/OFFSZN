@@ -490,7 +490,7 @@ footer{padding:60px 0 46px;border-top:1px solid var(--line-soft);background:var(
           <li><strong>Watching is free.</strong> You're billed for monitored hours in wide bands and for clips you publish — not for every minute of footage that entered the pipe.</li>
           <li><strong>Rejected clips cost nothing.</strong> If you kill a clip in review, it never counts against your allowance. Tools that bill on ingest charge you for their own bad calls.</li>
           <li><strong>Accounts aren't a paywall.</strong> Streamers run a main, a clips channel, a vertical account and a burner. Connected destinations are unmetered from the first paid plan.</li>
-          <li><strong>Overage is a soft ceiling.</strong> Cross your clip allowance and the queue keeps running at $0.35/clip, capped at the next plan's price. You never wake up to a dead pipeline or a surprise invoice.</li>
+          <li><strong>Overage is a soft ceiling.</strong> Cross your clip allowance and the queue keeps running at $0.35 a clip, capped at the next plan's price. You never wake up to a dead pipeline or a surprise invoice.</li>
         </ul>
       </div>
     </div>
@@ -577,8 +577,8 @@ footer{padding:60px 0 46px;border-top:1px solid var(--line-soft);background:var(
         </div>
         <dl class="meters">
           <div class="meter"><dt>Live sources</dt><dd>12</dd></div>
-          <div class="meter"><dt>Monitored hours</dt><dd>Unmetered</dd></div>
-          <div class="meter"><dt>Published clips</dt><dd>2,000 / mo</dd></div>
+          <div class="meter"><dt>Monitored hours</dt><dd>600 / mo</dd></div>
+          <div class="meter"><dt>Published clips</dt><dd>1,500 / mo</dd></div>
           <div class="meter"><dt>Connected accounts</dt><dd>Unlimited</dd></div>
           <div class="meter"><dt>Seats</dt><dd>Unlimited</dd></div>
         </dl>
@@ -593,7 +593,7 @@ footer{padding:60px 0 46px;border-top:1px solid var(--line-soft);background:var(
         <div class="tier-foot"><a class="btn btn-ghost" href="#">Talk to us</a></div>
       </div>
     </div>
-    <p class="hero-note" style="margin-top:18px;">Overage on any plan: $0.35 per published clip, capped at the next plan up. Monitored hours never hard-stop mid-stream.</p>
+    <p class="hero-note" style="margin-top:18px;">Overage: $0.35 per published clip ($0.30 on Network), capped at the next plan up. Monitored hours never hard-stop mid-stream.</p>
   </div>
 </section>
 
@@ -764,7 +764,8 @@ footer{padding:60px 0 46px;border-top:1px solid var(--line-soft);background:var(
   if(!reduce){ setInterval(tick, 480); }
 
   /* ── cost calculator ────────────────────────── */
-  var PLANS = [{n:"Rail",p:29,h:60},{n:"Control Room",p:79,h:200},{n:"Network",p:249,h:Infinity}];
+  // Mirrors packages/billing/plans.py; tests/test_economics.py fails if they drift.
+  var PLANS = [{n:"Rail",p:29,h:60},{n:"Control Room",p:79,h:200},{n:"Network",p:249,h:600}];
   var hrs=document.getElementById("hrs"), hrsOut=document.getElementById("hrsOut"),
       fThem=document.getElementById("fThem"), fUs=document.getElementById("fUs"),
       aThem=document.getElementById("aThem"), aUs=document.getElementById("aUs");

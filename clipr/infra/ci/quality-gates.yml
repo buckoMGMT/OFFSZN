@@ -1,0 +1,85 @@
+# Install at .github/workflows/quality-gates.yml
+#
+# The gate that matters is `strict-security`: a security test that skips is not
+# a passing security test, so CI fails if tests/test_rls.py reports any skip.
+# The draft workflow ran those tests without a database configured, which meant
+# the isolation suite passed by never executing.
+
+name: Quality Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: clipr
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: clipr_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U clipr"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://clipr:test@localhost:5432/clipr_test
+      CLIPR_TEST_DSN: postgresql://clipr:test@localhost:5432/clipr_test
+      JWT_SECRET: ci_only_secret_that_is_definitely_long_enough_ok
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements-dev.txt
+
+      - name: Apply migrations
+        run: make migrate
+
+      - name: Test suite
+        run: python -m pytest tests -q --junitxml=report.xml
+
+      - name: Security tests must run, not skip
+        run: |
+          skipped=$(python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("report.xml").getroot()
+          print(sum(
+              1 for case in root.iter("testcase")
+              if "test_rls" in (case.get("classname") or "")
+              and case.find("skipped") is not None
+          ))
+          PY
+          )
+          if [ "$skipped" != "0" ]; then
+            echo "::error::$skipped workspace-isolation tests were skipped."
+            exit 1
+          fi
+
+      - name: Plan table parity
+        run: |
+          python -m pytest \
+            tests/test_economics.py::test_sql_and_python_plan_tables_agree \
+            tests/test_economics.py::test_pricing_page_quotes_the_same_numbers -q
+
+      - name: Margin floor
+        run: python -m pytest tests/test_billing.py -k margin_floor -q
+
+      - name: Lint
+        run: ruff check packages tests
+
+      - name: Static security scan
+        run: bandit -q -r packages -x tests
+
+      - name: Dependency audit
+        run: pip-audit --strict
