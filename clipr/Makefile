@@ -37,6 +37,12 @@ eval:      ## Run the detection eval harness
 loadtest:  ## Drive real jobs through the queue and record the run
 	$(PYTHON) -m packages.pipeline.loadtest --jobs 1200 --workers 8
 
+label:     ## Build an eval dataset from a real VOD (see docs/PATH_TO_10.md)
+	@$(PYTHON) -m packages.ai.labeler --help
+
+evidence:  ## Record an interview, usability session, pentest or legal review
+	@$(PYTHON) -m packages.audit.evidence --help
+
 check: lint security test eval  ## Everything CI enforces
 
 margins:   ## Gross margin per tier, self-hosted ASR vs a hosted speech API

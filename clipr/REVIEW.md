@@ -499,3 +499,79 @@ Reachable by writing code: 0 points.
 ruff:   All checks passed
 bandit: 0 issues at medium or high
 ```
+
+---
+
+## Fourth pass — building the machinery, and three more dead tables
+
+Asked to reach 10 without fabricating anything, the honest move is to make the
+remaining evidence cheap to acquire and to close the engineering gaps still
+hiding behind the sectors that were waiting on it. Three of those gaps were the
+same defect as the original build's cost ledger: **a table with a careful reader
+and no producer.**
+
+**`analytics_events` had no emitter.** The table existed, the RLS policy was
+right, the audit read from it — and nothing ever wrote a row. That silently
+blocked three sectors at once, because Retention and Landing Page conversion are
+both derived from those events. `packages/analytics/events.py` adds a closed
+27-event taxonomy (an open one becomes `clip_approved`, `clipApproved` and
+`approve_clip` within a month, and then the funnel under-counts and nobody can
+tell which name is real), refuses PII and secrets at the warehouse door, hashes
+IPs, and swallows warehouse failures — losing a funnel row is survivable, and
+failing a creator's publish because a metrics insert timed out is not.
+
+**`processing_costs` had no writer.** Same shape: `cost.py` computed unit
+economics, the fan-out join was fixed, the margin model was tested, and the
+table was empty. `packages/observability/ledger.py` records cost per physical
+unit consumed — GPU seconds, tokens, bytes — through one price book, and
+`reconcile()` compares the ledger against a real invoice. A cost model never
+checked against a bill is a guess wearing a number.
+
+**AI Quality was blocked on labeling, which is not engineering work — but how
+long it takes is an engineering decision.** `packages/ai/labeler.py` turns a
+week of scrubbing timelines into an afternoon: the cascade proposes candidates,
+a human accepts or rejects, accepted spans become the dataset. It mixes in
+random blind spans so misses can be labeled, and any dataset built without them
+is marked `recall_biased` so the harness reports recall as unmeasured rather
+than as a good number nobody should trust.
+
+**Evidence intake** (`make evidence`) is one command per kind, with validation
+strict enough that a hollow record is rejected at the door: placeholder names,
+evidence with no artifact link, future dates, and `--vendor internal` on a
+penetration test all fail. That strictness is the whole point — a row you can
+write without doing the work is indistinguishable from a lie.
+
+### What running it found
+
+Every one of these came from executing the code rather than reading it:
+
+| Found by | Defect |
+|---|---|
+| running the labeler | Blind-span generator compared a count against a set that grew as it inserted, so the difference never reached the target — 20 blind candidates for 2 real ones |
+| bandit, after fixing a pragma | A module-level `assert` guarding the taxonomy size; `python -O` strips asserts, and an invariant that vanishes under a flag is not an invariant |
+| executing the new SQL | `$1` replacement also matched inside `$10`, corrupting any query with ten or more parameters. Latent in the audit CLI too, where it had not bitten only because the runner passes one argument |
+| executing the new SQL | Untyped psql substitution: asyncpg infers parameter types, text substitution does not, so `incurred_at >= '2020-01-01'` failed on type |
+
+`tests/test_warehouse_sql.py` exists because of the last two. Every statement in
+this codebase that has never run is a statement that does not work yet, and both
+new modules had been tested only against a recording fake — which proves the
+Python is right and says nothing about whether the SQL parses.
+
+### Where that leaves the score
+
+Unchanged at **4.40**, and that is the correct outcome. None of this pass
+produced evidence, because none of it could. What it produced is the machinery
+that makes the next 5.6 points cheap to earn honestly, plus
+`docs/PATH_TO_10.md`: the sequenced route, what each step costs, and the command
+that records it.
+
+The two heaviest remaining items — Legal at 1.00 and the analytics cluster at
+0.90 — outweigh everything engineering has done across all four passes. For a
+product with no users that ratio is correct, and it is worth sitting with before
+writing more code.
+
+```
+265 passed
+ruff:   All checks passed
+bandit: 0 issues at every severity
+```

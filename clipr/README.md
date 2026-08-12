@@ -16,14 +16,16 @@ clipr/
 ├── packages/
 │   ├── db/migrations/            schema, RLS, and the evidence tables
 │   ├── auth/                     passwords, tokens, workspace context
-│   ├── ai/                       detector, eval harness, reframing, safety
+│   ├── ai/                       detector, eval harness, reframing, safety, labeler
+│   ├── analytics/                event taxonomy and emitter
 │   ├── billing/                  plans, entitlements, overage, margin model
 │   ├── publishing/               platform adapters + the degrade path
 │   ├── pipeline/                 job queue: leases, retries, dead-letter
-│   ├── observability/            unit economics + budget guard
-│   └── audit/                    readiness scoring from evidence
-├── tests/                        210 tests, ~5s
-└── infra/                        CI gates, backup + restore verification
+│   ├── observability/            cost ledger, unit economics, budget guard
+│   └── audit/                    readiness scoring + evidence intake
+├── tests/                        265 tests, ~7s
+├── infra/                        CI gates, backup + restore verification
+└── docs/PATH_TO_10.md            what the remaining 5.6 points take, and who does it
 ```
 
 ## Running it
@@ -63,9 +65,14 @@ workspace isolation, because a table owner bypasses RLS.
 | A fixture dataset cannot verify AI quality or gate a deploy | tested |
 | The queue loses, duplicates or strands no work under 8 concurrent workers | measured: 1,366 operations, 0 errors |
 | Every audit sector has a reachable path to verified | tested |
+| Analytics refuses unknown event names, and PII at the warehouse door | tested |
+| Cost ledger and margin model agree on prices | tested |
+| Every new SQL statement parses and runs | executed against a live Postgres |
+| A dataset labeled without blind sampling is marked recall-biased | tested |
+| Evidence intake rejects placeholder names, missing artifacts, future dates | tested |
 
 ```
-210 passed in 5.31s
+265 passed in 6.97s
 ruff:   All checks passed
 bandit: 0 issues at medium or high
 ```
@@ -148,6 +155,16 @@ The rest needs people, money, time or counsel.
 
 That number is computed, not asserted. When it is above zero, there is
 engineering left to do; it is currently zero.
+
+`docs/PATH_TO_10.md` is the sequenced route for the remaining 5.6 points —
+what each takes, roughly what it costs, and the one command that records it.
+Three tools exist to make that route cheap rather than to shortcut it:
+
+```bash
+make label      # turn real VODs into a labeled eval dataset (an afternoon, not a week)
+make evidence   # record an interview, usability session, pentest or legal review
+make audit      # see what it moved
+```
 
 ## Two things worth knowing before changing anything
 

@@ -46,8 +46,11 @@ class PsqlConnection:
         # today, but the engine that judges the codebase does not get to be the
         # one place that builds SQL by string formatting.
         params = {}
-        for i, arg in enumerate(args, start=1):
-            params[f"p{i}"] = arg
+        # Descending: replacing $1 before $10 would rewrite the $1 inside it and
+        # leave a stray 0 in the SQL. Harmless today at one parameter, wrong the
+        # first time a query takes ten.
+        for i in range(len(args), 0, -1):
+            params[f"p{i}"] = args[i - 1]
             sql = sql.replace(f"${i}", f":'p{i}'")
 
         cmd = [_psql_path(), self.dsn, "-X", "-q", "-A", "-t", "-F", "\x1f",
