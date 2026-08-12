@@ -56,19 +56,19 @@ def test_credit_exhaustion_is_a_hard_stop_and_ours_is_not():
     assert "Keeps running" in clipr_runway("rail", 2.5).what_happens
 
 
-def test_clips_bind_before_hours_on_rail_for_a_typical_stream():
-    """Rail advertises 60 monitored hours, but at 2.5 clips an hour the 80-clip
-    allowance runs out at 32. The headline number is not the binding one, which
-    is a real pricing problem and not a rounding detail."""
+def test_the_advertised_hours_are_what_actually_binds():
+    """Rail used to advertise 60 monitored hours while an 80-clip cap stopped
+    you at 32. The allowances were rebalanced so the headline number is the one
+    that runs out; this is the regression guard for that fix."""
     r = clipr_runway("rail", 2.5)
-    assert r.limit_hours == pytest.approx(32.0)
-    assert "clips" in r.binding_limit
-
-
-def test_a_quiet_stream_is_bound_by_hours_instead():
-    r = clipr_runway("rail", 1.0)
     assert r.limit_hours == pytest.approx(60.0)
     assert "monitored hours" in r.binding_limit
+
+
+def test_an_unusually_clippable_stream_is_bound_by_clips():
+    r = clipr_runway("rail", 5.0)
+    assert r.limit_hours == pytest.approx(30.0)
+    assert "clips" in r.binding_limit
 
 
 def test_the_more_clippable_the_stream_the_shorter_the_runway():

@@ -54,5 +54,21 @@ print('self-hosted ASR:'); \
 print('hosted speech API:'); \
 [print(f\"  {m['plan']:<14} rev \$${m['revenue_usd']:>7.2f}  cogs \$${m['cogs_usd']:>7.2f}  margin {m['gross_margin']:.1%}\") for m in (margin_for_plan(p, CostModel(asr_per_candidate_hour=0.36)) for p in paid)]"
 
+economics: ## Unit economics, worst-case customers, breakeven, sensitivity
+	@$(PYTHON) -c "import sys; sys.path.insert(0,'.'); \
+from packages.billing.economics import unit_economics, stress, business, sensitivity; \
+paid=['rail','control_room','network']; \
+print('PER CUSTOMER (100% of allowance)'); \
+[print(f\"  {u.plan:<14} rev \$${u.revenue_usd:>7.2f}  contrib \$${u.contribution_usd:>7.2f}  \" \
+       f\"margin {u.contribution_margin:>5.1%}  LTV:CAC {u.ltv_to_cac:>5.1f}  \" \
+       f\"{'ok' if u.healthy else 'UNHEALTHY'}\") for u in (unit_economics(c, utilisation=1.0) for c in paid)]; \
+print(); print('WORST CASE EACH PLAN PERMITS'); \
+[print(f\"  {s.plan:<14} {s.scenario:<32} profit \$${s.profit_usd:>8.2f}{'  LOSS' if s.loses_money else ''}\") \
+ for c in paid for s in stress(c)]; \
+b=business(300); print(); \
+print(f'BREAKEVEN: {b.breakeven_customers} customers at \$${b.contribution_per_customer_usd:.2f} contribution each'); \
+print(); print('IF AN ASSUMPTION IS WRONG (300 customers)'); \
+[print(f\"  {k:<44} \$${v['profit_usd']:>8,.0f}  ({v['delta_usd']:>+8,.0f})\") for k,v in sensitivity(300).items()]"
+
 audit:     ## Readiness report, computed from evidence
 	$(PYTHON) -m packages.audit.cli

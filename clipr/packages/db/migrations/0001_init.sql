@@ -372,9 +372,9 @@ CREATE TABLE plan_limits (
 -- Must stay identical to PLANS in packages/billing/plans.py.
 -- tests/test_plan_parity.py fails the build if these two drift apart.
 INSERT INTO plan_limits VALUES
-  ('trial',        'Trial',         1,  10,   20, -1,  1,  10,     0,      0,  0,     0, 3.0, 0),
-  ('rail',         'Rail',          1,  60,   80, -1,  1,  40,  2900,  29000, 35,  7900, 3.0, 1),
-  ('control_room', 'Control Room',  3, 200,  400, -1,  4, 200,  7900,  79000, 35, 24900, 3.0, 2),
+  ('trial',        'Trial',         1,  10,   25, -1,  1,  10,     0,      0,  0,     0, 3.0, 0),
+  ('rail',         'Rail',          1,  60,  150, -1,  1,  40,  2900,  29000, 35,  7900, 3.0, 1),
+  ('control_room', 'Control Room',  3, 200,  500, -1,  4, 200,  7900,  79000, 35, 24900, 3.0, 2),
   ('network',      'Network',      12, 600, 1500, -1, -1, 600, 24900, 249000, 30, 99900, 3.0, 3);
 
 ALTER TABLE workspaces

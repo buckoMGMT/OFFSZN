@@ -46,16 +46,20 @@ def test_no_overage_inside_allowance():
 
 
 def test_overage_is_priced_per_clip():
-    q = quote_overage("rail", 90)
+    # Derived from the plan table rather than hardcoded: these broke when the
+    # clip allowance was rebalanced, which is the test doing its job badly.
+    allowance = get_plan("rail").published_clips
+    q = quote_overage("rail", allowance + 10)
     assert q.billable_clips == 10
-    assert q.charged_cents == 350
+    assert q.charged_cents == 10 * get_plan("rail").clip_overage_cents
 
 
 def test_overage_never_exceeds_the_next_plan():
-    # 1,000 clips over on Rail would be $350 uncapped.
-    q = quote_overage("rail", 1080)
-    assert q.raw_cents == 35_000
-    assert q.charged_cents == get_plan("rail").overage_cap_cents
+    plan = get_plan("rail")
+    over = 930                      # far past any allowance
+    q = quote_overage("rail", plan.published_clips + over)
+    assert q.raw_cents == over * plan.clip_overage_cents
+    assert q.charged_cents == plan.overage_cap_cents
     assert q.capped
     assert q.savings_from_upgrade_cents > 0
 
@@ -110,7 +114,8 @@ def test_hard_limits_block():
 
 
 def test_soft_limits_keep_running_and_bill():
-    d = check("rail", Meter.PUBLISHED_CLIPS, Usage(clips_published=80))
+    d = check("rail", Meter.PUBLISHED_CLIPS,
+              Usage(clips_published=get_plan("rail").published_clips))
     assert d.allowed and d.billable_overage
 
 

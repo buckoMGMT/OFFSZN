@@ -18,6 +18,12 @@ from enum import StrEnum
 
 UNLIMITED = -1
 
+# Clips per monitored hour on a typical stream. The two meters are sized against
+# this so that the hours allowance and the clip allowance run out at roughly the
+# same time. Publishing an hours figure that a clip cap silently overrides is
+# the same trick this product exists to stop other people playing.
+REFERENCE_CLIPS_PER_HOUR = 2.5
+
 
 class Meter(StrEnum):
     MONITORED_HOURS = "monitored_hours"
@@ -55,10 +61,10 @@ class Plan:
 PLANS: dict[str, Plan] = {
     p.code: p
     for p in [
-        Plan("trial", "Trial", 1, 10, 20, UNLIMITED, 1, 10, 0, 0, 0, 0, 3.0, 0),
-        Plan("rail", "Rail", 1, 60, 80, UNLIMITED, 1, 40,
+        Plan("trial", "Trial", 1, 10, 25, UNLIMITED, 1, 10, 0, 0, 0, 0, 3.0, 0),
+        Plan("rail", "Rail", 1, 60, 150, UNLIMITED, 1, 40,
              2_900, 29_000, 35, 7_900, 3.0, 1),
-        Plan("control_room", "Control Room", 3, 200, 400, UNLIMITED, 4, 200,
+        Plan("control_room", "Control Room", 3, 200, 500, UNLIMITED, 4, 200,
              7_900, 79_000, 35, 24_900, 3.0, 2),
         # Monitored hours are metered here rather than unlimited. Twelve sources
         # against an unmetered watcher is the one shape in this table that can
