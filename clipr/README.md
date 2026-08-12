@@ -28,14 +28,83 @@ clipr/
 └── docs/PATH_TO_10.md            what the remaining 5.6 points take, and who does it
 ```
 
-## Running it
+## Start here: put a video in and get clips out
+
+```bash
+make demo INPUT=/path/to/your/video.mp4
+make verify-demo
+```
+
+Any local `mp4`, `mov`, `mkv` or `webm`. **No Twitch, TikTok, Instagram or
+YouTube credentials. No Postgres, Redis or Stripe.** If any of those were
+required to find out whether the clips are good, they would be in the way.
+
+You get, in `demo_output/`:
+
+| file | what it is |
+| --- | --- |
+| `clip_01.mp4` … | clean 1080x1920 clips. What you would post. No overlays. |
+| `clip_01_debug.mp4` … | source beside result, with the score, the signals and the crop's swept range drawn on |
+| `before_after.mp4` | original and ClipR output, synchronised |
+| `contact_sheet.jpg` | frames from every clip, to spot a framing failure without watching |
+| `transcript.txt` / `.json` | real speech recognition output, with word timings |
+| `candidates.json` | every moment considered, its score, and why |
+| `demo_report.md` | the run, in prose |
+
+### What the demo will not do
+
+* **It will not invent a transcript.** If no speech recognition engine can run,
+  it fails and says so. Placeholder text would flow into the captions and be
+  found by a customer rather than by us.
+* **It will not call a clip good.** The report ends with two separate verdicts:
+
+  > **TECHNICALLY VALID** — every clip decodes, is 1080x1920, has non-blank
+  > frames, and carries audio when the source did.
+  >
+  > **HUMAN QUALITY VERIFIED** — false. No code path may set it.
+
+  Automated checks establish that a clip is *watchable*. Nothing automated
+  establishes that a moment is worth posting, and this pipeline is not allowed
+  to claim it. That distinction exists because an earlier version reported a
+  completed demo for a clip nobody could see anything in — ffmpeg exited 0, the
+  container was valid, the dimensions were right, and the artifact was useless.
+
+### Transcription
+
+`faster-whisper` is the real engine and the one to install:
+
+```bash
+pip install faster-whisper       # downloads model weights once
+```
+
+Without network access it falls back to `pocketsphinx`, whose acoustic model
+ships inside the wheel. That is genuine offline recognition, not a stub — and
+it is a 2010-era model, so the words are substantially wrong. Every result
+carries a `quality`, and anything below `good` makes the report state plainly
+that the captions cannot be judged.
+
+## Running the rest of it
 
 ```bash
 cp .env.example .env          # set JWT_SECRET to 32+ chars
 make up                       # postgres, redis, minio
 make migrate                  # 0001 then 0002 — 0002 is what makes isolation real
-make test
+make test-all
 ```
+
+### Tests are in two halves, on purpose
+
+```bash
+make test-unit          # fast. mocks allowed. never sufficient on its own.
+make test-integration   # real ffmpeg, real files, no mocks. slow.
+```
+
+Three hundred unit tests passed while the pipeline produced an unwatchable
+clip, because they asserted against *assumptions about ffmpeg* rather than
+against ffmpeg. Two of those assumptions were wrong and no amount of mocking
+could have revealed either: `astats reset=N` counts audio frames rather than
+seconds, and `drawbox` fixes its coordinates at filter init. Nothing in
+`tests/integration` may mock a binary, a codec or a filter.
 
 `make migrate` must run both files. `0001` creates the schema; `0002` creates
 the non-owner application role and forces row-level security. Running the

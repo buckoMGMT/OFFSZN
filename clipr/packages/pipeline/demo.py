@@ -1,265 +1,485 @@
-"""End-to-end pipeline demo on real video.
+"""ClipR on a real video file.
 
-What this is: a synthetic stream, generated with ffmpeg, pushed through the
-*real* detection cascade, the *real* reframer, the *real* safety screening and
-the *real* cost ledger. The audio analysis is genuine ffmpeg output, the clip
-that comes out is a genuine H.264 file you can play.
+    python -m packages.pipeline.demo --input /path/to/video.mp4
+    make demo INPUT=/path/to/video.mp4
 
-What this is not: a demo on a live Twitch stream. There is no Twitch
-credential here, no HLS ingest, and no publishing. Those are the parts that are
-stubbed, and this demo cannot tell you anything about them.
+A local file is the only requirement. No Twitch, TikTok, Instagram or YouTube
+credentials; no Postgres, Redis or Stripe; no dashboard. If any of those were
+needed to see whether the clips are good, they would be in the way.
 
-The value is that it proves the middle of the pipeline works on real media
-rather than on fixtures, and it produces the first real cost numbers this
-project has ever had -- measured GPU-less wall time, not estimates.
+The output is the point of this program, not the log it prints. It writes real
+MP4 files to a directory that stays put, and the question it exists to let
+somebody answer is: would I post this?
 
-    python -m packages.pipeline.demo --out /tmp/clipr-demo
+What this program will not do:
+
+* invent a transcript when speech recognition cannot run
+* describe a clip as good, funny, or postable
+* report success on a file it has not decoded and inspected
+
+The last section of the report separates TECHNICALLY VALID from HUMAN QUALITY
+VERIFIED, because everything above it is machine-checkable and nothing above it
+establishes that a clip is worth posting.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import shutil
-import subprocess
-import tempfile
+import sys
 import time
-from dataclasses import asdict
+from dataclasses import dataclass, field
 from pathlib import Path
 
-from packages.ai.crop import Reframer
-from packages.ai.detector import MomentDetector, ffmpeg_loudness_envelope
+from packages.ai import captions as C
+from packages.ai.reframe import decide
 from packages.ai.safety import screen
-from packages.ai.subject import to_regions, track_subject
+from packages.ai.signals import MAX_CLIP_SECONDS, find_candidates, snap_to_speech
+from packages.ai.transcribe import (
+    Transcript,
+    TranscriptionUnavailable,
+    available_engines,
+    transcribe,
+)
+from packages.ai.transcribe import (
+    save as save_transcript,
+)
+from packages.media.probe import MediaError, probe, validate_output
+from packages.pipeline.render import (
+    before_after,
+    contact_sheet,
+    render_clip,
+    render_debug,
+    write_json,
+)
 
-# Where the interesting moments actually are, so detection can be scored rather
-# than admired. The generator puts real audio energy here.
-PLANTED = [
-    {"at": 95, "label": "big reaction"},
-    {"at": 240, "label": "clutch play"},
-    {"at": 430, "label": "chat explodes"},
-]
-DURATION = 540  # nine minutes
-
-
-def ffmpeg() -> str:
-    path = shutil.which("ffmpeg")
-    if path is None:
-        raise RuntimeError("ffmpeg not found on PATH")
-    return path
-
-
-def synthesize_stream(path: Path, duration: int = DURATION) -> None:
-    """Build a video whose audio is quiet except at the planted moments.
-
-    The detector reads real dBFS off this file, so the loud sections have to be
-    genuinely louder -- not annotated as loud. That is the whole point of
-    running the demo on media instead of on a dict.
-    """
-    # Shaped like a stream rather than like a test card: a dark scene, a bright
-    # subject that moves, a facecam box in the corner, and a burned-in clock so
-    # you can tell from the output which part of the source a clip came from.
-    # A colour-bar source proves the plumbing and shows a viewer nothing.
-    bursts = "+".join(
-        f"between(t,{m['at'] - 12},{m['at'] + 14})" for m in PLANTED
-    )
-    # The subject sweeps across the frame and bobs, so a crop that follows it is
-    # visibly different from a centre crop -- which is the whole point.
-    sub_x = "640+520*sin(t/9)"
-    sub_y = "300+120*sin(t/3.5)"
-
-    # `overlay` rather than `drawbox`: drawbox in ffmpeg 6.1 has no `eval`
-    # option and fixes its coordinates at init, so a "moving" box is pinned at
-    # its t=0 position for the whole file. overlay evaluates x/y per frame,
-    # which is the difference between a subject to track and a still image.
-    filtergraph = (
-        f"color=c=0x0d1117:s=1280x720:r=24:d={duration}[bg];"
-        # the subject: a bright square that actually moves
-        "color=c=0xff4b32:s=110x110:d=1[subject];"
-        f"[bg][subject]overlay=x='{sub_x}-55':y='{sub_y}-55':eval=frame[a1];"
-        # facecam, static, bottom right -- and a good test that a bright static
-        # element does not capture the tracker
-        "[a1]drawbox=x=980:y=470:w=260:h=200:color=0x1f2933@1.0:t=fill[a2];"
-        "[a2]drawbox=x=980:y=470:w=260:h=200:color=0x3fc9de@0.9:t=3[a3];"
-        "[a3]drawtext=text='FACECAM':x=1012:y=492:fontsize=22:fontcolor=0x3fc9de[a4];"
-        # burned clock, so a clip's position in the source is visible in the output
-        "[a4]drawtext=text='%{pts\\:hms}':x=40:y=40:fontsize=44:"
-        "fontcolor=white:box=1:boxcolor=0x000000@0.6:boxborderw=12[v]"
-    )
-
-    subprocess.run(
-        [
-            ffmpeg(), "-y", "-hide_banner", "-loglevel", "error",
-            "-f", "lavfi", "-i", f"sine=frequency=220:duration={duration}",
-            "-filter_complex",
-            filtergraph + f";[0:a]volume='if({bursts},0.35,0.008)':eval=frame[a]",
-            "-map", "[v]", "-map", "[a]",
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "30",
-            "-c:a", "aac", "-b:a", "64k", "-shortest",
-            str(path),
-        ],
-        check=True, capture_output=True, timeout=900,
-    )
+DEFAULT_CLIPS = 3
+RULE = "=" * 74
 
 
-def synthetic_chat(duration: int = DURATION) -> list[dict]:
-    """A chat log with bursts at the planted moments and a quiet baseline."""
-    events = [{"t": float(t)} for t in range(0, duration, 7)]      # ~1 msg / 7s
-    for moment in PLANTED:
-        events += [{"t": moment["at"] + i * 0.12} for i in range(90)]
-    return sorted(events, key=lambda e: e["t"])
+@dataclass
+class Stage:
+    name: str
+    seconds: float
+    detail: str = ""
 
 
-def transcript_for(duration: int = DURATION) -> list[dict]:
-    lines = {
-        95: "oh my god he actually hit that, chat did you see it",
-        240: "no way, no way, that was frame perfect",
-        430: "okay okay everyone calm down, my email is not going in the clip",
-    }
-    out = []
-    for t in range(0, duration, 30):
-        text = next((v for k, v in lines.items() if abs(k - t) < 20), "so anyway as I was saying")
-        out.append({"start": t, "end": t + 30, "text": text})
-    return out
+@dataclass
+class DemoReport:
+    input_path: str
+    output_dir: str
+    stages: list[Stage] = field(default_factory=list)
+    source: dict = field(default_factory=dict)
+    transcript: dict = field(default_factory=dict)
+    candidates: list[dict] = field(default_factory=list)
+    clips: list[dict] = field(default_factory=list)
+    validation: list[dict] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    technically_valid: bool = False
+    human_quality_verified: bool = False
+
+    def to_dict(self) -> dict:
+        return {
+            "input": self.input_path,
+            "output_dir": self.output_dir,
+            "source": self.source,
+            "transcript": self.transcript,
+            "candidates": self.candidates,
+            "clips": self.clips,
+            "validation": self.validation,
+            "warnings": self.warnings,
+            "verdict": {
+                "technically_valid": self.technically_valid,
+                "human_quality_verified": self.human_quality_verified,
+                "what_technically_valid_means": (
+                    "Every clip decodes, is 1080x1920, has non-blank frames, "
+                    "and carries audio when the source did."
+                ),
+                "what_it_does_not_mean": (
+                    "Nothing here establishes that a clip is interesting, funny, "
+                    "well-timed, or worth posting. Only a person watching it can "
+                    "establish that, and no automated check in this pipeline is "
+                    "allowed to claim it."
+                ),
+            },
+            "stages": [{"stage": s.name, "seconds": round(s.seconds, 2),
+                        "detail": s.detail} for s in self.stages],
+        }
 
 
-def matched(moment, tolerance: float = 25.0) -> str | None:
-    for planted in PLANTED:
-        if moment.start - tolerance <= planted["at"] <= moment.end + tolerance:
-            return planted["label"]
-    return None
+class Timer:
+    def __init__(self, report: DemoReport) -> None:
+        self.report = report
 
-
-def run(out_dir: Path) -> dict:
-    out_dir.mkdir(parents=True, exist_ok=True)
-    source = out_dir / "stream.mp4"
-    report: dict = {"stages": []}
-
-    def stage(name: str, fn):
+    def run(self, name: str, fn, detail: str = ""):
         started = time.perf_counter()
         value = fn()
         elapsed = time.perf_counter() - started
-        report["stages"].append({"stage": name, "seconds": round(elapsed, 2)})
-        print(f"  {name:<28} {elapsed:>6.2f}s")
+        self.report.stages.append(Stage(name, elapsed, detail))
+        print(f"  {name:<30} {elapsed:>7.2f}s  {detail}")
         return value
 
-    print("\n1. INGEST — synthesising a 9-minute stream with real audio")
-    stage("generate source", lambda: synthesize_stream(source))
-    size_mb = source.stat().st_size / 1e6
-    print(f"     {source} · {size_mb:.1f} MB · {DURATION}s")
 
-    print("\n2. DETECT — real ffmpeg loudness envelope, one pass")
-    envelope = stage("loudness envelope", lambda: ffmpeg_loudness_envelope(str(source)))
-    finite = [v for v in envelope if v > -100]
-    print(f"     {len(envelope)} samples · "
-          f"range {min(finite):.1f} to {max(finite):.1f} dBFS")
+def _markdown(report: DemoReport) -> str:
+    d = report.to_dict()
+    lines = [
+        "# ClipR demo report",
+        "",
+        f"**Input:** `{d['input']}`  ",
+        f"**Output:** `{d['output_dir']}`",
+        "",
+        "## Source",
+        "",
+        "| field | value |",
+        "| --- | --- |",
+    ]
+    for k, v in d["source"].items():
+        lines.append(f"| {k} | {v} |")
 
-    chat = synthetic_chat()
-    transcript = transcript_for()
+    t = d["transcript"]
+    lines += [
+        "", "## Transcription", "",
+        f"- Engine: **{t.get('engine', 'none')}** ({t.get('model', '-')})",
+        f"- Quality: **{t.get('quality', 'n/a')}**",
+        f"- Words: {t.get('word_count', 0)}",
+        f"- Trustworthy for caption accuracy: **{t.get('trustworthy', False)}**",
+        "", "## Clips", "",
+        "| # | start | end | strategy | captions | file |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    for clip in d["clips"]:
+        lines.append(
+            f"| {clip['index']} | {clip['start']}s | {clip['end']}s | "
+            f"{clip['strategy']} | {clip['caption_cues']} cues | "
+            f"`{Path(clip['path']).name}` |"
+        )
 
-    print("\n3. CASCADE — chat velocity + audio, then rank")
-    detector = MomentDetector(loudness_provider=lambda _: envelope)
-    result = stage("detect", lambda: detector.detect(
-        str(source), duration_seconds=DURATION,
-        transcript=transcript, chat_events=chat))
-    print(f"     {result.windows_examined} windows examined, "
-          f"{result.windows_promoted} promoted "
-          f"({result.windows_promoted / result.windows_examined:.0%})")
+    lines += ["", "## Why these moments", ""]
+    for clip in d["clips"]:
+        lines.append(f"**Clip {clip['index']}** — score {clip['score']} — {clip['reason']}")
+        lines.append("")
 
-    print("\n4. RANKING — top moments, and whether they are the planted ones")
-    hits = 0
-    for moment in result.moments[:6]:
-        label = matched(moment)
-        hits += bool(label)
-        mark = f"HIT  {label}" if label else "miss"
-        print(f"     {moment.start:>6.0f}-{moment.end:<6.0f} score {moment.score:>5.1f}  "
-              f"{mark:<22} {'; '.join(moment.reasons)[:52]}")
-    top3 = sum(1 for m in result.moments[:3] if matched(m))
-    print(f"     recall {hits}/{len(PLANTED)} planted moments; "
-          f"{top3}/3 of the top three are real")
+    lines += ["## Verdict", ""]
+    v = d["verdict"]
+    lines += [
+        f"- TECHNICALLY VALID: **{v['technically_valid']}** — {v['what_technically_valid_means']}",
+        f"- HUMAN QUALITY VERIFIED: **{v['human_quality_verified']}**",
+        "",
+        f"> {v['what_it_does_not_mean']}",
+        "",
+        "Open the clips and answer these yourself:",
+        "",
+        "1. Was this actually a good moment?",
+        "2. Did ClipR choose the right beginning?",
+        "3. Did ClipR choose the right ending?",
+        "4. Is the speaker or action visible?",
+        "5. Are the captions correct?",
+        "6. Does the vertical crop look good?",
+        "7. Would you actually post this?",
+    ]
+    if d["warnings"]:
+        lines += ["", "## Warnings", ""] + [f"- {w}" for w in d["warnings"]]
+    return "\n".join(lines) + "\n"
 
-    print("\n5. REFRAME — real 9:16 render with a moving crop track")
-    reframer = Reframer(1280, 720, 1080, 1920)
-    best = result.moments[0]
-    clip_path = out_dir / "clip.mp4"
 
-    # Real tracking off the actual pixels: ffmpeg decodes small greyscale
-    # frames and the subject is the centroid of what is bright and moving. No
-    # OpenCV on this machine, and a centre crop on gameplay is close to useless,
-    # so this is the fallback that had to exist.
-    clip_seconds = min(45.0, best.end - best.start)
-    subject = stage("track subject", lambda: track_subject(
-        str(source), best.start, clip_seconds, fps=4.0))
-    regions = to_regions(subject, 1280, 720)
-    track = reframer.smooth(
-        [reframer.crop_box(r, t=i / subject.fps) for i, r in enumerate(regions)],
-        window=5, max_step=34,
+def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
+        engine: str = "auto", clip_seconds: float | None = None) -> DemoReport:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    report = DemoReport(input_path=str(input_path.resolve()),
+                        output_dir=str(out_dir.resolve()))
+    timer = Timer(report)
+
+    # --- 1. input -----------------------------------------------------------
+    print(f"\n{RULE}\nCLIPR DEMO\n{RULE}")
+    print("\n1. INPUT")
+    info = timer.run("probe", lambda: probe(input_path))
+    print(info.describe())
+    report.source = info.to_dict()
+    write_json(out_dir / "source_info.json", info.to_dict())
+
+    if not info.has_audio:
+        report.warnings.append(
+            "Source has no audio track. Detection falls back to visual signals "
+            "only, and there will be no captions."
+        )
+        print("\n  ! No audio stream. Continuing on visual signals alone.")
+
+    # --- 2. transcript ------------------------------------------------------
+    print("\n2. TRANSCRIPTION")
+    transcript: Transcript | None = None
+    if info.has_audio:
+        try:
+            transcript = timer.run(
+                "transcribe",
+                lambda: transcribe(input_path, engine=engine, work_dir=out_dir),
+            )
+        except TranscriptionUnavailable as exc:
+            print(f"\n  TRANSCRIPTION FAILED\n{exc}\n")
+            print("  Engines seen: " + json.dumps(available_engines(), indent=2))
+            raise
+
+        save_transcript(transcript, out_dir)
+        report.transcript = {
+            k: v for k, v in transcript.to_dict().items() if k != "segments"
+        }
+        print(f"     engine {transcript.engine} ({transcript.model}), "
+              f"{transcript.word_count} words, quality={transcript.quality}")
+        if not transcript.trustworthy:
+            report.warnings.append(
+                f"Transcript came from {transcript.engine}, whose accuracy is "
+                f"'{transcript.quality}'. Captions will contain wrong words. "
+                f"Install faster-whisper for usable captions."
+            )
+            print(f"     ! quality is '{transcript.quality}' — captions will be wrong")
+    else:
+        report.transcript = {"engine": None, "reason": "source has no audio"}
+
+    # --- 3. detection -------------------------------------------------------
+    print("\n3. DETECTION — real media signals, no planted moments")
+    candidates, context = timer.run(
+        "find candidates",
+        lambda: find_candidates(input_path.as_posix(), info.duration_seconds,
+                                transcript=transcript, top_n=max(8, clips_wanted * 3)),
     )
-    tracked = sum(1 for c in subject.confidence if c > 0.05)
-    print(f"     {len(subject)} samples, subject located in {tracked} "
-          f"({tracked / max(1, len(subject)):.0%})")
-    stage("render clip", lambda: reframer.render(
-        str(source), str(clip_path), track,
-        start=best.start, duration=clip_seconds))
+    print(f"     {context['windows_examined']} windows examined, "
+          f"{context['windows_scored']} scored, {len(candidates)} after overlap "
+          f"suppression")
+    print(f"     baseline {context['baseline_dbfs']} dBFS, "
+          f"{context['scene_changes']} scene changes")
 
-    probe = subprocess.run(
-        [shutil.which("ffprobe"), "-v", "error", "-select_streams", "v:0",
-         "-show_entries", "stream=width,height,nb_frames,duration",
-         "-of", "json", str(clip_path)],
-        capture_output=True, text=True, check=True,
-    )
-    meta = json.loads(probe.stdout)["streams"][0]
-    print(f"     {clip_path} · {meta['width']}x{meta['height']} · "
-          f"{float(meta.get('duration', 0)):.1f}s · "
-          f"{clip_path.stat().st_size / 1e6:.2f} MB")
-    moves = reframer.sendcmd_script(track).strip().count(";")
-    print(f"     crop moved {moves} times across the clip")
+    if not candidates:
+        report.warnings.append(
+            "No candidate moments scored above zero. The file may be uniformly "
+            "quiet and static; there is nothing to clip."
+        )
+        print("\n  No moments found. Nothing to render.")
+        _finish(report, out_dir)
+        return report
 
-    print("\n6. SCREEN — rights and safety, before anything publishes")
-    text = " ".join(s["text"] for s in transcript)
-    screening = screen(transcript_text=text + " reach me at streamer@example.com")
-    for flag in screening.flags:
-        print(f"     {flag.severity.upper():<7} {flag.flag_type:<18} {flag.message}")
-    print(f"     autopilot blocked: {screening.blocks_autopilot}")
+    candidates = [snap_to_speech(c, transcript, info.duration_seconds)
+                  for c in candidates]
+    write_json(out_dir / "candidates.json",
+               {"context": context, "candidates": [c.to_dict() for c in candidates]})
+    report.candidates = [c.to_dict() for c in candidates]
 
-    report.update({
-        "source_mb": round(size_mb, 2),
-        "windows_examined": result.windows_examined,
-        "windows_promoted": result.windows_promoted,
-        "promotion_rate": round(result.windows_promoted / result.windows_examined, 4),
-        "planted": len(PLANTED),
-        "planted_found": hits,
-        "top3_precision": round(top3 / 3, 2),
-        "clip": {"path": str(clip_path), "width": meta["width"],
-                 "height": meta["height"], "crop_moves": moves},
-        "safety_flags": [f.flag_type for f in screening.flags],
-        "moments": [asdict(m) for m in result.moments[:6]],
-    })
-    (out_dir / "report.json").write_text(json.dumps(report, indent=2))
+    for c in candidates[:clips_wanted]:
+        print(f"     {c.describe()}")
+
+    # --- 4. render ----------------------------------------------------------
+    print("\n4. REFRAME + CAPTIONS + RENDER")
+    rendered: list[dict] = []
+    clip_paths: list[Path] = []
+
+    for i, cand in enumerate(candidates[:clips_wanted], start=1):
+        duration = min(cand.duration, clip_seconds or MAX_CLIP_SECONDS)
+        decision = timer.run(
+            f"clip {i}: choose framing",
+            lambda c=cand, d=duration: decide(
+                input_path.as_posix(), c.start, d, info.width, info.height),
+        )
+        print(f"     -> {decision.strategy}: {decision.reason}")
+
+        ass_path = None
+        cue_count = 0
+        if transcript is not None:
+            cap = C.prepare(transcript, cand.start, cand.start + duration,
+                            out_dir / f".clip_{i:02d}.ass")
+            ass_path = cap.ass_path if cap.rendered_anything else None
+            cue_count = cap.cue_count
+            for w in cap.warnings:
+                if "overflow" in w or "no captions" in w:
+                    report.warnings.append(f"clip {i}: {w}")
+
+        clip_path = out_dir / f"clip_{i:02d}.mp4"
+        timer.run(
+            f"clip {i}: render",
+            lambda c=cand, d=duration, dec=decision, a=ass_path, p=clip_path:
+                render_clip(input_path.as_posix(), p, start=c.start, duration=d,
+                            decision=dec, source_w=info.width,
+                            source_h=info.height, ass_path=a,
+                            has_audio=info.has_audio),
+        )
+        debug_path = out_dir / f"clip_{i:02d}_debug.mp4"
+        timer.run(
+            f"clip {i}: debug render",
+            lambda c=cand, d=duration, dec=decision, p=debug_path, cp=clip_path:
+                render_debug(input_path.as_posix(), p, cp, start=c.start,
+                             duration=d, candidate=c, decision=dec,
+                             source_w=info.width, source_h=info.height),
+        )
+
+        clip_paths.append(clip_path)
+        rendered.append({
+            "index": i,
+            "path": str(clip_path.resolve()),
+            "debug_path": str(debug_path.resolve()),
+            "start": round(cand.start, 2),
+            "end": round(cand.start + duration, 2),
+            "score": round(cand.score, 2),
+            "reason": "; ".join(cand.reasons),
+            "strategy": str(decision.strategy),
+            "framing": decision.to_dict(),
+            "caption_cues": cue_count,
+        })
+
+    report.clips = rendered
+
+    # --- 5. validation ------------------------------------------------------
+    print("\n5. VALIDATION — decoding what we produced")
+    all_valid = True
+    for clip in rendered:
+        result = validate_output(
+            clip["path"], min_seconds=min(10.0, info.duration_seconds),
+            expect_audio=info.has_audio,
+        )
+        report.validation.append(result.to_dict())
+        mark = "OK  " if result.passed else "FAIL"
+        print(f"     {mark} {Path(clip['path']).name}  "
+              f"{result.width}x{result.height}  {result.duration_seconds}s  "
+              f"luma {[s['mean_luma'] for s in result.frame_samples]}")
+        for failure in result.failures:
+            print(f"          {failure}")
+            report.warnings.append(f"{Path(clip['path']).name}: {failure}")
+        all_valid &= result.passed
+
+    report.technically_valid = all_valid and bool(rendered)
+    # Never set by this program. It is here to be false until a person says so.
+    report.human_quality_verified = False
+
+    # --- 6. comparison artifacts -------------------------------------------
+    print("\n6. INSPECTION ARTIFACTS")
+    try:
+        timer.run("contact sheet",
+                  lambda: contact_sheet(clip_paths, out_dir / "contact_sheet.jpg"))
+    except Exception as exc:  # noqa: BLE001
+        report.warnings.append(f"contact sheet failed: {exc}")
+        print(f"     ! contact sheet failed: {exc}")
+
+    try:
+        first = rendered[0]
+        timer.run(
+            "before/after",
+            lambda: before_after(input_path.as_posix(), Path(first["path"]),
+                                 out_dir / "before_after.mp4",
+                                 start=first["start"],
+                                 duration=first["end"] - first["start"]),
+        )
+    except Exception as exc:  # noqa: BLE001
+        report.warnings.append(f"before/after failed: {exc}")
+        print(f"     ! before/after failed: {exc}")
+
+    # --- 7. safety ----------------------------------------------------------
+    if transcript is not None and not transcript.is_empty:
+        screening = screen(transcript_text=transcript.text)
+        if screening.flags:
+            print("\n7. SCREENING")
+            for flag in screening.flags:
+                print(f"     {flag.severity.upper():<7} {flag.flag_type:<16} {flag.message}")
+            print(f"     autopilot blocked: {screening.blocks_autopilot}")
+
+    _finish(report, out_dir)
     return report
 
 
+def _finish(report: DemoReport, out_dir: Path) -> None:
+    for tmp in out_dir.glob(".clip_*.ass"):
+        tmp.unlink(missing_ok=True)
+    for tmp in out_dir.glob(".*.asr.wav"):
+        tmp.unlink(missing_ok=True)
+    write_json(out_dir / "demo_report.json", report.to_dict())
+    (out_dir / "demo_report.md").write_text(_markdown(report))
+
+
+def _print_paths(report: DemoReport, out_dir: Path) -> bool:
+    """Print every artifact's absolute path, and verify each one exists."""
+    print(f"\n{RULE}\nCLIPR DEMO COMPLETE\n{RULE}")
+    print(f"\nInput:\n  {report.input_path}")
+
+    missing: list[str] = []
+
+    def show(label: str, path: Path) -> None:
+        exists = path.exists()
+        if not exists:
+            missing.append(str(path))
+        print(f"  {'' if exists else '[MISSING] '}{path.resolve()}")
+
+    if report.clips:
+        print("\nGenerated clips:")
+        for clip in report.clips:
+            show("clip", Path(clip["path"]))
+        print("\nDebug versions:")
+        for clip in report.clips:
+            show("debug", Path(clip["debug_path"]))
+
+    print("\nBefore/After:")
+    show("before_after", out_dir / "before_after.mp4")
+    print("\nContact sheet:")
+    show("contact_sheet", out_dir / "contact_sheet.jpg")
+    print("\nTranscript:")
+    show("transcript", out_dir / "transcript.txt")
+    print("\nReport:")
+    show("report", out_dir / "demo_report.md")
+
+    print(f"\n{RULE}")
+    print(f"TECHNICALLY VALID:      {report.technically_valid}")
+    print("HUMAN QUALITY VERIFIED: False  <- only you can set this")
+    print(RULE)
+    print(
+        "\nAutomated checks establish that the clips decode, are 1080x1920, are\n"
+        "not blank, and carry audio. They establish nothing about whether the\n"
+        "moments are good. Open the clips and answer:\n"
+        "  1. Was this actually a good moment?\n"
+        "  2. Did ClipR choose the right beginning?\n"
+        "  3. Did ClipR choose the right ending?\n"
+        "  4. Is the speaker/action visible?\n"
+        "  5. Are captions correct?\n"
+        "  6. Does the vertical crop look good?\n"
+        "  7. Would you actually post this?"
+    )
+
+    if report.warnings:
+        print("\nWarnings:")
+        for w in report.warnings:
+            print(f"  - {w}")
+
+    if missing:
+        print(f"\n{len(missing)} promised file(s) do not exist:")
+        for m in missing:
+            print(f"  {m}")
+        return False
+    return True
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path,
-                        default=Path(tempfile.gettempdir()) / "clipr-demo")
+    parser = argparse.ArgumentParser(
+        prog="python -m packages.pipeline.demo",
+        description="Run ClipR over a local video file and write watchable clips.",
+    )
+    parser.add_argument("--input", "-i", type=Path, required=True,
+                        help="A local video file (mp4, mov, mkv, webm).")
+    parser.add_argument("--out", "-o", type=Path, default=Path("demo_output"),
+                        help="Output directory (default: ./demo_output)")
+    parser.add_argument("--clips", "-n", type=int, default=DEFAULT_CLIPS)
+    parser.add_argument("--engine", default="auto",
+                        choices=["auto", "faster-whisper", "pocketsphinx"])
+    parser.add_argument("--clip-seconds", type=float, default=None,
+                        help="Cap each clip's length.")
     args = parser.parse_args(argv)
 
-    print("=" * 72)
-    print("ClipR pipeline demo — synthetic stream, real media, real code")
-    print("Not a live Twitch stream: ingest and publishing are not exercised.")
-    print("=" * 72)
+    try:
+        report = run(args.input, args.out, clips_wanted=args.clips,
+                     engine=args.engine, clip_seconds=args.clip_seconds)
+    except MediaError as exc:
+        print(f"\nINPUT REJECTED\n  {exc}\n", file=sys.stderr)
+        return 2
+    except TranscriptionUnavailable:
+        # Already reported in full where it happened.
+        return 3
 
-    report = run(args.out)
-    total = sum(s["seconds"] for s in report["stages"])
-
-    print("\n" + "=" * 72)
-    print(f"Processed {DURATION / 60:.0f} minutes of video in {total:.1f}s "
-          f"({DURATION / total:.0f}x realtime on CPU alone)")
-    print(f"Report: {args.out / 'report.json'}")
-    print(f"Clip:   {report['clip']['path']}")
-    print("=" * 72)
-    return 0
+    ok = _print_paths(report, args.out)
+    if not report.clips:
+        return 4
+    return 0 if (ok and report.technically_valid) else 1
 
 
 if __name__ == "__main__":

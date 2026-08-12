@@ -1,5 +1,19 @@
 # Twenty priorities, and the economics behind them
 
+> ## P0, ahead of everything on this page
+>
+> **A real video goes in and watchable clips come out, and a human has watched
+> them.** `make demo INPUT=/path/to/video.mp4`
+>
+> The pipeline exists and is tested against real media. What has not happened
+> is the only test that counts: a genuine stream or VOD, processed, and the
+> resulting `clip_01.mp4` watched by a person who says whether they would post
+> it. Until that has happened, every number below is a projection about a
+> product nobody has confirmed works.
+>
+> Nothing on this page — pricing, support instrumentation, platform APIs, audit
+> scoring, growth, mobile — comes before that.
+
 Every number here comes from `packages/billing/economics.py`, which is locked by
 30 tests. Re-run it with `make economics` after any pricing change.
 

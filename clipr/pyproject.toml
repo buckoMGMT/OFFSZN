@@ -28,3 +28,11 @@ testpaths = ["tests"]
 # Skipping is a legitimate result locally (no database, no bcrypt) and a failure
 # in CI. `-r s` prints which tests skipped so that difference is visible.
 addopts = "-r s"
+markers = [
+    # Integration tests invoke the real ffmpeg binary and write real media.
+    # They are slow and they are the only tests that can catch a wrong
+    # assumption about what ffmpeg does, so they are separated rather than
+    # mixed in: `make test-unit` must stay fast enough to run constantly, and
+    # `make test-integration` must never be allowed to become optional.
+    "integration: runs real ffmpeg against real files (slow, no mocks)",
+]

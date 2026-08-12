@@ -4,11 +4,38 @@ PSQL   ?= psql
 DB     ?= $(DATABASE_URL)
 PYTHON ?= python3
 
-.PHONY: help up down migrate test lint security eval check margins audit
+.PHONY: help up down migrate test test-unit test-integration test-all \
+        demo verify-demo lint security eval check margins audit
+
+# Where `make demo` writes. A persistent directory in the project, not /tmp:
+# the clips are the deliverable, and a deliverable that a reboot deletes is
+# not one.
+OUT ?= demo_output
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | \
-		awk 'BEGIN{FS=":.*?## "}{printf "  %-10s %s\n", $$1, $$2}'
+		awk 'BEGIN{FS=":.*?## "}{printf "  %-16s %s\n", $$1, $$2}'
+
+demo:      ## Run ClipR on a local video: make demo INPUT=/path/video.mp4
+	@if [ -z "$(INPUT)" ]; then \
+		echo "Usage: make demo INPUT=/path/to/video.mp4 [OUT=demo_output]"; \
+		echo ""; \
+		echo "Any local mp4/mov/mkv/webm. No Twitch, TikTok, Postgres or"; \
+		echo "Stripe credentials are needed or used."; \
+		exit 2; \
+	fi
+	$(PYTHON) -m packages.pipeline.demo --input "$(INPUT)" --out "$(OUT)"
+
+verify-demo: ## Re-check every file `make demo` produced, by decoding it
+	$(PYTHON) -m packages.pipeline.verify --dir "$(OUT)"
+
+test-unit: ## Fast tests. Mocks allowed. Never sufficient on their own.
+	$(PYTHON) -m pytest tests -m "not integration" -q
+
+test-integration: ## Real ffmpeg against real media. No mocks. Slow.
+	$(PYTHON) -m pytest tests/integration -q
+
+test-all: test-unit test-integration  ## Both suites
 
 up:        ## Start the local stack
 	docker compose up -d
