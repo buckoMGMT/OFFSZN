@@ -10,7 +10,11 @@ import math
 import pytest
 
 from packages.ai.detector import (
-    CANDIDATE_FRACTION, MomentDetector, Window, _db_to_unit, sanitize_for_prompt,
+    CANDIDATE_FRACTION,
+    MomentDetector,
+    Window,
+    _db_to_unit,
+    sanitize_for_prompt,
 )
 
 

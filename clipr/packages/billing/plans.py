@@ -13,14 +13,13 @@ whether someone can publish are unit-testable without a stack.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
-from enum import Enum
-from typing import Optional
+from dataclasses import dataclass
+from enum import StrEnum
 
 UNLIMITED = -1
 
 
-class Meter(str, Enum):
+class Meter(StrEnum):
     MONITORED_HOURS = "monitored_hours"
     PUBLISHED_CLIPS = "published_clips"
     LIVE_SOURCES = "live_sources"
@@ -82,7 +81,7 @@ def get_plan(code: str) -> Plan:
         ) from None
 
 
-def next_plan_up(code: str) -> Optional[Plan]:
+def next_plan_up(code: str) -> Plan | None:
     plan = get_plan(code)
     higher = [p for p in ORDERED if p.sort_order > plan.sort_order]
     return higher[0] if higher else None
@@ -99,7 +98,7 @@ class OverageQuote:
     raw_cents: int
     charged_cents: int
     capped: bool
-    upgrade_hint: Optional[str]
+    upgrade_hint: str | None
 
     @property
     def savings_from_upgrade_cents(self) -> int:
@@ -202,7 +201,7 @@ class Decision:
     # Distinct from `allowed`: over allowance but still running, on the meter.
     billable_overage: bool
     message: str
-    meter: Optional[Meter] = None
+    meter: Meter | None = None
 
 
 def check(plan_code: str, meter: Meter, usage: Usage) -> Decision:
@@ -305,9 +304,12 @@ class CostModel:
     storage_per_gb_month: float = 0.021    # blended, with lifecycle to infrequent access
 
 
+DEFAULT_COST_MODEL = CostModel()
+
+
 def cogs_for_usage(
     monitored_hours: float, clips_published: int, storage_gb: float = 0.0,
-    model: CostModel = CostModel(),
+    model: CostModel = DEFAULT_COST_MODEL,
 ) -> float:
     per_hour = (
         model.watch_per_hour
@@ -321,7 +323,7 @@ def cogs_for_usage(
     )
 
 
-def margin_for_plan(plan_code: str, model: CostModel = CostModel()) -> dict:
+def margin_for_plan(plan_code: str, model: CostModel = DEFAULT_COST_MODEL) -> dict:
     """Gross margin at full allowance use -- the worst realistic case.
 
     Reported to two decimals rather than rounded to a headline number, because

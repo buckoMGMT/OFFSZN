@@ -168,8 +168,10 @@ CREATE TABLE processing_jobs (
   max_retries INT NOT NULL DEFAULT 3,
   worker_id TEXT,
   -- Lease-based claim. A worker that dies mid-job lets the lease lapse and the
-  -- reaper requeues it; without this, `status='running'` is a permanent leak.
+  -- next claim reclaims it; without this, `status='running'` is a permanent leak.
   lease_expires_at TIMESTAMPTZ,
+  -- Retry backoff. A queued job is invisible to claims until this passes.
+  next_attempt_at TIMESTAMPTZ,
   error TEXT,
   queued_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   started_at TIMESTAMPTZ,
@@ -495,6 +497,9 @@ CREATE TABLE ai_evaluations (
   crop_accuracy NUMERIC(5,4),
   duplicate_rate NUMERIC(5,4),
   publishable_rate NUMERIC(5,4),
+  -- A run over a fixture dataset. Recorded so the audit engine can refuse to
+  -- verify AI quality from it; a smoke test must never read as a result.
+  synthetic BOOLEAN NOT NULL DEFAULT false,
   is_baseline BOOLEAN NOT NULL DEFAULT false,
   regressed BOOLEAN NOT NULL DEFAULT false,
   ran_at TIMESTAMPTZ NOT NULL DEFAULT now()

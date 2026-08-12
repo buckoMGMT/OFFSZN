@@ -24,11 +24,11 @@ point of the exercise:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
-from typing import Optional, Protocol
+from enum import StrEnum
+from typing import Protocol
 
 
-class State(str, Enum):
+class State(StrEnum):
     VERIFIED = "verified"
     CODE_COMPLETE = "code_complete"
     INSUFFICIENT = "insufficient_data"
@@ -66,7 +66,7 @@ class SectorResult:
     sector: str
     state: State
     evidence: str
-    blocker: Optional[str] = None
+    blocker: str | None = None
 
     @property
     def score(self) -> int:
@@ -82,17 +82,27 @@ class AuditRunner:
     def __init__(self, db: Db):
         self.db = db
 
-    async def _count(self, table: str) -> Optional[int]:
+    # Interpolating a table name into SQL is the shape of an injection even when
+    # today's callers all pass literals. The allowlist means a future caller
+    # cannot turn this into one by accident.
+    COUNTABLE = {
+        "interviews": "SELECT count(*) FROM interviews",
+        "users": "SELECT count(*) FROM users",
+    }
+
+    async def _count(self, table: str) -> int | None:
         """Row count, or None if the table is absent.
 
         Returning None rather than 0 keeps "this table was never created" from
         being reported as "this has happened zero times" -- a missing migration
         should read as a broken audit, not a bad score.
         """
+        if table not in self.COUNTABLE:
+            raise ValueError(f"{table!r} is not a countable table: {sorted(self.COUNTABLE)}")
         exists = await self.db.fetchval("SELECT to_regclass($1) IS NOT NULL", f"public.{table}")
         if not exists:
             return None
-        return int(await self.db.fetchval(f"SELECT count(*) FROM {table}") or 0)
+        return int(await self.db.fetchval(self.COUNTABLE[table]) or 0)
 
     # -- sectors -----------------------------------------------------------
 
@@ -109,13 +119,21 @@ class AuditRunner:
 
     async def ai_quality(self) -> SectorResult:
         row = await self.db.fetchrow("""
-            SELECT f1_score, publishable_rate, labeled_moment_count, pipeline_version
+            SELECT f1_score, publishable_rate, labeled_moment_count, pipeline_version,
+                   synthetic
             FROM ai_evaluations ORDER BY ran_at DESC LIMIT 1
         """)
         if row is None:
             return SectorResult("AI Quality", State.CODE_COMPLETE,
                                 "Harness and regression gate are built; no run recorded.",
                                 "One eval run against a labeled dataset.")
+        if row["synthetic"]:
+            # The harness ran, which is worth something. A fixture scoring 1.0
+            # is worth nothing, and must not be allowed to look like it is.
+            return SectorResult("AI Quality", State.CODE_COMPLETE,
+                                "Last run was over a synthetic dataset; the harness "
+                                "executes but nothing has been measured.",
+                                "An eval run over real labeled streams.")
         f1, pub = row["f1_score"], row["publishable_rate"]
         if f1 is None or pub is None:
             return SectorResult("AI Quality", State.CODE_COMPLETE,

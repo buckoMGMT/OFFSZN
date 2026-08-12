@@ -1,0 +1,30 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "C4", "SIM", "RET"]
+ignore = [
+  # Long docstrings in this codebase carry the reasoning behind a decision.
+  # Wrapping prose to satisfy a linter makes it worse to read.
+  "E501",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests build deliberately awkward inputs and assert on internals.
+"tests/*" = ["B011", "SIM117"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+# B404 (import subprocess) and B603 (subprocess without shell=True) fire on
+# every ffmpeg and pg_dump call in the codebase. Both are unavoidable for a
+# video pipeline, and B603 in particular flags the *correct* form -- a list of
+# arguments with no shell. The dangerous form, shell=True, is B602 and stays on;
+# it is the exact bug that made the original backup script write no file.
+skips = ["B404", "B603"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Skipping is a legitimate result locally (no database, no bcrypt) and a failure
+# in CI. `-r s` prints which tests skipped so that difference is visible.
+addopts = "-r s"

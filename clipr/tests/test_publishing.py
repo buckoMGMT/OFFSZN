@@ -6,13 +6,17 @@ to go. The requirement is that the product gets worse rather than stopping, and
 that it never reports a post that does not exist.
 """
 
-import os
 from datetime import timedelta
 
 import pytest
 
 from packages.publishing.adapter import (
-    Adapter, PublishRequest, PublishStatus, Registry, Response, TikTokAdapter,
+    Adapter,
+    PublishRequest,
+    PublishStatus,
+    Registry,
+    Response,
+    TikTokAdapter,
 )
 
 

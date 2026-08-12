@@ -28,8 +28,8 @@ import hmac
 import os
 import secrets
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Protocol
+from datetime import UTC, datetime, timedelta
+from typing import Protocol
 
 import bcrypt
 import jwt
@@ -82,7 +82,7 @@ def verify_password(password: str, hashed: str) -> bool:
 
 
 def issue_access_token(user_id: str, workspace_id: str) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return jwt.encode(
         {
             "sub": user_id,

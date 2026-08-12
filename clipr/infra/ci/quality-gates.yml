@@ -53,16 +53,20 @@ jobs:
         run: |
           skipped=$(python - <<'PY'
           import xml.etree.ElementTree as ET
+          # A security test that skips is not a passing security test. The draft
+          # workflow ran these with no database configured, so the whole
+          # isolation suite passed by never executing.
+          GUARDED = ("test_rls", "test_auth", "test_worker")
           root = ET.parse("report.xml").getroot()
           print(sum(
               1 for case in root.iter("testcase")
-              if "test_rls" in (case.get("classname") or "")
+              if any(g in (case.get("classname") or "") for g in GUARDED)
               and case.find("skipped") is not None
           ))
           PY
           )
           if [ "$skipped" != "0" ]; then
-            echo "::error::$skipped workspace-isolation tests were skipped."
+            echo "::error::$skipped guarded tests were skipped."
             exit 1
           fi
 
@@ -75,11 +79,14 @@ jobs:
       - name: Margin floor
         run: python -m pytest tests/test_billing.py -k margin_floor -q
 
+      - name: Eval harness must execute
+        run: python -m packages.ai.cli_eval
+
       - name: Lint
         run: ruff check packages tests
 
       - name: Static security scan
-        run: bandit -q -r packages -x tests
+        run: bandit -q -c pyproject.toml -r packages
 
       - name: Dependency audit
         run: pip-audit --strict

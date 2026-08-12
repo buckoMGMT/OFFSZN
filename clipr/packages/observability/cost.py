@@ -24,9 +24,9 @@ independent single-table aggregates that cannot fan out.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from enum import Enum
-from typing import Optional, Protocol
+from datetime import UTC, datetime, timedelta
+from enum import StrEnum
+from typing import Protocol
 
 # ---------------------------------------------------------------------------
 # SQL
@@ -111,8 +111,8 @@ class UnitEconomics:
     total_cost_usd: float
     monitored_hours: float
     published_clips: int
-    cost_per_monitored_hour: Optional[float]
-    cost_per_published_clip: Optional[float]
+    cost_per_monitored_hour: float | None
+    cost_per_published_clip: float | None
     by_category: dict[str, float]
     as_of: str
 
@@ -126,9 +126,9 @@ class CostEngine:
         self.db = db
 
     async def unit_economics(
-        self, *, workspace_id: Optional[str] = None, days: int = 30
+        self, *, workspace_id: str | None = None, days: int = 30
     ) -> UnitEconomics:
-        since = datetime.now(timezone.utc) - timedelta(days=days)
+        since = datetime.now(UTC) - timedelta(days=days)
 
         rows = await self.db.fetch(SPEND_SQL, since, workspace_id)
         by_category = {r["cost_category"]: float(r["total"] or 0) for r in rows}
@@ -148,15 +148,15 @@ class CostEngine:
             cost_per_monitored_hour=round(total / hours, 4) if hours > 0 else None,
             cost_per_published_clip=round(total / clips, 4) if clips > 0 else None,
             by_category={k: round(v, 4) for k, v in by_category.items()},
-            as_of=datetime.now(timezone.utc).isoformat(),
+            as_of=datetime.now(UTC).isoformat(),
         )
 
     async def margin_by_plan(self, days: int = 30) -> list[dict]:
-        since = datetime.now(timezone.utc) - timedelta(days=days)
+        since = datetime.now(UTC) - timedelta(days=days)
         return [dict(r) for r in await self.db.fetch(MARGIN_BY_PLAN_SQL, since)]
 
     async def underwater_workspaces(self, days: int = 30) -> list[dict]:
-        since = datetime.now(timezone.utc) - timedelta(days=days)
+        since = datetime.now(UTC) - timedelta(days=days)
         return [dict(r) for r in await self.db.fetch(UNDERWATER_SQL, since)]
 
 
@@ -165,7 +165,7 @@ class CostEngine:
 # ---------------------------------------------------------------------------
 
 
-class GuardAction(str, Enum):
+class GuardAction(StrEnum):
     CONTINUE = "continue"
     WARN = "warn"
     THROTTLE = "throttle"
@@ -191,7 +191,7 @@ DEFAULT_CEILING_MULTIPLE = 4.0
 
 
 def evaluate_budget(
-    *, spend_usd: float, plan_price_usd: float, ceiling_usd: Optional[float] = None
+    *, spend_usd: float, plan_price_usd: float, ceiling_usd: float | None = None
 ) -> GuardDecision:
     """Decide what to do about a workspace's month-to-date spend.
 

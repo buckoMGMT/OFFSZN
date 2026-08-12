@@ -23,9 +23,9 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Sequence
 
 
 @dataclass(frozen=True)
@@ -70,7 +70,7 @@ class Reframer:
 
     # -- geometry (pure) ---------------------------------------------------
 
-    def crop_box(self, region: Optional[Region], t: float = 0.0, reason: str = "center") -> Crop:
+    def crop_box(self, region: Region | None, t: float = 0.0, reason: str = "center") -> Crop:
         """A target-aspect box inside the source, centred on `region` if given.
 
         Always clamped inside the source frame -- an out-of-bounds crop makes
@@ -190,19 +190,22 @@ class Reframer:
 
     def render(
         self, video_path: str, output_path: str, crops: Sequence[Crop],
-        *, start: float = 0.0, duration: Optional[float] = None,
+        *, start: float = 0.0, duration: float | None = None,
     ) -> None:
         if not crops:
             raise ValueError("no crop track; call track() first")
-        if shutil.which("ffmpeg") is None:
-            raise RuntimeError("ffmpeg not found on PATH")
-
         box = crops[0]
         script = Path(output_path).with_suffix(".sendcmd")
         script.write_text(self.sendcmd_script(crops))
 
         # -ss before -i seeks by index instead of decoding from zero.
-        cmd = ["ffmpeg", "-nostdin", "-y", "-ss", f"{start}"]
+        # Absolute path: a bare name is resolved through PATH at call time, so
+        # anything that can prepend a directory chooses what we execute.
+        ffmpeg = shutil.which("ffmpeg")
+        if ffmpeg is None:
+            raise RuntimeError("ffmpeg not found on PATH")
+
+        cmd = [ffmpeg, "-nostdin", "-y", "-ss", f"{start}"]
         if duration is not None:
             cmd += ["-t", f"{duration}"]
         cmd += [

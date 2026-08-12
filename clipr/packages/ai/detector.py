@@ -36,9 +36,10 @@ import os
 import re
 import shutil
 import subprocess
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Callable, Optional, Protocol, Sequence
+from datetime import UTC, datetime
+from typing import Protocol
 
 PIPELINE_VERSION = "clipr-ai-v1"
 PROMPT_VERSION = "detection-v1.3"
@@ -123,6 +124,19 @@ def _db_to_unit(db: float) -> float:
     return max(0.0, min(1.0, (db - DB_FLOOR) / (DB_CEIL - DB_FLOOR)))
 
 
+def _ffmpeg() -> str:
+    """Absolute path to ffmpeg.
+
+    Resolved rather than invoked as a bare name: a bare `ffmpeg` is looked up
+    through PATH at call time, so anything that can prepend a directory to the
+    worker's PATH chooses what runs with our credentials.
+    """
+    path = shutil.which("ffmpeg")
+    if path is None:
+        raise RuntimeError("ffmpeg not found on PATH")
+    return path
+
+
 def ffmpeg_loudness_envelope(media_path: str, interval: float = 1.0) -> list[float]:
     """RMS level per `interval` seconds for the whole file, in one ffmpeg pass.
 
@@ -130,12 +144,9 @@ def ffmpeg_loudness_envelope(media_path: str, interval: float = 1.0) -> list[flo
     caller can fall back explicitly -- silently returning zeros would make a
     broken install look like a quiet stream.
     """
-    if shutil.which("ffmpeg") is None:
-        raise RuntimeError("ffmpeg not found on PATH")
-
     proc = subprocess.run(
         [
-            "ffmpeg", "-nostdin", "-hide_banner", "-i", media_path,
+            _ffmpeg(), "-nostdin", "-hide_banner", "-i", media_path,
             "-map", "0:a:0",
             "-af", f"astats=metadata=1:reset={max(1, int(interval))},ametadata=print:key=lavfi.astats.Overall.RMS_level",
             "-f", "null", "-",
@@ -176,9 +187,9 @@ def _chat_component(velocity: float) -> float:
 class MomentDetector:
     def __init__(
         self,
-        llm: Optional[LLM] = None,
+        llm: LLM | None = None,
         *,
-        loudness_provider: Optional[Callable[[str], list[float]]] = None,
+        loudness_provider: Callable[[str], list[float]] | None = None,
         candidate_fraction: float = CANDIDATE_FRACTION,
         llm_input_cost_per_1k: float = 0.00015,
         llm_output_cost_per_1k: float = 0.0006,
@@ -196,9 +207,9 @@ class MomentDetector:
         media_path: str,
         *,
         duration_seconds: float,
-        transcript: Optional[Sequence[dict]] = None,
-        chat_events: Optional[Sequence[dict]] = None,
-        native_clip_events: Optional[Sequence[float]] = None,
+        transcript: Sequence[dict] | None = None,
+        chat_events: Sequence[dict] | None = None,
+        native_clip_events: Sequence[float] | None = None,
     ) -> DetectionResult:
         windows = self._build_windows(duration_seconds)
         if not windows:
@@ -358,7 +369,7 @@ class MomentDetector:
     # -- stage 2: ranking --------------------------------------------------
 
     def _rank_cheap(self, windows: list[Window]) -> list[Moment]:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         return [
             Moment(
                 start=w.start, end=w.end, duration=w.duration,
@@ -380,7 +391,7 @@ class MomentDetector:
         response = self.llm.complete(prompt)
         cost = self._llm_cost(prompt, response)   # per call, not per candidate
         scored = self._parse_scores(response)
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
 
         moments = []
         for i, w in enumerate(windows):

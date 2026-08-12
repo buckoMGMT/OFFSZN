@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from packages.ai.crop import Crop, Reframer, Region
-from packages.billing.plans import PLANS, UNLIMITED
+from packages.billing.plans import PLANS
 from packages.observability.cost import GuardAction, evaluate_budget
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -123,8 +123,8 @@ def test_crop_never_leaves_the_frame():
     r = Reframer(1920, 1080)
     for x in (-500, 0, 960, 1919, 5000):
         box = r.crop_box(Region(x, 540, 10, 10))
-        assert 0 <= box.x and box.x + box.w <= 1920
-        assert 0 <= box.y and box.y + box.h <= 1080
+        assert box.x >= 0 and box.x + box.w <= 1920
+        assert box.y >= 0 and box.y + box.h <= 1080
 
 
 def test_crop_dimensions_are_even():

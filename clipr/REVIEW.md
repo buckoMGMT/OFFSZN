@@ -362,3 +362,63 @@ Not verified here: the FastAPI app, the Next.js app, the worker loop, Terraform,
 and the k6 load test, none of which exist in this repository. The claims in the
 original README about 1,000 concurrent users at p95 < 2s and a verified restore
 test are not supported by anything I can see, and I have not restated them.
+
+---
+
+## Second pass — closing the code-closable gaps
+
+The first pass fixed defects. This pass closes the things the first pass listed
+as not built, and hardens what the tooling found once it was actually run.
+
+**The auth module had no tests.** It is the security core of the product and it
+was the only package with zero coverage, because PyJWT and bcrypt would not
+import in the working environment. Fixed with a clean virtualenv, and 31 tests
+now cover it — including `alg=none` forgery, a refresh token presented as an
+access token, a token carrying no workspace, corrupt password hashes, and
+bcrypt's silent 72-byte truncation.
+
+Two of those tests move claims from *reasoned* to *proven*:
+`test_context_sets_the_workspace_with_a_bound_parameter` pins the set_config
+form against the `SET LOCAL … = $1` syntax error, and
+`test_context_outside_a_transaction_is_an_error` pins the transaction
+requirement that made the original silently no-op.
+
+**The job queue did not exist.** `packages/pipeline/worker.py` now implements
+claim-with-lease over `FOR UPDATE SKIP LOCKED`, retry with jittered backoff, a
+dead-letter path, and checkpoint merging. Twenty-four tests, fourteen of them
+against a live Postgres — including two workers never claiming the same job,
+which cannot be observed through a mock, and a lapsed lease being reclaimed with
+the reclaim counted as an attempt so a job that reliably kills its worker cannot
+loop forever.
+
+**`make eval` now runs.** The harness executes end to end against a fixture
+dataset. Because a fixture scoring 1.0 is worth nothing, `synthetic` is recorded
+on the dataset, the result, and the `ai_evaluations` row; the regression gate
+abstains on it in both directions, and the audit engine refuses to verify AI
+quality from it. Without that, `make eval` would have shipped a self-
+congratulating 1.0.
+
+**Findings from running the tooling, all fixed rather than suppressed:**
+
+| Tool | Finding | Fix |
+|---|---|---|
+| bandit B608 | `f"SELECT count(*) FROM {table}"` in the audit engine | Allowlist of countable tables; interpolation removed |
+| bandit B607 | `ffmpeg` invoked as a bare name | Resolved to an absolute path — a bare name is looked up through PATH at call time, so anything that can prepend a directory chooses what runs with our credentials |
+| ruff B008 | `model: CostModel = CostModel()` evaluated at import | Named module-level singleton |
+| ruff UP042 | `str, Enum` on seven enums | `StrEnum`, so `str(x)` serialises to the value |
+| ruff F401 | Six unused imports | Removed |
+
+B404 and B603 remain and are documented in `pyproject.toml`: they fire on every
+ffmpeg and pg_dump call, and B603 flags the *correct* form — a list of arguments
+with no shell. The dangerous form is B602 (`shell=True`), which stays enabled,
+and which is the exact bug that made the original backup script write no file.
+
+CI now fails on a skip in `test_rls`, `test_auth` or `test_worker`, not just
+`test_rls`. Any of those skipping means the environment could not exercise the
+code, which is not the same as the code being correct.
+
+```
+198 passed
+ruff:   All checks passed  (E, F, W, I, B, UP, C4, SIM, RET)
+bandit: 0 issues at medium or high
+```

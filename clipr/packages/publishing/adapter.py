@@ -26,12 +26,12 @@ from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from enum import Enum
-from typing import Optional, Protocol
+from datetime import datetime, timedelta
+from enum import StrEnum
+from typing import Protocol
 
 
-class PublishStatus(str, Enum):
+class PublishStatus(StrEnum):
     PUBLISHED = "published"
     PROCESSING = "processing"
     MANUAL_HANDOFF = "manual_handoff"
@@ -47,7 +47,7 @@ class PublishRequest:
     caption: str
     hashtags: list[str] = field(default_factory=list)
     access_token: str = ""
-    scheduled_for: Optional[datetime] = None
+    scheduled_for: datetime | None = None
 
     @property
     def idempotency_key(self) -> str:
@@ -59,12 +59,12 @@ class PublishRequest:
 @dataclass
 class PublishResult:
     status: PublishStatus
-    external_post_id: Optional[str] = None
-    external_post_url: Optional[str] = None
-    handoff_deeplink: Optional[str] = None
-    error_code: Optional[str] = None
-    error_message: Optional[str] = None
-    retry_after: Optional[timedelta] = None
+    external_post_id: str | None = None
+    external_post_url: str | None = None
+    handoff_deeplink: str | None = None
+    error_code: str | None = None
+    error_message: str | None = None
+    retry_after: timedelta | None = None
 
     @property
     def success(self) -> bool:
@@ -77,8 +77,8 @@ class PublishResult:
 
 class Transport(Protocol):
     """Minimal HTTP surface, injected so adapters are testable offline."""
-    def post(self, url: str, *, headers: dict, json: dict) -> "Response": ...
-    def put_file(self, url: str, *, path: str, headers: dict) -> "Response": ...
+    def post(self, url: str, *, headers: dict, json: dict) -> Response: ...
+    def put_file(self, url: str, *, path: str, headers: dict) -> Response: ...
 
 
 @dataclass
@@ -100,7 +100,7 @@ class Adapter(ABC):
     platform: str
     handoff_scheme: str
 
-    def __init__(self, transport: Optional[Transport] = None):
+    def __init__(self, transport: Transport | None = None):
         self.transport = transport
 
     @property
@@ -226,7 +226,7 @@ class YouTubeAdapter(TikTokAdapter):
 
 
 class Registry:
-    def __init__(self, transport: Optional[Transport] = None):
+    def __init__(self, transport: Transport | None = None):
         self._adapters = {
             a.platform: a for a in (
                 TikTokAdapter(transport),

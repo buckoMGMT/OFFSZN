@@ -10,7 +10,12 @@ from dataclasses import replace
 import pytest
 
 from packages.ai.evaluation import (
-    EvalResult, MIN_LABELS_FOR_GATE, check_regression, evaluate, iou, load_dataset,
+    MIN_LABELS_FOR_GATE,
+    EvalResult,
+    check_regression,
+    evaluate,
+    iou,
+    load_dataset,
 )
 
 
@@ -167,3 +172,24 @@ def test_gate_abstains_when_the_dataset_changed():
 
 def test_gate_abstains_with_no_baseline():
     assert check_regression(baseline(), None).abstained
+
+
+# --- synthetic datasets ----------------------------------------------------
+
+def test_synthetic_datasets_are_marked(tmp_path):
+    ds = write_dataset(tmp_path, [{"synthetic": True, "labels": [{"start": 1, "end": 2}]}])
+    assert evaluate(lambda s: [Det(1, 2)], ds).synthetic
+
+
+def test_real_datasets_are_not_marked(tmp_path):
+    ds = write_dataset(tmp_path, [{"labels": [{"start": 1, "end": 2}]}])
+    assert not evaluate(lambda s: [Det(1, 2)], ds).synthetic
+
+
+def test_the_gate_abstains_on_a_synthetic_dataset():
+    """A fixture scoring 1.0 must not be able to approve a deploy, and a fixture
+    scoring 0.0 must not be able to block one."""
+    for f1 in (0.0, 1.0):
+        v = check_regression(baseline(synthetic=True, f1=f1), baseline())
+        assert v.abstained and not v.blocks_deploy
+        assert "synthetic" in v.reasons[0].lower()

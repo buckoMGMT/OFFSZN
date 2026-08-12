@@ -4,10 +4,18 @@ customer can get the product for free."""
 import pytest
 
 from packages.billing.plans import (
-    PLANS, UNLIMITED, Decision, Meter, Usage, check, cogs_for_usage, get_plan,
-    margin_for_plan, next_plan_up, quote_overage, rule_on_rejection,
+    PLANS,
+    UNLIMITED,
+    Meter,
+    Usage,
+    check,
+    cogs_for_usage,
+    get_plan,
+    margin_for_plan,
+    next_plan_up,
+    quote_overage,
+    rule_on_rejection,
 )
-
 
 # --- plan table ------------------------------------------------------------
 

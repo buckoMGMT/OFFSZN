@@ -15,12 +15,12 @@ creator, because we are not in a position to adjudicate fair use.
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
-from enum import Enum
-from typing import Optional, Sequence
+from enum import StrEnum
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -35,8 +35,8 @@ class Flag:
     flag_type: str
     severity: Severity
     message: str
-    matched_text: Optional[str] = None
-    detail: Optional[dict] = None
+    matched_text: str | None = None
+    detail: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -48,7 +48,7 @@ class Screening:
         return any(f.severity is Severity.BLOCK for f in self.flags)
 
     @property
-    def worst(self) -> Optional[Severity]:
+    def worst(self) -> Severity | None:
         return max((f.severity for f in self.flags), key=_ORDER.get, default=None)
 
     def of_type(self, flag_type: str) -> list[Flag]:
@@ -177,7 +177,7 @@ def screen_third_party_video(scene_matches: Sequence[dict] = ()) -> list[Flag]:
     return flags
 
 
-def screen_duplicate(similarity: Optional[float], *, threshold: float = 0.92) -> list[Flag]:
+def screen_duplicate(similarity: float | None, *, threshold: float = 0.92) -> list[Flag]:
     if similarity is not None and similarity >= threshold:
         return [Flag(
             "duplicate", Severity.MEDIUM,
@@ -192,7 +192,7 @@ def screen(
     transcript_text: str = "",
     music_matches: Sequence[dict] = (),
     scene_matches: Sequence[dict] = (),
-    duplicate_similarity: Optional[float] = None,
+    duplicate_similarity: float | None = None,
 ) -> Screening:
     return Screening(
         screen_transcript(transcript_text)

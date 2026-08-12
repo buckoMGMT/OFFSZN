@@ -7,7 +7,7 @@ than average over the sectors it managed to compute.
 
 import pytest
 
-from packages.audit.runner import AuditRunner, SCORE, State, WEIGHTS
+from packages.audit.runner import SCORE, WEIGHTS, AuditRunner, State
 
 
 class FakeDb:
@@ -89,13 +89,15 @@ def test_no_eval_run_is_code_complete_not_zero():
 def test_null_metrics_do_not_crash():
     """`float(row['f1_score'])` on a nullable column raised TypeError."""
     db = FakeDb(__row__={"f1_score": None, "publishable_rate": None,
-                         "labeled_moment_count": 100, "pipeline_version": "v1"})
+                         "labeled_moment_count": 100, "pipeline_version": "v1",
+                         "synthetic": False})
     assert run(AuditRunner(db).ai_quality()).state is State.CODE_COMPLETE
 
 
 def test_good_metrics_on_a_tiny_dataset_do_not_verify():
     db = FakeDb(__row__={"f1_score": 0.99, "publishable_rate": 0.99,
-                         "labeled_moment_count": 8, "pipeline_version": "v1"})
+                         "labeled_moment_count": 8, "pipeline_version": "v1",
+                         "synthetic": False})
     result = run(AuditRunner(db).ai_quality())
     assert result.state is State.INSUFFICIENT
     assert "not enough" in result.evidence
@@ -103,7 +105,8 @@ def test_good_metrics_on_a_tiny_dataset_do_not_verify():
 
 def test_strong_metrics_on_a_real_dataset_verify():
     db = FakeDb(__row__={"f1_score": 0.81, "publishable_rate": 0.66,
-                         "labeled_moment_count": 200, "pipeline_version": "v1"})
+                         "labeled_moment_count": 200, "pipeline_version": "v1",
+                         "synthetic": False})
     assert run(AuditRunner(db).ai_quality()).state is State.VERIFIED
 
 
@@ -140,3 +143,14 @@ def test_legal_can_never_be_verified_from_a_database():
     result = run(AuditRunner(FakeDb()).legal())
     assert result.state is State.INSUFFICIENT
     assert "Cannot be built" in result.blocker
+
+
+def test_a_synthetic_eval_run_cannot_verify_ai_quality():
+    """`make eval` ships with a fixture dataset that scores 1.0. If that could
+    verify the sector, the audit would be self-congratulating out of the box."""
+    db = FakeDb(__row__={"f1_score": 1.0, "publishable_rate": 1.0,
+                         "labeled_moment_count": 500, "pipeline_version": "v1",
+                         "synthetic": True})
+    result = run(AuditRunner(db).ai_quality())
+    assert result.state is State.CODE_COMPLETE
+    assert "synthetic" in result.evidence

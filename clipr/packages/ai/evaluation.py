@@ -25,10 +25,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+from collections.abc import Callable, Sequence
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable, Optional, Sequence
 
 IOU_MATCH_THRESHOLD = 0.5
 PUBLISHABLE_SCORE = 80.0
@@ -64,14 +64,18 @@ class EvalResult:
     f1: float
     false_negative_rate: float
     publishable_rate: float
-    boundary_error_seconds: Optional[float]
-    caption_wer: Optional[float] = None
-    crop_accuracy: Optional[float] = None
-    duplicate_rate: Optional[float] = None
+    boundary_error_seconds: float | None
+    caption_wer: float | None = None
+    crop_accuracy: float | None = None
+    duplicate_rate: float | None = None
+    # True when any sample is marked synthetic. A fixture dataset proves the
+    # harness runs; it says nothing about whether the model is good, and
+    # nothing downstream is allowed to treat it as if it did.
+    synthetic: bool = False
     pipeline_version: str = ""
     prompt_version: str = ""
     model_version: str = ""
-    ran_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    ran_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -119,8 +123,8 @@ def evaluate(
     pipeline_version: str = "",
     prompt_version: str = "",
     model_version: str = "",
-    caption_scorer: Optional[Callable[[dict], float]] = None,
-    crop_scorer: Optional[Callable[[dict], float]] = None,
+    caption_scorer: Callable[[dict], float] | None = None,
+    crop_scorer: Callable[[dict], float] | None = None,
 ) -> EvalResult:
     """Run `detect_fn` over a labeled dataset.
 
@@ -204,13 +208,23 @@ def evaluate(
         pipeline_version=pipeline_version,
         prompt_version=prompt_version,
         model_version=model_version,
+        synthetic=any(sample.get("synthetic") for sample in samples),
     )
 
 
 def check_regression(
-    candidate: EvalResult, baseline: Optional[EvalResult]
+    candidate: EvalResult, baseline: EvalResult | None
 ) -> RegressionVerdict:
     """Compare a candidate against the current production baseline."""
+    if candidate.synthetic:
+        # A synthetic dataset is a smoke test for the harness. Gating a deploy on
+        # it -- in either direction -- would be theatre.
+        return RegressionVerdict(
+            False, True,
+            ["Dataset is synthetic. It proves the harness runs; it cannot approve "
+             "or block a model."],
+        )
+
     if baseline is None:
         return RegressionVerdict(False, True, ["No baseline recorded; nothing to compare."])
 

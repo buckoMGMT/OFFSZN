@@ -19,9 +19,10 @@ clipr/
 │   ├── ai/                       detector, eval harness, reframing, safety
 │   ├── billing/                  plans, entitlements, overage, margin model
 │   ├── publishing/               platform adapters + the degrade path
+│   ├── pipeline/                 job queue: leases, retries, dead-letter
 │   ├── observability/            unit economics + budget guard
 │   └── audit/                    readiness scoring from evidence
-├── tests/                        139 tests, ~0.7s
+├── tests/                        198 tests, ~5s
 └── infra/                        CI gates, backup + restore verification
 ```
 
@@ -54,9 +55,17 @@ workspace isolation, because a table owner bypasses RLS.
 | No adapter reports a post that does not exist | tested |
 | The eval gate blocks a real regression and abstains on noise | tested |
 | Injected instructions in a transcript are not obeyed | tested |
+| Two workers never claim the same job | tested against a live Postgres |
+| A dead worker's job is reclaimed, and reclaiming counts as an attempt | tested |
+| A duplicate go-live webhook cannot double-process a stream | tested |
+| `alg=none` and refresh-as-access token forgeries are rejected | tested |
+| A demoted admin loses access immediately, not at token expiry | tested |
+| A fixture dataset cannot verify AI quality or gate a deploy | tested |
 
 ```
-139 passed in 0.74s
+198 passed in 5.34s
+ruff:   All checks passed
+bandit: 0 issues at medium or high
 ```
 
 ## What is deliberately not built
@@ -65,12 +74,27 @@ workspace isolation, because a table owner bypasses RLS.
 separate concern and the decision on it is in `STRATEGY.md`: web first, then a
 Capacitor shell for the swipe review queue and push notifications.
 
-**No worker loop or FastAPI app.** The schema supports both (job leases, a
-dead-letter queue, an idempotent publish key) but neither is written.
+**No FastAPI app.** The auth layer, request context and job queue underneath one
+are built and tested; the HTTP routes and the Next.js client are not.
+
+**No real eval dataset.** `make eval` runs end to end against a synthetic
+fixture, which proves the harness executes and nothing more. The harness knows
+it is synthetic and refuses to let it gate a deploy or verify the audit
+sector — labelling real streams is the remaining work, and it is labelling work,
+not engineering work.
 
 **No k6 load test, no Terraform.** The previous README claimed 1,000 concurrent
 users at p95 < 2s and a verified restore test. Neither claim had anything behind
 it, so neither is repeated here.
+
+## Why the audit will not read 10/10
+
+Because it cannot, and a version that could would be worthless. Of the twelve
+weighted sectors, seven are gated on evidence no code produces: interviews,
+users, cohorts, revenue, counsel, a penetration test, real labeled streams.
+Every sector where writing code was the blocker is now built, tested and
+lint-clean — that is what moves a sector to 6. The last four points are earned
+by shipping to people.
 
 ## What cannot be known yet
 
