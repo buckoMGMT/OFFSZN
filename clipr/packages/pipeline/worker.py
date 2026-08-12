@@ -97,8 +97,8 @@ def decide_retry(
 
 
 def jittered() -> float:
-    # Spreading retries, not generating a secret. random is the right tool and
-    # secrets.SystemRandom here would be cargo cult.
+    # Spreading retries, not generating a secret. random is the right tool here;
+    # secrets.SystemRandom would be cargo cult.
     return random.random()  # nosec B311
 
 

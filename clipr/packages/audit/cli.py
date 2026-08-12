@@ -14,20 +14,19 @@ import argparse
 import asyncio
 import json
 import os
+import shutil
 import subprocess
 import sys
 
 from packages.audit.runner import REQUIREMENTS, AuditRunner
 
 
-def _quote(value) -> str:
-    if value is None:
-        return "NULL"
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, (int, float)):
-        return str(value)
-    return "'" + str(value).replace("'", "''") + "'"
+def _psql_path() -> str:
+    """Absolute path to psql; a bare name is resolved through PATH at call time."""
+    path = shutil.which("psql")
+    if path is None:
+        raise RuntimeError("psql not found on PATH")
+    return path
 
 
 class PsqlConnection:
@@ -42,13 +41,24 @@ class PsqlConnection:
         self.dsn = dsn
 
     def _run(self, sql: str, args: tuple) -> list[list[str]]:
-        for i, arg in enumerate(reversed(args), start=1):
-            sql = sql.replace(f"${len(args) - i + 1}", _quote(arg))
-        proc = subprocess.run(
-            ["psql", self.dsn, "-X", "-q", "-A", "-t", "-F", "\x1f",
-             "-v", "ON_ERROR_STOP=1", "-c", sql],
-            capture_output=True, text=True, timeout=60,
-        )
+        # Positional placeholders become psql variables rather than being
+        # formatted into the SQL text. The audit's own arguments are literals
+        # today, but the engine that judges the codebase does not get to be the
+        # one place that builds SQL by string formatting.
+        params = {}
+        for i, arg in enumerate(args, start=1):
+            params[f"p{i}"] = arg
+            sql = sql.replace(f"${i}", f":'p{i}'")
+
+        cmd = [_psql_path(), self.dsn, "-X", "-q", "-A", "-t", "-F", "\x1f",
+               "-v", "ON_ERROR_STOP=1"]
+        for name, value in params.items():
+            cmd += ["-v", f"{name}={value}"]
+        # -f - rather than -c: psql only interpolates :'name' in input read from
+        # a file or stdin, never in a -c command string.
+        cmd += ["-f", "-"]
+
+        proc = subprocess.run(cmd, input=sql, capture_output=True, text=True, timeout=60)
         if proc.returncode != 0:
             raise RuntimeError(proc.stderr.strip())
         return [line.split("\x1f") for line in proc.stdout.strip().splitlines() if line]

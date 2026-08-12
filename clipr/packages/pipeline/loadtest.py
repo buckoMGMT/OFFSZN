@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import os
 import random
+import shutil
 import subprocess
 import time
 import uuid
@@ -31,11 +32,35 @@ TRANSIENT = ["PROVIDER_TIMEOUT", "RENDER_OOM", "STORAGE_5XX"]
 PERMANENT = ["SOURCE_DELETED", "UNSUPPORTED_CODEC"]
 
 
-def psql(dsn: str, query: str) -> str:
-    proc = subprocess.run(
-        ["psql", dsn, "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1", "-c", query],
-        capture_output=True, text=True, timeout=120,
-    )
+def _psql_path() -> str:
+    """Absolute path to psql.
+
+    A bare name is resolved through PATH at call time, so anything that can
+    prepend a directory chooses what runs against the database.
+    """
+    path = shutil.which("psql")
+    if path is None:
+        raise RuntimeError("psql not found on PATH")
+    return path
+
+
+def psql(dsn: str, query: str, **params: str | int) -> str:
+    """Run a query, binding values through psql variables.
+
+    Values are passed with `-v` and referenced as :'name' in the SQL rather than
+    interpolated into it. Everything here is internally generated, but SQL built
+    by string formatting is the shape of an injection whether or not today's
+    inputs are safe -- and this file is the one that scores the Engineering
+    sector, so it does not get to be the exception.
+    """
+    cmd = [_psql_path(), dsn, "-X", "-q", "-A", "-t", "-v", "ON_ERROR_STOP=1"]
+    for name, value in params.items():
+        cmd += ["-v", f"{name}={value}"]
+    # -f - rather than -c: psql only interpolates :'name' in input read from a
+    # file or stdin, never in a -c command string.
+    cmd += ["-f", "-"]
+
+    proc = subprocess.run(cmd, input=query, capture_output=True, text=True, timeout=120)
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip())
     return proc.stdout.strip()
@@ -63,23 +88,24 @@ class Stats:
 
 def seed(dsn: str, jobs: int) -> tuple[str, str]:
     ws, vod = str(uuid.uuid4()), str(uuid.uuid4())
-    psql(dsn, f"""
+    psql(dsn, """
         INSERT INTO workspaces (id, name, plan)
-          VALUES ('{ws}', 'load test {ws[:8]}', 'network');
+          VALUES (:'ws', 'load test', 'network');
         INSERT INTO vods (id, workspace_id, title, status)
-          VALUES ('{vod}', '{ws}', 'load source', 'ready');
-    """)
+          VALUES (:'vod', :'ws', 'load source', 'ready');
+    """, ws=ws, vod=vod)
     # One row per job. Each needs a distinct vod because of the idempotency
     # constraint UNIQUE(vod_id, pipeline_version) -- which is exactly the
     # constraint that stops a duplicate go-live webhook double-processing, so
     # the load test has to respect it rather than work around it.
-    psql(dsn, f"""
+    psql(dsn, """
         INSERT INTO vods (workspace_id, title, status)
-          SELECT '{ws}', 'load source ' || g, 'ready' FROM generate_series(1, {jobs}) g;
+          SELECT :'ws', 'load source ' || g, 'ready'
+          FROM generate_series(1, :'jobs'::int) g;
         INSERT INTO processing_jobs (workspace_id, vod_id, max_retries)
-          SELECT '{ws}', id, 2 FROM vods
-          WHERE workspace_id = '{ws}' AND title LIKE 'load source %';
-    """)
+          SELECT :'ws', id, 2 FROM vods
+          WHERE workspace_id = :'ws' AND title LIKE 'load source %';
+    """, ws=ws, jobs=int(jobs))
     return ws, vod
 
 
@@ -95,7 +121,8 @@ def worker(dsn: str, worker_id: str, deadline: float, fail_rate: float) -> Stats
         decide_retry,
     )
 
-    rng = random.Random(worker_id)  # nosec B311 - scheduling, not secrets
+    # Scheduling, not secrets; seeded per worker so a run is reproducible.
+    rng = random.Random(worker_id)  # nosec B311
     stats = Stats()
 
     while time.monotonic() < deadline:
@@ -173,39 +200,40 @@ def run(dsn: str, jobs: int, workers: int, seconds: int, fail_rate: float) -> di
 
     # The integrity checks. A queue that is fast and loses work is worthless, so
     # these matter more than the latency number.
-    stranded = int(psql(dsn, f"""
+    stranded = int(psql(dsn, """
         SELECT count(*) FROM processing_jobs
-        WHERE workspace_id = '{ws}' AND status = 'running' AND lease_expires_at < now();
-    """) or 0)
-    unfinished = int(psql(dsn, f"""
+        WHERE workspace_id = :'ws' AND status = 'running' AND lease_expires_at < now();
+    """, ws=ws) or 0)
+    unfinished = int(psql(dsn, """
         SELECT count(*) FROM processing_jobs
-        WHERE workspace_id = '{ws}' AND status IN ('queued', 'running');
-    """) or 0)
-    double_completed = int(psql(dsn, f"""
+        WHERE workspace_id = :'ws' AND status IN ('queued', 'running');
+    """, ws=ws) or 0)
+    double_completed = int(psql(dsn, """
         SELECT count(*) FROM (
           SELECT vod_id FROM processing_jobs
-          WHERE workspace_id = '{ws}' AND status = 'succeeded'
+          WHERE workspace_id = :'ws' AND status = 'succeeded'
           GROUP BY vod_id HAVING count(*) > 1
         ) d;
-    """) or 0)
+    """, ws=ws) or 0)
 
     operations = totals.claimed
     error_rate = totals.errors / operations if operations else 1.0
     p95 = percentile(totals.latencies_ms, 0.95)
 
-    psql(dsn, f"""
+    notes = (f"completed={totals.completed} requeued={totals.requeued} "
+             f"dead_lettered={totals.dead_lettered} permanent={totals.failed_permanent} "
+             f"stranded={stranded} unfinished={unfinished} "
+             f"double_completed={double_completed}")
+    psql(dsn, """
         INSERT INTO load_test_runs
           (tool, scenario, concurrency, operations, duration_seconds,
            p95_ms, error_rate, provenance, notes)
         VALUES ('packages.pipeline.loadtest', 'queue claim/complete/retry/dead-letter',
-                {workers}, {operations}, {elapsed:.3f},
-                {f'{p95:.3f}' if p95 is not None else 'NULL'},
-                {error_rate:.5f}, 'load_test',
-                'completed={totals.completed} requeued={totals.requeued} '
-                'dead_lettered={totals.dead_lettered} permanent={totals.failed_permanent} '
-                'stranded={stranded} unfinished={unfinished} '
-                'double_completed={double_completed}');
-    """)
+                :'workers'::int, :'operations'::int, :'elapsed'::numeric,
+                NULLIF(:'p95', '')::numeric, :'error_rate'::numeric, 'load_test', :'notes');
+    """, workers=workers, operations=operations, elapsed=f"{elapsed:.3f}",
+         p95="" if p95 is None else f"{p95:.3f}",
+         error_rate=f"{error_rate:.5f}", notes=notes)
 
     return {
         "operations": operations,
