@@ -27,6 +27,7 @@ from __future__ import annotations
 import shutil
 import statistics
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
 from packages.ai.subject import GRID_H, GRID_W, _frames
@@ -162,9 +163,17 @@ def find_candidates(
     top_n: int = 12,
 ) -> tuple[list[Candidate], dict]:
     """Score every window in the file and return the best, with reasons."""
-    loudness = loudness_series(media_path)
-    motion = motion_series(media_path, duration)
-    cuts = scene_changes(media_path)
+    # Three independent passes over the file, each one mostly waiting on an
+    # ffmpeg subprocess. Run together they cost about what the slowest one
+    # costs instead of the sum, and the GIL is not in the way because the work
+    # happens in another process.
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        f_loud = pool.submit(loudness_series, media_path)
+        f_motion = pool.submit(motion_series, media_path, duration)
+        f_cuts = pool.submit(scene_changes, media_path)
+        loudness = f_loud.result()
+        motion = f_motion.result()
+        cuts = f_cuts.result()
 
     audible = [v for v in loudness if v > -119]
     baseline = statistics.median(audible) if audible else -120.0

@@ -30,7 +30,11 @@ from packages.ai.reframe import (
     static_crop_filter,
 )
 from packages.ai.signals import find_candidates, loudness_series
-from packages.ai.transcribe import TranscriptionUnavailable, transcribe
+from packages.ai.transcribe import (
+    TranscriptionUnavailable,
+    available_engines,
+    transcribe,
+)
 from packages.media.probe import MediaError, probe, sample_frames, validate_output
 from packages.pipeline.render import before_after, contact_sheet, render_clip
 from tests import fixtures
@@ -220,11 +224,16 @@ def test_candidates_do_not_all_overlap(talking: Path):
 def test_transcription_produces_real_words_with_timings(talking: Path, media: Path):
     result = transcribe(talking, work_dir=media)
     assert result.word_count > 0
-    assert result.engine in {"faster-whisper", "pocketsphinx"}
+    # Checked against the engine registry rather than a hardcoded set. The
+    # hardcoded version went stale the moment a third engine was added and
+    # failed a run that was working correctly -- the test was asserting which
+    # engines existed when it was written, not that transcription worked.
+    assert result.engine in available_engines()
     assert not result.is_empty
     words = [w for s in result.segments for w in s.words]
     assert words, "an engine with no word timings cannot drive captions"
     assert all(w.end >= w.start for w in words)
+    assert all(w.text.strip() for w in words)
 
 
 @requires_ffmpeg

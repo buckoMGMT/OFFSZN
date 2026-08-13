@@ -26,8 +26,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -293,49 +295,36 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
 
     # --- 4. render ----------------------------------------------------------
     print("\n4. REFRAME + CAPTIONS + RENDER")
-    rendered: list[dict] = []
-    clip_paths: list[Path] = []
 
-    for i, cand in enumerate(candidates[:clips_wanted], start=1):
+    def build_clip(i: int, cand) -> dict:
+        """Everything for one clip. Independent of every other clip."""
         duration = min(cand.duration, clip_seconds or MAX_CLIP_SECONDS)
-        decision = timer.run(
-            f"clip {i}: choose framing",
-            lambda c=cand, d=duration: decide(
-                input_path.as_posix(), c.start, d, info.width, info.height),
-        )
-        print(f"     -> {decision.strategy}: {decision.reason}")
+        decision = decide(input_path.as_posix(), cand.start, duration,
+                          info.width, info.height)
 
         ass_path = None
         cue_count = 0
+        caption_warnings: list[str] = []
         if transcript is not None:
             cap = C.prepare(transcript, cand.start, cand.start + duration,
                             out_dir / f".clip_{i:02d}.ass")
             ass_path = cap.ass_path if cap.rendered_anything else None
             cue_count = cap.cue_count
-            for w in cap.warnings:
-                if "overflow" in w or "no captions" in w:
-                    report.warnings.append(f"clip {i}: {w}")
+            caption_warnings = [f"clip {i}: {w}" for w in cap.warnings
+                                if "overflow" in w or "no captions" in w]
 
         clip_path = out_dir / f"clip_{i:02d}.mp4"
-        timer.run(
-            f"clip {i}: render",
-            lambda c=cand, d=duration, dec=decision, a=ass_path, p=clip_path:
-                render_clip(input_path.as_posix(), p, start=c.start, duration=d,
-                            decision=dec, source_w=info.width,
-                            source_h=info.height, ass_path=a,
-                            has_audio=info.has_audio),
-        )
-        debug_path = out_dir / f"clip_{i:02d}_debug.mp4"
-        timer.run(
-            f"clip {i}: debug render",
-            lambda c=cand, d=duration, dec=decision, p=debug_path, cp=clip_path:
-                render_debug(input_path.as_posix(), p, cp, start=c.start,
-                             duration=d, candidate=c, decision=dec,
-                             source_w=info.width, source_h=info.height),
-        )
+        render_clip(input_path.as_posix(), clip_path, start=cand.start,
+                    duration=duration, decision=decision, source_w=info.width,
+                    source_h=info.height, ass_path=ass_path,
+                    has_audio=info.has_audio)
 
-        clip_paths.append(clip_path)
-        rendered.append({
+        debug_path = out_dir / f"clip_{i:02d}_debug.mp4"
+        render_debug(input_path.as_posix(), debug_path, clip_path,
+                     start=cand.start, duration=duration, candidate=cand,
+                     decision=decision, source_w=info.width, source_h=info.height)
+
+        return {
             "index": i,
             "path": str(clip_path.resolve()),
             "debug_path": str(debug_path.resolve()),
@@ -346,7 +335,37 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
             "strategy": str(decision.strategy),
             "framing": decision.to_dict(),
             "caption_cues": cue_count,
-        })
+            "_warnings": caption_warnings,
+            "_reason": decision.reason,
+        }
+
+    chosen = candidates[:clips_wanted]
+    # Clips share nothing, and each one spends nearly all its time waiting on
+    # an ffmpeg subprocess, so they overlap almost perfectly. Capped at the
+    # core count because the encoders are the thing competing, not Python.
+    workers = max(1, min(len(chosen), os.cpu_count() or 2))
+    started = time.perf_counter()
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(build_clip, i, c): i
+                   for i, c in enumerate(chosen, start=1)}
+        results = {futures[f]: f.result() for f in as_completed(futures)}
+
+    elapsed = time.perf_counter() - started
+    report.stages.append(Stage(f"build {len(chosen)} clips ({workers} at once)",
+                               elapsed))
+    print(f"  {'build clips':<30} {elapsed:>7.2f}s  "
+          f"({len(chosen)} clips, {workers} in parallel)")
+
+    # Report in clip order, not completion order.
+    rendered: list[dict] = []
+    clip_paths: list[Path] = []
+    for i in sorted(results):
+        entry = results[i]
+        print(f"     clip {i} -> {entry['strategy']}: {entry['_reason']}")
+        report.warnings.extend(entry.pop("_warnings"))
+        entry.pop("_reason")
+        rendered.append(entry)
+        clip_paths.append(Path(entry["path"]))
 
     report.clips = rendered
 

@@ -69,6 +69,27 @@ You get, in `demo_output/`:
   completed demo for a clip nobody could see anything in — ffmpeg exited 0, the
   container was valid, the dimensions were right, and the artifact was useless.
 
+### Speed
+
+Measured end to end on an 8-minute file, 4 CPU cores, no GPU:
+
+| | before | after |
+| --- | ---: | ---: |
+| 8-minute file | 368s | **178s** |
+| relative to realtime | 0.77x | **0.37x** |
+| a 20-minute VOD | ~15 min | **~7 min** |
+
+Three changes, in order of what they returned. Clips share nothing and spend
+their time waiting on ffmpeg, so they are built concurrently across cores.
+Detection's three passes over the file — loudness, motion, scene cuts — are
+independent and now run together, costing what the slowest one costs instead
+of the sum. And `probe()` is memoised on (path, size, mtime): it runs an
+ffprobe *plus* a one-frame decode, validation alone calls it four times per
+clip, and the cache re-probes correctly when a file changes.
+
+Transcription is still the single largest stage and is the thing to attack
+next if this needs to be faster.
+
 ### Transcription: three engines, all self-hosted
 
 ClipR does not call a speech API. Weights are files on disk and inference runs

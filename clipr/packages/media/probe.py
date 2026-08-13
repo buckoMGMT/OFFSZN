@@ -121,6 +121,13 @@ def _parse_fps(rate: str) -> float:
         return 0.0
 
 
+# Keyed on identity *and* content stamp, so a rewritten file is re-probed
+# rather than served stale. Each probe costs an ffprobe plus a one-frame decode,
+# and validation alone calls it four times per clip -- worth keeping, not worth
+# repeating.
+_PROBE_CACHE: dict[tuple[str, int, int], SourceInfo] = {}
+
+
 def probe(path: str | Path) -> SourceInfo:
     """Inspect an input file, or explain precisely why it cannot be used.
 
@@ -128,6 +135,14 @@ def probe(path: str | Path) -> SourceInfo:
     is not; "this file has no video stream" is.
     """
     p = Path(path).expanduser().resolve()
+    try:
+        stat = p.stat()
+        cache_key: tuple[str, int, int] | None = (
+            str(p), stat.st_size, stat.st_mtime_ns)
+    except OSError:
+        cache_key = None
+    if cache_key is not None and cache_key in _PROBE_CACHE:
+        return _PROBE_CACHE[cache_key]
     if not p.exists():
         raise MediaError(f"No such file: {p}")
     if p.is_dir():
@@ -206,6 +221,8 @@ def probe(path: str | Path) -> SourceInfo:
             f"  ffmpeg said: {check.stderr.strip()[:400]}"
         )
 
+    if cache_key is not None:
+        _PROBE_CACHE[cache_key] = info
     return info
 
 
