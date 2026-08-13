@@ -69,6 +69,68 @@ You get, in `demo_output/`:
   completed demo for a clip nobody could see anything in — ffmpeg exited 0, the
   container was valid, the dimensions were right, and the artifact was useless.
 
+### How a clip gets chosen
+
+Detection finds where something happened. That is not the product — a loud
+moment is not a good clip. Ranking decides whether a moment is worth a
+creator's time, and where it should start and end.
+
+Seven dimensions, scored separately because they fail separately:
+
+| dimension | question |
+| --- | --- |
+| hook | does something happen in the first three seconds |
+| payoff | is there a reaction, punchline, reveal or result |
+| energy | does activity rise across the moment |
+| context | can it be understood without the previous five minutes |
+| speech | clear talking, not filler and dead air |
+| visual | can a decent vertical frame be made of it |
+| completeness | beginning, middle and end rather than a slice |
+| novelty | a different moment from the ones already chosen |
+
+**`clip_score` means "ClipR thinks this is worth reviewing."** It is
+deliberately not a virality score. Nothing here has been shown to correlate
+with how a post performs, and naming it after an outcome we have never
+measured would be inventing precision we have not earned.
+
+Three behaviours matter as much as the numbers:
+
+**Boundaries.** Finding the peak is the easy half. Cut points move backwards to
+the sentence that sets the moment up and forwards to the one that pays it off,
+and hold for a reaction if one lands. A 35-second clip with its setup intact
+beats a 45-second one that opens mid-word.
+
+**De-duplication.** Three views of one moment is one clip. Candidates compete
+on time overlap *and* on what is actually said, because a shifted window keeps
+most of the words even when the spans barely intersect.
+
+**Abstention.** If a VOD has one good moment, ClipR returns one. Below
+`MINIMUM_CLIP_SCORE` it offers nothing and says so. Manufacturing three clips
+because a UI expects three is how a product teaches people to stop trusting it.
+
+Every score is explained. `candidates.json` carries the per-dimension numbers,
+the reason each was given, and where the cut points moved to.
+
+### Reviewing, and the only metric that counts
+
+```bash
+make review          # walk the clips, record post / maybe / reject
+```
+
+**Publishable Rate = clips approved ÷ clips offered.** Below 30% is bad, 30-50
+weak, 50-70 promising, 70-85 strong, 85%+ exceptional. It cannot be computed
+from labels and no code path derives it — only a creator saying yes or no
+produces it. Rejection *reasons* are recorded alongside, because a rate tells
+you something is wrong and the reasons tell you what: "bad crop" and "missing
+context" send you to different parts of the codebase.
+
+`packages/ai/clip_eval.py` measures recall@k, precision@k, boundary error and
+duplicate rate against human labels in `evaluation/creator_vods/`. Labels carry
+a *range* of acceptable start and end points, because two editors will not
+agree on a frame and a metric demanding they do is measuring noise. Below
+twenty labelled VODs it reports that the sample is too small rather than
+quoting a number.
+
 ### Speed
 
 Measured end to end on an 8-minute file, 4 CPU cores, no GPU:

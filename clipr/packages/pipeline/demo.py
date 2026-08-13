@@ -34,9 +34,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from packages.ai import captions as C
+from packages.ai.ranking import MAX_CLIP_SECONDS, MINIMUM_CLIP_SCORE, rank
 from packages.ai.reframe import decide
 from packages.ai.safety import screen
-from packages.ai.signals import MAX_CLIP_SECONDS, find_candidates, snap_to_speech
+from packages.ai.signals import find_candidates, snap_to_speech
 from packages.ai.transcribe import (
     Transcript,
     TranscriptionUnavailable,
@@ -164,7 +165,16 @@ def _markdown(report: DemoReport) -> str:
 
     lines += ["", "## Why these moments", ""]
     for clip in d["clips"]:
-        lines.append(f"**Clip {clip['index']}** — score {clip['score']} — {clip['reason']}")
+        lines.append(f"**Clip {clip['index']}** — clip_score {clip['clip_score']}")
+        dims = clip.get("dimensions", {})
+        if dims:
+            lines.append("")
+            lines.append("| " + " | ".join(dims) + " |")
+            lines.append("| " + " | ".join("---" for _ in dims) + " |")
+            lines.append("| " + " | ".join(str(v) for v in dims.values()) + " |")
+        lines.append("")
+        for k, v in clip.get("why", {}).items():
+            lines.append(f"- **{k}** — {v}")
         lines.append("")
 
     lines += ["## Verdict", ""]
@@ -286,18 +296,76 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
 
     candidates = [snap_to_speech(c, transcript, info.duration_seconds)
                   for c in candidates]
-    write_json(out_dir / "candidates.json",
-               {"context": context, "candidates": [c.to_dict() for c in candidates]})
-    report.candidates = [c.to_dict() for c in candidates]
 
-    for c in candidates[:clips_wanted]:
-        print(f"     {c.describe()}")
+    # --- 3b. ranking --------------------------------------------------------
+    # Detection says where something happened. Ranking decides whether it is
+    # worth a creator's time and where the clip should actually begin and end.
+    print("\n3b. RANKING — scoring each candidate on separate dimensions")
+    series = context.pop("_series", {"loudness": [], "motion": [], "cuts": []})
+
+    framing_cache: dict[tuple[float, float], tuple[float, str]] = {}
+
+    def framing_for(start: float, end: float) -> tuple[float, str]:
+        key = (round(start, 1), round(end, 1))
+        if key not in framing_cache:
+            d = decide(input_path.as_posix(), start, min(end - start, 12.0),
+                       info.width, info.height)
+            framing_cache[key] = (d.confidence, str(d.strategy))
+        return framing_cache[key]
+
+    ranked, rank_context = timer.run(
+        "rank candidates",
+        lambda: rank(candidates, transcript=transcript,
+                     loudness=series["loudness"], motion=series["motion"],
+                     duration=info.duration_seconds,
+                     baseline_dbfs=context["baseline_dbfs"],
+                     framing_for=framing_for, wanted=clips_wanted),
+    )
+    print(f"     {rank_context['scored']} scored, "
+          f"{rank_context['duplicates_dropped']} duplicates dropped, "
+          f"{rank_context['offered']} above the {MINIMUM_CLIP_SCORE:.0f} threshold")
+
+    write_json(out_dir / "candidates.json", {
+        "detection": context,
+        "ranking": rank_context,
+        "detected": [c.to_dict() for c in candidates],
+        "ranked": [c.to_dict() for c in ranked],
+    })
+    report.candidates = [c.to_dict() for c in ranked]
+
+    if not ranked:
+        # Abstention is a feature. Manufacturing three clips because a UI
+        # expects three is how a product teaches people to stop trusting it.
+        report.warnings.append(
+            f"No moment scored above {MINIMUM_CLIP_SCORE:.0f}. ClipR is not "
+            f"offering clips it does not think are worth reviewing."
+        )
+        print(f"\n  No moment cleared the quality threshold "
+              f"({MINIMUM_CLIP_SCORE:.0f}). Offering nothing rather than filler.")
+        _finish(report, out_dir)
+        return report
+
+    if len(ranked) < clips_wanted:
+        report.warnings.append(
+            f"Asked for {clips_wanted} clips, offering {len(ranked)}: no other "
+            f"moment scored above {MINIMUM_CLIP_SCORE:.0f}."
+        )
+
+    for clip in ranked:
+        print(f"     {clip.start:7.1f}-{clip.end:<7.1f} clip_score "
+              f"{clip.clip_score:5.1f}   {clip.why()}")
+        print(f"     {'':16}hook: {clip.explanations['hook']}")
+        print(f"     {'':16}payoff: {clip.explanations['payoff']}")
 
     # --- 4. render ----------------------------------------------------------
     print("\n4. REFRAME + CAPTIONS + RENDER")
 
     def build_clip(i: int, cand) -> dict:
-        """Everything for one clip. Independent of every other clip."""
+        """Everything for one clip. Independent of every other clip.
+
+        `cand` is a RankedClip: its boundaries have already been moved to
+        sentence edges, so they are used as given rather than re-derived.
+        """
         duration = min(cand.duration, clip_seconds or MAX_CLIP_SECONDS)
         decision = decide(input_path.as_posix(), cand.start, duration,
                           info.width, info.height)
@@ -330,8 +398,12 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
             "debug_path": str(debug_path.resolve()),
             "start": round(cand.start, 2),
             "end": round(cand.start + duration, 2),
-            "score": round(cand.score, 2),
-            "reason": "; ".join(cand.reasons),
+            "clip_score": round(cand.clip_score, 1),
+            "dimensions": {k: round(v, 1) for k, v in cand.dimensions.items()},
+            "why": cand.explanations,
+            "boundary_notes": cand.boundary_notes,
+            "reason": "; ".join(cand.detection_reasons),
+            "hook_text": cand.hook_text,
             "strategy": str(decision.strategy),
             "framing": decision.to_dict(),
             "caption_cues": cue_count,
@@ -339,7 +411,7 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
             "_reason": decision.reason,
         }
 
-    chosen = candidates[:clips_wanted]
+    chosen = ranked
     # Clips share nothing, and each one spends nearly all its time waiting on
     # an ffmpeg subprocess, so they overlap almost perfectly. Capped at the
     # core count because the encoders are the thing competing, not Python.

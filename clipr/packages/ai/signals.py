@@ -302,6 +302,10 @@ def find_candidates(
         "windows_scored": len(candidates),
         "transcript_engine": transcript.engine if transcript else None,
     }
+    # The raw series travel with the result so the ranking stage can score
+    # against them without decoding the file a second time. They are large, so
+    # they are kept out of anything that gets serialised into a report.
+    context["_series"] = {"loudness": loudness, "motion": motion, "cuts": cuts}
     return selected, context
 
 

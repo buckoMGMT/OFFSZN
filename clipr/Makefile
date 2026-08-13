@@ -5,7 +5,7 @@ DB     ?= $(DATABASE_URL)
 PYTHON ?= python3
 
 .PHONY: help up down migrate test test-unit test-integration test-all \
-        demo verify-demo lint security eval check margins audit
+        demo verify-demo review lint security eval check margins audit
 
 # Where `make demo` writes. A persistent directory in the project, not /tmp:
 # the clips are the deliverable, and a deliverable that a reboot deletes is
@@ -28,6 +28,9 @@ demo:      ## Run ClipR on a local video: make demo INPUT=/path/video.mp4
 
 verify-demo: ## Re-check every file `make demo` produced, by decoding it
 	$(PYTHON) -m packages.pipeline.verify --dir "$(OUT)"
+
+review:    ## Review the clips and record the Publishable Rate
+	$(PYTHON) -m packages.pipeline.review --dir "$(OUT)"
 
 test-unit: ## Fast tests. Mocks allowed. Never sufficient on their own.
 	$(PYTHON) -m pytest tests -m "not integration" -q

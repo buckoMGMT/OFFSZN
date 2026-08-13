@@ -226,13 +226,29 @@ def render_debug(
     # off the edge of the panel that exists to explain the decision.
     wrap_at = max(16, int((half_w - 28) / (size * 0.55)))
 
+    # Accepts either a raw detection Candidate or a scored RankedClip. The
+    # debug view is for diagnosing a bad pick, and the dimension breakdown is
+    # the fastest way to see *which* part of the judgement went wrong.
+    score = getattr(candidate, "clip_score", None)
+    if score is None:
+        score = getattr(candidate, "score", 0.0)
+    reasons = (getattr(candidate, "detection_reasons", None)
+               or getattr(candidate, "reasons", []))
+
     header = [
-        f"score {candidate.score:.1f}   {candidate.start:.1f}-{candidate.end:.1f}s",
+        f"clip_score {score:.1f}   {candidate.start:.1f}-{candidate.end:.1f}s",
         f"{decision.strategy}  conf {decision.confidence:.2f}  "
         f"conc {decision.concentration:.2f}",
         window_note,
     ]
-    header += _wrap_words("; ".join(candidate.reasons), wrap_at, max_lines=3)
+
+    dimensions = getattr(candidate, "dimensions", None)
+    if dimensions:
+        ordered = sorted(dimensions.items(), key=lambda kv: -kv[1])
+        header += _wrap_words(
+            "  ".join(f"{k[:4]} {v:.0f}" for k, v in ordered), wrap_at, max_lines=2)
+
+    header += _wrap_words("; ".join(reasons), wrap_at, max_lines=2)
 
     left_chain = ["[0:v]"]
     if box is not None:
