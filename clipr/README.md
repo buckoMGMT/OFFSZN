@@ -69,19 +69,44 @@ You get, in `demo_output/`:
   completed demo for a clip nobody could see anything in — ffmpeg exited 0, the
   container was valid, the dimensions were right, and the artifact was useless.
 
-### Transcription
+### Transcription: three engines, all self-hosted
 
-`faster-whisper` is the real engine and the one to install:
+ClipR does not call a speech API. Weights are files on disk and inference runs
+on our own CPU, because ASR is a per-minute cost line in the margin model —
+renting someone's endpoint is what turns a 55% gross margin into a 20% one.
+
+| engine | words | timings | needs |
+| --- | --- | --- | --- |
+| `faster-whisper` | Whisper | **exact, per word** | `pip install faster-whisper` + weights |
+| `sherpa-onnx-whisper` | Whisper | approximate (VAD segments) | `pip install sherpa-onnx` + weights below |
+| `pocketsphinx` | poor | exact | `pip install pocketsphinx` (model in the wheel) |
+
+`faster-whisper` is first choice because it returns per-word timings, which is
+what makes captions land on the syllable. Its weights come from Hugging Face.
+Where that is unreachable, the ONNX build runs the same Whisper weights from a
+plain file:
 
 ```bash
-pip install faster-whisper       # downloads model weights once
+mkdir -p models && cd models
+curl -sSLO https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-base.en.tar.bz2
+tar xjf sherpa-onnx-whisper-base.en.tar.bz2
+curl -sSLO https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx
 ```
 
-Without network access it falls back to `pocketsphinx`, whose acoustic model
-ships inside the wheel. That is genuine offline recognition, not a stub — and
-it is a 2010-era model, so the words are substantially wrong. Every result
-carries a `quality`, and anything below `good` makes the report state plainly
-that the captions cannot be judged.
+Searched in `$CLIPR_ASR_MODEL_DIR`, `./models`, `~/.cache/clipr/models`, and
+`/opt/clipr/models`. World-writable directories are deliberately **not** on
+that list: an ONNX file is executed by the runtime, so a model path anyone can
+write to is a code-execution path.
+
+Measured here: Whisper `base.en` int8 transcribed real speech at **6.1×
+realtime on CPU**, correctly, with no network.
+
+Two quality axes are tracked separately, because they fail independently.
+`quality` is whether the *words* are right; `word_timing` is whether the
+*times* are. Whisper-via-ONNX returns perfect words and no timings at all —
+correct captions that drift — so speech boundaries come from Silero VAD and
+words are distributed inside utterances a few seconds long. Anything less than
+exact is stated in the report rather than glossed.
 
 ## Running the rest of it
 

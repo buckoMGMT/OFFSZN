@@ -44,7 +44,13 @@ from packages.ai.transcribe import (
 from packages.ai.transcribe import (
     save as save_transcript,
 )
-from packages.media.probe import MediaError, probe, validate_output
+from packages.media.probe import (
+    SILENT_DBFS,
+    MediaError,
+    audio_rms_dbfs,
+    probe,
+    validate_output,
+)
 from packages.pipeline.render import (
     before_after,
     contact_sheet,
@@ -207,7 +213,23 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
     # --- 2. transcript ------------------------------------------------------
     print("\n2. TRANSCRIPTION")
     transcript: Transcript | None = None
-    if info.has_audio:
+
+    # A file can carry a real audio stream containing digital silence. Running
+    # speech recognition over it is worse than pointless: Whisper hallucinates
+    # on silence, and a real 2-minute clip of nothing produced twelve segments
+    # reading "(buzzing)". That is invented text reaching the captions, which
+    # is the exact failure this pipeline refuses to commit.
+    source_rms = audio_rms_dbfs(input_path) if info.has_audio else None
+    source_audible = source_rms is not None and source_rms > SILENT_DBFS
+    if info.has_audio and not source_audible:
+        report.warnings.append(
+            f"Source has an audio stream but it is silent ({source_rms} dBFS). "
+            f"Transcription was skipped -- speech recognition on silence "
+            f"invents text. Detection falls back to visual signals."
+        )
+        print(f"     ! audio stream is silent ({source_rms} dBFS) — skipping ASR")
+
+    if info.has_audio and source_audible:
         try:
             transcript = timer.run(
                 "transcribe",
@@ -232,7 +254,11 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
             )
             print(f"     ! quality is '{transcript.quality}' — captions will be wrong")
     else:
-        report.transcript = {"engine": None, "reason": "source has no audio"}
+        report.transcript = {
+            "engine": None,
+            "reason": ("source has no audio" if not info.has_audio
+                       else "source audio is silent; ASR skipped"),
+        }
 
     # --- 3. detection -------------------------------------------------------
     print("\n3. DETECTION — real media signals, no planted moments")
@@ -330,7 +356,7 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
     for clip in rendered:
         result = validate_output(
             clip["path"], min_seconds=min(10.0, info.duration_seconds),
-            expect_audio=info.has_audio,
+            expect_audio=info.has_audio, expect_audible=source_audible,
         )
         report.validation.append(result.to_dict())
         mark = "OK  " if result.passed else "FAIL"

@@ -49,8 +49,21 @@ class TranscriptionUnavailable(RuntimeError):
 
 
 class Quality(StrEnum):
+    """How much the *words* can be trusted."""
     GOOD = "good"            # Whisper-class. Captions can be trusted.
     POOR = "poor"            # Real recognition, unreliable words.
+
+
+class Timing(StrEnum):
+    """How much the *timings* can be trusted.
+
+    Separate from Quality because they fail independently, and captions need
+    both. An engine can return perfect words with no timing information at all
+    (Whisper via ONNX does exactly that), which produces correct captions that
+    drift out of sync -- a different defect from correct timing on wrong words.
+    """
+    EXACT = "exact"              # per-word timings from the decoder
+    APPROXIMATE = "approximate"  # real segment bounds, words spread within them
 
 
 @dataclass(frozen=True)
@@ -87,6 +100,7 @@ class Transcript:
     quality: Quality
     audio_seconds: float
     seconds_to_transcribe: float
+    word_timing: Timing = Timing.EXACT
 
     @property
     def text(self) -> str:
@@ -111,6 +125,7 @@ class Transcript:
             "model": self.model,
             "language": self.language,
             "quality": str(self.quality),
+            "word_timing": str(self.word_timing),
             "trustworthy": self.trustworthy,
             "audio_seconds": round(self.audio_seconds, 2),
             "seconds_to_transcribe": round(self.seconds_to_transcribe, 2),
@@ -178,6 +193,15 @@ def available_engines() -> dict[str, str]:
         status["faster-whisper"] = "not installed (pip install faster-whisper)"
 
     try:
+        import sherpa_onnx  # noqa: F401
+        found = _find_sherpa_whisper()
+        status["sherpa-onnx-whisper"] = (
+            f"installed, model {found['name']}" if found
+            else "installed but no model on disk (see _transcribe_sherpa docstring)")
+    except ImportError:
+        status["sherpa-onnx-whisper"] = "not installed (pip install sherpa-onnx)"
+
+    try:
         import pocketsphinx  # noqa: F401
         status["pocketsphinx"] = "installed (offline model bundled)"
     except ImportError:
@@ -212,6 +236,203 @@ def _transcribe_whisper(wav: Path, *, language: str | None) -> Transcript:
         language=getattr(info, "language", language or "en"),
         quality=Quality.GOOD, audio_seconds=_wav_seconds(wav),
         seconds_to_transcribe=0.0,
+    )
+
+
+# Where a self-hosted Whisper lives. Searched in order; the first hit wins.
+# Weights are ordinary files on disk, not a hosted API -- ASR is a cost line in
+# the margin model, and paying per minute for someone else's endpoint is what
+# turns a 55% gross margin into a 20% one.
+# No world-writable directory belongs on this list. Model weights are code in
+# every sense that matters -- they are loaded and executed by the ONNX runtime
+# -- so searching /tmp or /var/tmp would let any local user drop in a file we
+# then run. Each entry below is either explicitly configured or writable only
+# by the owner.
+SHERPA_SEARCH_PATHS = (
+    "CLIPR_ASR_MODEL_DIR",           # explicit override, checked as an env var
+    "models",                        # ./models in the project
+    "~/.cache/clipr/models",
+    "/opt/clipr/models",
+)
+
+
+def _find_sherpa_whisper() -> dict | None:
+    """Locate a sherpa-onnx Whisper model on disk.
+
+    Returns the three file paths it needs, or None. Prefers int8 weights: on
+    CPU they run several times faster and the difference does not show up in a
+    caption.
+    """
+    roots: list[Path] = []
+    for entry in SHERPA_SEARCH_PATHS:
+        raw = os.environ.get(entry) if entry.isupper() else entry
+        if raw:
+            roots.append(Path(raw).expanduser())
+
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for candidate in sorted(root.glob("sherpa-onnx-whisper-*")) + [root]:
+            if not candidate.is_dir():
+                continue
+            tokens = sorted(candidate.glob("*-tokens.txt"))
+            if not tokens:
+                continue
+            encoders = (sorted(candidate.glob("*-encoder.int8.onnx"))
+                        or sorted(candidate.glob("*-encoder.onnx")))
+            decoders = (sorted(candidate.glob("*-decoder.int8.onnx"))
+                        or sorted(candidate.glob("*-decoder.onnx")))
+            if encoders and decoders:
+                return {
+                    "encoder": str(encoders[0]),
+                    "decoder": str(decoders[0]),
+                    "tokens": str(tokens[0]),
+                    "name": candidate.name,
+                    "vad": next((str(p) for p in
+                                 (candidate / "silero_vad.onnx",
+                                  candidate.parent / "silero_vad.onnx")
+                                 if p.exists()), None),
+                }
+    return None
+
+
+def _read_wav_mono(wav: Path):
+    import numpy as np
+
+    with wave.open(str(wav), "rb") as fh:
+        rate = fh.getframerate()
+        raw = fh.readframes(fh.getnframes())
+    samples = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+    return samples, rate
+
+
+def _vad_segments(samples, rate: int, vad_model: str) -> list[tuple[float, float]]:
+    """Split audio into spans of actual speech.
+
+    This is what makes Whisper-via-ONNX usable for captions. The decoder
+    returns words with no timings at all, so without speech boundaries the only
+    option is to spread a whole file's words evenly across it -- captions that
+    are correct and completely out of sync. VAD gives real start and end times
+    per utterance, and words are distributed inside spans that are a few
+    seconds long, where the error is small enough not to read as drift.
+    """
+    import sherpa_onnx
+
+    config = sherpa_onnx.VadModelConfig()
+    config.silero_vad.model = vad_model
+    config.silero_vad.threshold = 0.5
+    config.silero_vad.min_silence_duration = 0.35
+    config.silero_vad.min_speech_duration = 0.2
+    # Whisper's receptive field is 30s; staying well under it keeps each
+    # utterance inside a single encoder window.
+    config.silero_vad.max_speech_duration = 12.0
+    config.sample_rate = rate
+
+    detector = sherpa_onnx.VoiceActivityDetector(config, buffer_size_in_seconds=120)
+    spans: list[tuple[float, float]] = []
+
+    def drain() -> None:
+        while not detector.empty():
+            seg = detector.front
+            spans.append((seg.start / rate, (seg.start + len(seg.samples)) / rate))
+            detector.pop()
+
+    window = 512
+    for i in range(0, len(samples), window):
+        detector.accept_waveform(samples[i:i + window])
+        drain()
+    detector.flush()
+    drain()
+    return spans
+
+
+def _spread_words(text: str, start: float, end: float) -> list[Word]:
+    """Lay a segment's words across its span, weighted by length.
+
+    Longer words take longer to say. Weighting by character count is a better
+    approximation than an even split and costs nothing.
+    """
+    tokens = text.split()
+    if not tokens:
+        return []
+    total = sum(len(t) for t in tokens) or len(tokens)
+    span = max(0.05, end - start)
+    words: list[Word] = []
+    cursor = start
+    for token in tokens:
+        share = (len(token) / total) * span
+        words.append(Word(start=round(cursor, 3),
+                          end=round(min(end, cursor + share), 3), text=token))
+        cursor += share
+    return words
+
+
+def _transcribe_sherpa(wav: Path) -> Transcript:
+    """Whisper weights running locally through ONNX, no hosted API."""
+    import sherpa_onnx
+
+    model = _find_sherpa_whisper()
+    if model is None:
+        raise TranscriptionUnavailable(
+            "No sherpa-onnx Whisper model found. Fetch one with:\n"
+            "  mkdir -p models && cd models\n"
+            "  curl -sSL -O https://github.com/k2-fsa/sherpa-onnx/releases/"
+            "download/asr-models/sherpa-onnx-whisper-base.en.tar.bz2\n"
+            "  tar xjf sherpa-onnx-whisper-base.en.tar.bz2\n"
+            "  curl -sSL -O https://github.com/k2-fsa/sherpa-onnx/releases/"
+            "download/asr-models/silero_vad.onnx\n"
+            "Or set CLIPR_ASR_MODEL_DIR to wherever it already lives."
+        )
+
+    recognizer = sherpa_onnx.OfflineRecognizer.from_whisper(
+        encoder=model["encoder"], decoder=model["decoder"], tokens=model["tokens"],
+        num_threads=max(2, (os.cpu_count() or 4) // 2),
+    )
+    samples, rate = _read_wav_mono(wav)
+    duration = len(samples) / rate if rate else 0.0
+
+    spans: list[tuple[float, float]] = []
+    if model["vad"]:
+        spans = _vad_segments(samples, rate, model["vad"])
+
+    if not spans and duration > 0:
+        # VAD found nothing. That is often correct -- a music bed has no speech
+        # -- but "the speech detector abstained" must not silently become "this
+        # file has no transcript". Silero is trained on speech and rejects
+        # singing outright, so a sung hook, a heavily processed voice, or a
+        # noisy stream can all come back empty. Fall back to fixed windows and
+        # let the recogniser decide; if there really are no words it returns
+        # nothing, which is a conclusion rather than an omission.
+        spans = [(float(t), min(duration, t + 12.0))
+                 for t in range(0, max(1, int(duration)), 12)]
+
+    if not spans:
+        return Transcript([], "sherpa-onnx-whisper", model["name"], "en",
+                          Quality.GOOD, duration, 0.0, Timing.APPROXIMATE)
+
+    # Batch the whole file through the recognizer in one call per chunk group.
+    streams = []
+    for start, end in spans:
+        stream = recognizer.create_stream()
+        stream.accept_waveform(rate, samples[int(start * rate):int(end * rate)])
+        streams.append(stream)
+
+    batch = 8
+    for i in range(0, len(streams), batch):
+        recognizer.decode_streams(streams[i:i + batch])
+
+    segments: list[Segment] = []
+    for (start, end), stream in zip(spans, streams, strict=True):
+        text = (stream.result.text or "").strip()
+        if not text:
+            continue
+        segments.append(Segment(start=round(start, 3), end=round(end, 3),
+                                text=text, words=_spread_words(text, start, end)))
+
+    return Transcript(
+        segments=segments, engine="sherpa-onnx-whisper", model=model["name"],
+        language="en", quality=Quality.GOOD, audio_seconds=duration,
+        seconds_to_transcribe=0.0, word_timing=Timing.APPROXIMATE,
     )
 
 
@@ -294,7 +515,8 @@ def transcribe(
     work_dir = work_dir or media_path.parent
     wav = extract_audio(media_path, Path(work_dir) / f".{media_path.stem}.asr.wav")
 
-    order = ["faster-whisper", "pocketsphinx"] if engine == "auto" else [engine]
+    order = (["faster-whisper", "sherpa-onnx-whisper", "pocketsphinx"]
+             if engine == "auto" else [engine])
 
     errors: list[str] = []
     for name in order:
@@ -302,6 +524,8 @@ def transcribe(
         try:
             if name == "faster-whisper":
                 result = _transcribe_whisper(wav, language=language)
+            elif name == "sherpa-onnx-whisper":
+                result = _transcribe_sherpa(wav)
             elif name == "pocketsphinx":
                 result = _transcribe_pocketsphinx(wav)
             else:

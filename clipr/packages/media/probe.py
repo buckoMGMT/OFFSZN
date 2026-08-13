@@ -321,6 +321,7 @@ def validate_output(
     min_seconds: float = 10.0,
     max_seconds: float = 90.0,
     expect_audio: bool = True,
+    expect_audible: bool = True,
     min_bytes: int = 50_000,
 ) -> ValidationResult:
     """Check a rendered clip is something a person could actually watch.
@@ -366,10 +367,21 @@ def validate_output(
 
     rms = audio_rms_dbfs(p) if info.has_audio else None
     if expect_audio and rms is not None and rms < SILENT_DBFS:
-        failures.append(
-            f"Audio track is effectively silent ({rms} dBFS). The clip has sound "
-            f"on paper and none in practice."
-        )
+        if expect_audible:
+            failures.append(
+                f"Audio track is effectively silent ({rms} dBFS). The clip has "
+                f"sound on paper and none in practice."
+            )
+        else:
+            # The source was silent too, so silence here is faithful rather than
+            # broken. Found on real footage: a file with a real AAC stream
+            # carrying digital silence was rendered correctly and then failed
+            # its own validation. A validator that fails correct output teaches
+            # people to ignore it.
+            warnings.append(
+                f"Clip audio is silent ({rms} dBFS), matching a silent source. "
+                f"Faithful, but there is nothing to hear."
+            )
 
     samples = sample_frames(p)
     black = [s for s in samples if s.is_black]
