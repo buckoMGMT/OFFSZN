@@ -86,6 +86,10 @@ class DemoReport:
     warnings: list[str] = field(default_factory=list)
     technically_valid: bool = False
     human_quality_verified: bool = False
+    # Deliberately offering nothing is a correct outcome, not a failure. It
+    # has to be a distinct state or abstention reads as a broken run and the
+    # threshold gets quietly lowered to make the red go away.
+    abstained: bool = False
 
     def to_dict(self) -> dict:
         return {
@@ -100,6 +104,7 @@ class DemoReport:
             "verdict": {
                 "technically_valid": self.technically_valid,
                 "human_quality_verified": self.human_quality_verified,
+                "abstained": self.abstained,
                 "what_technically_valid_means": (
                     "Every clip decodes, is 1080x1920, has non-blank frames, "
                     "and carries audio when the source did."
@@ -342,6 +347,9 @@ def run(input_path: Path, out_dir: Path, *, clips_wanted: int = DEFAULT_CLIPS,
         )
         print(f"\n  No moment cleared the quality threshold "
               f"({MINIMUM_CLIP_SCORE:.0f}). Offering nothing rather than filler.")
+        # The pipeline ran correctly and reached a conclusion. That is a pass.
+        report.abstained = True
+        report.technically_valid = True
         _finish(report, out_dir)
         return report
 
@@ -538,6 +546,10 @@ def _print_paths(report: DemoReport, out_dir: Path) -> bool:
     show("report", out_dir / "demo_report.md")
 
     print(f"\n{RULE}")
+    if report.abstained:
+        print("ABSTAINED — no moment cleared the quality bar. The pipeline ran")
+        print("            correctly and concluded there was nothing worth")
+        print("            offering. That is a result, not a failure.")
     print(f"TECHNICALLY VALID:      {report.technically_valid}")
     print("HUMAN QUALITY VERIFIED: False  <- only you can set this")
     print(RULE)
@@ -595,7 +607,9 @@ def main(argv: list[str] | None = None) -> int:
 
     ok = _print_paths(report, args.out)
     if not report.clips:
-        return 4
+        # Abstaining is a successful run. Only an actual failure to produce
+        # clips it wanted to produce is an error.
+        return 0 if report.abstained else 4
     return 0 if (ok and report.technically_valid) else 1
 
 
