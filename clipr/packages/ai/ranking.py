@@ -42,6 +42,24 @@ from dataclasses import asdict, dataclass, field
 from packages.ai.signals import Candidate, _slice
 from packages.ai.transcribe import Transcript
 
+# --- Ranking V1: frozen -----------------------------------------------------
+#
+# Every weight, threshold and marker word below is a prior. Not one of them has
+# met a creator, and the honest description of this model is "a hypothesis with
+# good ergonomics".
+#
+# It is frozen at v1 so that it can be *measured*. The failure this prevents is
+# the obvious one: run a VOD, dislike a pick, nudge a weight, run again, feel
+# better. That produces a model tuned to whoever was in the room and a number
+# that means nothing, because the thing being measured changed between
+# measurements.
+#
+# The rule until the first dataset is collected: no weight, threshold or word
+# list in this file changes. Results carry RANKING_VERSION, verdicts record it,
+# and a change of any constant here is a version bump -- so any comparison
+# across versions is visible rather than silent.
+RANKING_VERSION = "v1"
+
 # Below this, a candidate is not offered at all.
 MINIMUM_CLIP_SCORE = 45.0
 
@@ -600,6 +618,7 @@ def rank(
     held_back = [c for c in selected[:wanted] if c.clip_score < minimum]
 
     context = {
+        "ranking_version": RANKING_VERSION,
         "scored": len(scored),
         "after_deduplication": len(selected),
         "duplicates_dropped": dropped_duplicates,

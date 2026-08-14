@@ -17,8 +17,14 @@ Design rules, learned from what the terminal version could not do:
 * one clip at a time. A grid invites skimming; the question is per clip.
 * rejecting asks why. The rate says something is wrong, the reason says what,
   and "bad crop" and "missing context" send you to different code.
-* keyboard first. K and J, or the arrow keys. A creator reviewing forty clips
-  should never touch the mouse.
+* keyboard first. K, M and J. A creator reviewing forty clips should never
+  touch the mouse.
+* **blind by default.** The score and the reasoning stay hidden until after
+  the verdict. Showing a creator "87/100" before they judge anchors them, and
+  a baseline dataset collected that way measures agreement with ClipR rather
+  than whether the clip is good. Pass --show-scores to review with them
+  visible; the mode is recorded on every verdict so a contaminated batch can
+  be told apart later.
 """
 
 from __future__ import annotations
@@ -35,6 +41,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from packages.ai.clip_eval import band
+from packages.ai.ranking import RANKING_VERSION
 
 REJECT_REASONS = [
     "bad moment", "missing context", "bad boundary", "bad crop",
@@ -89,6 +96,10 @@ PAGE = """<!doctype html>
           font-weight:700; }
   .reject { background:var(--reject); color:#fff; border-color:var(--reject);
             font-weight:700; }
+  .maybe { background:#3a4250; color:var(--text); border-color:#4a5464;
+           font-weight:600; }
+  .blind { border:1px dashed var(--line); border-radius:10px; padding:16px;
+           color:var(--muted); font-size:13px; margin:18px 0 22px; }
   .reasons { display:none; gap:8px; flex-wrap:wrap; margin-top:14px; }
   .reasons.open { display:flex; }
   .chip { padding:7px 13px; border-radius:20px; border:1px solid var(--line);
@@ -107,6 +118,7 @@ PAGE = """<!doctype html>
 <main id="app"></main>
 <script>
 const REASONS = __REASONS__;
+const BLIND = __BLIND__;
 let clips = [], i = 0, picked = new Set(), reviewed = [];
 
 async function boot() {
@@ -119,7 +131,9 @@ async function boot() {
 }
 
 function rate() {
-  const done = reviewed.filter(v => v.verdict !== 'skip');
+  const el0 = document.getElementById('rate');
+  if (BLIND) { el0.textContent = `${clips.length} clips to review`; return; }
+  const done = reviewed.filter(v => v.verdict !== 'skip' && v.verdict !== 'unreviewed');
   const kept = done.filter(v => v.verdict === 'post').length;
   const el = document.getElementById('rate');
   if (!done.length) { el.textContent = `${clips.length} clips to review`; return; }
@@ -131,15 +145,16 @@ function render() {
   rate();
   const app = document.getElementById('app');
   if (i >= clips.length) {
-    const done = reviewed.filter(v => v.verdict !== 'skip');
+    const done = reviewed.filter(v => v.verdict !== 'skip' && v.verdict !== 'unreviewed');
     const kept = done.filter(v => v.verdict === 'post').length;
+    const maybe = done.filter(v => v.verdict === 'maybe').length;
     const pct = done.length ? Math.round(100 * kept / done.length) : 0;
     const counts = {};
     reviewed.forEach(v => (v.reasons || []).forEach(x => counts[x] = (counts[x]||0)+1));
     const list = Object.entries(counts).sort((a,b) => b[1]-a[1])
       .map(([k,v]) => `<div>${v}&times; ${k}</div>`).join('') || '<div>No rejections.</div>';
     app.style.gridTemplateColumns = '1fr';
-    app.innerHTML = `<div class="done"><h2>Done — ${kept} of ${done.length} worth posting</h2>
+    app.innerHTML = `<div class="done"><h2>Done — ${kept} of ${done.length} worth posting${maybe ? ` (${maybe} maybe)` : ''}</h2>
       <div class="score">${pct}%<span> publishable rate</span></div>
       <div class="reasonlist"><div class="sub">Why clips were rejected</div>${list}</div>
       <div class="hint">Saved to reviews.json. One session is an anecdote —
@@ -159,16 +174,20 @@ function render() {
     <div>
       <h2>Would you post this?</h2>
       <div class="sub">${c.file}</div>
-      <div class="score">${(c.clip_score ?? 0).toFixed(0)}<span> / 100 &nbsp;ClipR thinks this is worth reviewing</span></div>
+      ${BLIND ? `<div class="blind">Blind review — ClipR's score and reasoning are
+        hidden until you decide, so your judgement is your own. Watch it and
+        answer: would you post this?</div>`
+      : `<div class="score">${(c.clip_score ?? 0).toFixed(0)}<span> / 100 &nbsp;ClipR thinks this is worth reviewing</span></div>
       ${c.hook_text ? `<div class="hook">Opens with: &ldquo;${c.hook_text.slice(0,90)}&rdquo;</div>` : ''}
       <div class="dims">${dims.map(([k,v]) => `
         <div class="dim"><span>${k}</span>
           <span class="bar"><i style="width:${Math.max(0,Math.min(100,v))}%"></i></span>
           <span class="num">${v.toFixed(0)}</span></div>`).join('')}</div>
       <div class="why">${Object.entries(c.why || {}).map(([k,v]) =>
-        v ? `<div><b>${k}</b> — ${v}</div>` : '').join('')}</div>
+        v ? `<div><b>${k}</b> — ${v}</div>` : '').join('')}</div>`}
       <div class="actions">
         <button class="keep" onclick="send('post')">Keep &nbsp;K</button>
+        <button class="maybe" onclick="send('maybe')">Maybe &nbsp;M</button>
         <button class="reject" onclick="openReasons()">Reject &nbsp;J</button>
         <button onclick="send('skip')">Skip</button>
       </div>
@@ -176,7 +195,7 @@ function render() {
         ${REASONS.map(r => `<span class="chip" onclick="toggle(this,'${r}')">${r}</span>`).join('')}
         <button class="reject" onclick="send('reject')">Confirm reject</button>
       </div>
-      <div class="hint">K keep &middot; J reject &middot; S skip &middot; Space play/pause</div>
+      <div class="hint">K keep &middot; M maybe &middot; J reject &middot; S skip &middot; Space play/pause</div>
     </div>`;
 }
 
@@ -189,7 +208,7 @@ function toggle(el, r) {
 async function send(verdict) {
   const c = clips[i];
   const body = { clip: c.file, verdict, reasons: [...picked],
-                 clip_score: c.clip_score };
+                 clip_score: c.clip_score, blind: BLIND };
   reviewed = reviewed.filter(v => v.clip !== c.file).concat([body]);
   await fetch('/api/verdict', { method:'POST',
     headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
@@ -200,6 +219,7 @@ document.addEventListener('keydown', e => {
   if (i >= clips.length) return;
   const k = e.key.toLowerCase();
   if (k === 'k') send('post');
+  else if (k === 'm') send('maybe');
   else if (k === 'j') openReasons();
   else if (k === 's') send('skip');
   else if (e.code === 'Space') {
@@ -215,6 +235,7 @@ boot();
 
 class Handler(BaseHTTPRequestHandler):
     directory: Path
+    blind: bool = True
 
     def log_message(self, *args) -> None:  # noqa: D102 - quiet by default
         pass
@@ -256,7 +277,8 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
 
         if path in ("/", "/index.html"):
-            page = PAGE.replace("__REASONS__", json.dumps(REJECT_REASONS))
+            page = (PAGE.replace("__REASONS__", json.dumps(REJECT_REASONS))
+                        .replace("__BLIND__", "true" if self.blind else "false"))
             self._send(200, page.encode(), "text/html; charset=utf-8")
             return
 
@@ -287,6 +309,11 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length") or 0)
         payload = json.loads(self.rfile.read(length) or b"{}")
         payload["at"] = datetime.now(UTC).isoformat()
+        payload["ranking_version"] = RANKING_VERSION
+        # Recorded per verdict, not per session: a batch reviewed with the
+        # scores showing is contaminated for baseline purposes and has to be
+        # separable later rather than silently averaged in.
+        payload["blind"] = bool(payload.get("blind", self.blind))
 
         store = self.directory / "verdicts.json"
         existing = json.loads(store.read_text()) if store.exists() else []
@@ -296,7 +323,12 @@ class Handler(BaseHTTPRequestHandler):
         existing.append(payload)
         store.write_text(json.dumps(existing, indent=2))
 
-        decided = [v for v in existing if v.get("verdict") in ("post", "reject")]
+        # Publishable Rate is approvals over everything ClipR *offered*, so a
+        # "maybe" sits in the denominator: it was recommended and not approved.
+        # Excluding maybes would let a model that produces borderline clips
+        # score the same as one that produces confident keeps.
+        decided = [v for v in existing
+                   if v.get("verdict") in ("post", "maybe", "reject")]
         kept = sum(1 for v in decided if v["verdict"] == "post")
         rate = kept / len(decided) if decided else 0.0
         self._send(200, json.dumps({
@@ -305,7 +337,8 @@ class Handler(BaseHTTPRequestHandler):
         }).encode(), "application/json")
 
 
-def serve(directory: Path, port: int = 8765, open_browser: bool = True) -> int:
+def serve(directory: Path, port: int = 8765, open_browser: bool = True,
+          blind: bool = True) -> int:
     directory = directory.resolve()
     if not (directory / "demo_report.json").exists():
         print(f"No demo_report.json in {directory}. Run `make demo INPUT=...` first.",
@@ -314,12 +347,14 @@ def serve(directory: Path, port: int = 8765, open_browser: bool = True) -> int:
 
     handler = partial(Handler)
     Handler.directory = directory
+    Handler.blind = blind
     server = HTTPServer(("127.0.0.1", port), handler)
 
     url = f"http://127.0.0.1:{port}"
     print(f"ClipR review  →  {url}")
     print(f"  serving {directory}")
-    print("  K keep · J reject · S skip · Ctrl-C to stop\n")
+    print(f"  mode: {'BLIND — scores hidden until you decide' if blind else 'scores visible'}")
+    print("  K keep · M maybe · J reject · S skip · Ctrl-C to stop\n")
 
     if open_browser:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()
@@ -333,7 +368,8 @@ def serve(directory: Path, port: int = 8765, open_browser: bool = True) -> int:
     verdicts = directory / "verdicts.json"
     if verdicts.exists():
         data = json.loads(verdicts.read_text())
-        decided = [v for v in data if v.get("verdict") in ("post", "reject")]
+        decided = [v for v in data
+                   if v.get("verdict") in ("post", "maybe", "reject")]
         if decided:
             kept = sum(1 for v in decided if v["verdict"] == "post")
             rate = kept / len(decided)
@@ -347,8 +383,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dir", type=Path, default=Path("demo_output"))
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument("--show-scores", action="store_true",
+                        help="Show ClipR's score while reviewing. Off by "
+                             "default: seeing the score first anchors the "
+                             "verdict and contaminates a baseline dataset.")
     args = parser.parse_args(argv)
-    return serve(args.dir, args.port, not args.no_browser)
+    return serve(args.dir, args.port, not args.no_browser,
+                 blind=not args.show_scores)
 
 
 if __name__ == "__main__":

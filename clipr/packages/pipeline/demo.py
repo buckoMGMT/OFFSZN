@@ -34,7 +34,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from packages.ai import captions as C
-from packages.ai.ranking import MAX_CLIP_SECONDS, MINIMUM_CLIP_SCORE, rank
+from packages.ai.ranking import (
+    MAX_CLIP_SECONDS,
+    MINIMUM_CLIP_SCORE,
+    RANKING_VERSION,
+    rank,
+)
 from packages.ai.reframe import decide
 from packages.ai.safety import screen
 from packages.ai.signals import find_candidates, snap_to_speech
@@ -95,6 +100,7 @@ class DemoReport:
         return {
             "input": self.input_path,
             "output_dir": self.output_dir,
+            "ranking_version": RANKING_VERSION,
             "source": self.source,
             "transcript": self.transcript,
             "candidates": self.candidates,

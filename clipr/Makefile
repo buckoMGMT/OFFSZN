@@ -5,7 +5,7 @@ DB     ?= $(DATABASE_URL)
 PYTHON ?= python3
 
 .PHONY: help up down migrate test test-unit test-integration test-all \
-        demo verify-demo review review-web eval-clips lint security eval check margins audit
+        demo verify-demo review review-web eval-clips dataset lint security eval check margins audit
 
 # Where `make demo` writes. A persistent directory in the project, not /tmp:
 # the clips are the deliverable, and a deliverable that a reboot deletes is
@@ -37,6 +37,9 @@ review:    ## Review the clips in the terminal (no browser)
 
 eval-clips: ## Score the ranker against human-labelled VODs, check launch gates
 	$(PYTHON) -m packages.ai.cli_clip_eval --dir evaluation/creator_vods
+
+dataset:   ## Publishable Rate, rejection reasons, and which dimensions predict a keep
+	$(PYTHON) -m packages.pipeline.dataset --runs evaluation/runs
 
 test-unit: ## Fast tests. Mocks allowed. Never sufficient on their own.
 	$(PYTHON) -m pytest tests -m "not integration" -q
