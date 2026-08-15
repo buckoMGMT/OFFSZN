@@ -8,8 +8,18 @@ could print "transcript: ok" having done no speech recognition at all.
 Two engines, in preference order:
 
     faster-whisper   the real one. Word-level timings, punctuation, usable
-                     captions. Needs its model weights, which are downloaded
-                     once and cached.
+                     captions, and whole-file context so phrases are not split.
+                     Needs its model weights, downloaded once and cached.
+
+    sherpa-onnx      the same Whisper weights through ONNX, from a plain file.
+                     Runs where Hugging Face is unreachable. Two costs, both
+                     structural: timings come from VAD rather than the decoder,
+                     and each speech span is transcribed independently, so a
+                     phrase split across a VAD boundary loses the context that
+                     would have disambiguated it. Padding each span helps and
+                     does not eliminate it -- "Americans ask not what" can come
+                     back as "Americans. AS NOT! What". Prefer faster-whisper
+                     wherever it can reach its weights.
     pocketsphinx     a genuine offline decoder whose acoustic model ships
                      inside the wheel, so it runs with no network at all. It
                      is a 2010-era model: it produces real word timings and
@@ -410,11 +420,22 @@ def _transcribe_sherpa(wav: Path) -> Transcript:
         return Transcript([], "sherpa-onnx-whisper", model["name"], "en",
                           Quality.GOOD, duration, 0.0, Timing.APPROXIMATE)
 
-    # Batch the whole file through the recognizer in one call per chunk group.
+    # Feed each span with a little audio either side of it.
+    #
+    # VAD marks where speech is, not where a *phrase* is, and it will happily
+    # cut between two words of one. Whisper then transcribes each side without
+    # the other's context and guesses: "Americans ask not what" came back as
+    # "American S not What" purely because the boundary landed mid-phrase.
+    # A fifth of a second of lead-in and tail costs nothing and gives the
+    # decoder the run-up it needs. The *reported* timings stay the VAD ones --
+    # the padding is for the recogniser, not for the captions.
+    pad = 0.25
     streams = []
     for start, end in spans:
+        lo = int(max(0.0, start - pad) * rate)
+        hi = int(min(duration, end + pad) * rate)
         stream = recognizer.create_stream()
-        stream.accept_waveform(rate, samples[int(start * rate):int(end * rate)])
+        stream.accept_waveform(rate, samples[lo:hi])
         streams.append(stream)
 
     batch = 8

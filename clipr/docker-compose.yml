@@ -1,79 +1,41 @@
-# Local stack.
+# Run the ClipR engine somewhere the web app can reach it.
 #
-# Two changes from the draft that matter:
-#
-#   * Migrations are no longer mounted into docker-entrypoint-initdb.d. That
-#     directory only runs on an *empty* data volume, so once anyone has started
-#     the stack, schema edits silently stop applying and the next developer
-#     debugs a phantom. Migrations run explicitly via `make migrate`.
-#   * The worker and api wait for a healthy database rather than a started one,
-#     and both expose health endpoints so `depends_on` means something.
+#   cp .env.example .env      # set CLIPR_API_KEY
+#   docker compose up -d
+#   curl -H "Authorization: Bearer $CLIPR_API_KEY" localhost:8000/api/v1/health
 
 services:
-  postgres:
-    image: postgres:16-alpine
+  engine:
+    build: .
+    image: clipr-engine:latest
+    restart: unless-stopped
+    ports:
+      - "${CLIPR_PORT:-8000}:8000"
     environment:
-      POSTGRES_USER: clipr
-      POSTGRES_PASSWORD: dev_only_password
-      POSTGRES_DB: clipr
-    ports: ["5432:5432"]
+      # Required. The web app sends this as `Authorization: Bearer <key>`.
+      # With it unset the API is open to anyone who can reach the port.
+      CLIPR_API_KEY: ${CLIPR_API_KEY:?set CLIPR_API_KEY in .env}
+      # Lock this to the app's origin in production. The default of "*" is a
+      # convenience for local development, not a setting to ship.
+      CLIPR_CORS_ORIGINS: ${CLIPR_CORS_ORIGINS:-*}
+      CLIPR_CONCURRENT_JOBS: ${CLIPR_CONCURRENT_JOBS:-1}
+      CLIPR_MAX_UPLOAD_BYTES: ${CLIPR_MAX_UPLOAD_BYTES:-8589934592}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # Customer media and job state. Losing this loses their clips.
+      - clipr-data:/data
+    # Video encoding will use everything it is given. Without a ceiling one
+    # runaway job starves the host it shares.
+    deploy:
+      resources:
+        limits:
+          cpus: "${CLIPR_CPUS:-4}"
+          memory: ${CLIPR_MEMORY:-8g}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U clipr -d clipr"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  redis:
-    image: redis:7-alpine
-    ports: ["6379:6379"]
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      retries: 10
-
-  minio:
-    image: minio/minio
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: clipr
-      MINIO_ROOT_PASSWORD: dev_only_password
-    ports: ["9000:9000", "9001:9001"]
-    volumes: [miniodata:/data]
-    healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 5s
-      retries: 10
-
-  api:
-    build: ./apps/api
-    env_file: .env
-    ports: ["8000:8000"]
-    depends_on:
-      postgres: {condition: service_healthy}
-      redis: {condition: service_healthy}
-      minio: {condition: service_healthy}
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
-      interval: 10s
-      retries: 5
-
-  worker:
-    build: ./apps/pipeline
-    env_file: .env
-    depends_on:
-      postgres: {condition: service_healthy}
-      redis: {condition: service_healthy}
-      minio: {condition: service_healthy}
-
-  web:
-    build: ./apps/web
-    env_file: .env
-    ports: ["3000:3000"]
-    depends_on:
-      api: {condition: service_healthy}
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
 
 volumes:
-  pgdata: {}
-  miniodata: {}
+  clipr-data:
