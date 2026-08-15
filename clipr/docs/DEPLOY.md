@@ -1,5 +1,9 @@
 # Giving the web app an engine to call
 
+**Short version:** run `./start-engine.sh --public` and paste the two values it
+prints into the web app. Everything below is what that script does, and what to
+do when you outgrow it.
+
 Base44 asks for two secrets. One is trivial; the other requires the engine to
 be running somewhere on the public internet.
 
