@@ -5,7 +5,7 @@ DB     ?= $(DATABASE_URL)
 PYTHON ?= python3
 
 .PHONY: help up down migrate test test-unit test-integration test-all \
-        demo verify-demo review review-web eval-clips dataset lint security eval check margins audit
+        demo verify-demo review review-web eval-clips dataset api openapi lint security eval check margins audit
 
 # Where `make demo` writes. A persistent directory in the project, not /tmp:
 # the clips are the deliverable, and a deliverable that a reboot deletes is
@@ -40,6 +40,14 @@ eval-clips: ## Score the ranker against human-labelled VODs, check launch gates
 
 dataset:   ## Publishable Rate, rejection reasons, and which dimensions predict a keep
 	$(PYTHON) -m packages.pipeline.dataset --runs evaluation/runs
+
+api:       ## Serve the HTTP API a web front end calls (docs at /docs)
+	$(PYTHON) -m uvicorn packages.api.service:app --host 0.0.0.0 --port 8000
+
+openapi:   ## Regenerate docs/clipr-openapi.json
+	@$(PYTHON) -c "import json;from packages.api.service import app;\
+open('docs/clipr-openapi.json','w').write(json.dumps(app.openapi(),indent=2))" && \
+	echo "wrote docs/clipr-openapi.json"
 
 test-unit: ## Fast tests. Mocks allowed. Never sufficient on their own.
 	$(PYTHON) -m pytest tests -m "not integration" -q

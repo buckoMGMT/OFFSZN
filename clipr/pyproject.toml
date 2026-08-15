@@ -13,6 +13,10 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # Tests build deliberately awkward inputs and assert on internals.
 "tests/*" = ["B011", "SIM117"]
+# FastAPI's dependency injection *is* call-in-default: File(...), Depends(...),
+# Query(...). B008 is right everywhere else and wrong here, so it is scoped to
+# the API rather than silenced inline on every route.
+"packages/api/*.py" = ["B008"]
 
 [tool.bandit]
 exclude_dirs = ["tests"]

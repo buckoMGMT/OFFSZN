@@ -1,8 +1,33 @@
-# Runtime. Pinned loosely here; lock in the deploy image.
-asyncpg>=0.29
-bcrypt>=4.1
-pyjwt>=2.8
-pyotp>=2.9
-httpx>=0.27
-boto3>=1.34
-prometheus-client>=0.20
+# ClipR engine dependencies.
+#
+# The engine itself needs almost nothing: ffmpeg does the media work and it is
+# a system binary, not a Python package. Everything below is either speech
+# recognition or the HTTP layer.
+
+# --- HTTP API (what a web front end calls) ---------------------------------
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9      # multipart uploads
+
+# --- speech recognition, in preference order -------------------------------
+# faster-whisper is first choice: it returns per-word timings, which is what
+# makes captions land on the syllable. Weights come from Hugging Face.
+faster-whisper>=1.0
+
+# The same Whisper weights via ONNX, for environments that cannot reach
+# Hugging Face. Words are identical; timings come from VAD, so they are
+# segment-accurate rather than word-accurate.
+sherpa-onnx>=1.10
+
+# Last resort. A genuine offline decoder whose acoustic model ships inside the
+# wheel, so "no network" degrades the product instead of breaking it. It is a
+# 2010-era model and its words are substantially wrong -- every result carries
+# a quality flag so nothing downstream treats it as trustworthy.
+pocketsphinx>=5.0
+
+# --- system requirements, not installable here -----------------------------
+# ffmpeg >= 6.0 and ffprobe must be on PATH.
+#   apt: apt-get install -y ffmpeg
+#   brew: brew install ffmpeg
+# Fonts are needed for burned-in captions (libass):
+#   apt: apt-get install -y fonts-dejavu-core fontconfig
