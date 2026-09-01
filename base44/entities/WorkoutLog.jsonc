@@ -1,0 +1,94 @@
+{
+  "type": "object",
+  "name": "WorkoutLog",
+  "properties": {
+    "athlete_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "title": {
+      "type": "string"
+    },
+    "workout_type": {
+      "type": "string",
+      "enum": [
+        "Lift",
+        "Conditioning",
+        "Skills",
+        "Practice",
+        "Speed / Agility",
+        "Recovery",
+        "Other"
+      ]
+    },
+    "duration_minutes": {
+      "type": "number"
+    },
+    "calories_burned": {
+      "type": "number",
+      "default": 0
+    },
+    "source": {
+      "type": "string",
+      "description": "manual = logged by the athlete in-app, watch = auto-imported from Apple Watch / Health Connect.",
+      "enum": [
+        "manual",
+        "watch"
+      ],
+      "default": "manual"
+    },
+    "platform_id": {
+      "type": "string",
+      "description": "HealthKit/Health Connect workout id, present only for source: watch entries. Used for import dedup."
+    }
+  },
+  "required": [
+    "athlete_id",
+    "date",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
