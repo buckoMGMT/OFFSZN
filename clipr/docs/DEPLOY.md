@@ -117,7 +117,12 @@ curl -sS -H "Authorization: Bearer $KEY" $ENGINE/api/v1/health
 # if that says "no model on disk", captions will be wrong or missing.
 
 # 2. does the key actually protect it?
-curl -sS -o /dev/null -w "%{http_code}\n" $ENGINE/api/v1/health    # expect 401
+#    Test a *protected* endpoint. /health is deliberately public so that a
+#    load balancer can check it without credentials -- curling health without
+#    a key returns 200, which proves nothing.
+curl -sS -o /dev/null -w "%{http_code}\n" $ENGINE/api/v1/jobs           # expect 401
+curl -sS -o /dev/null -w "%{http_code}\n" \
+  -H "Authorization: Bearer $KEY" $ENGINE/api/v1/jobs                   # expect 200
 
 # 3. end to end with a real file
 JOB=$(curl -sS -X POST "$ENGINE/api/v1/jobs?clips=3" \
@@ -127,8 +132,8 @@ curl -sS -H "Authorization: Bearer $KEY" $ENGINE/api/v1/jobs/$JOB
 # poll until state is ready | abstained | failed
 ```
 
-If step 2 returns 200, the key is not set on the engine and anyone who finds
-the URL can use it.
+If the first call in step 2 returns 200, `CLIPR_API_KEY` is not set on the
+engine and anyone who finds the URL can spend your processing budget.
 
 ## Operational notes
 

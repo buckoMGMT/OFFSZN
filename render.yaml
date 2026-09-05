@@ -1,0 +1,52 @@
+# Render blueprint for the ClipR engine.
+#
+# This exists so the engine can be deployed by clicking rather than by wrestling
+# with a terminal. Render reads this file from the repository root, finds the
+# Dockerfile under clipr/, and hands back a permanent HTTPS URL -- which is what
+# CLIPR_ENGINE_URL wants.
+#
+# A tunnel from a laptop works for an afternoon and gives a new address every
+# time it restarts. This gives one address that survives reboots.
+
+services:
+  - type: web
+    name: clipr-engine
+    runtime: docker
+    # The engine is a subdirectory of this repo; the rest of the repo is the
+    # web app and has nothing to do with the image.
+    rootDir: clipr
+    dockerfilePath: ./Dockerfile
+
+    # Do not drop below this. The ASR model needs roughly 1 GB resident, and a
+    # smaller instance is killed part-way through loading it -- which surfaces
+    # as a container that restarts forever rather than as an out-of-memory
+    # error anyone would recognise.
+    plan: standard        # 2 GB RAM / 1 CPU
+
+    # /health is deliberately unauthenticated so this check works without
+    # giving the load balancer a credential.
+    healthCheckPath: /api/v1/health
+
+    envVars:
+      # sync:false means Render prompts for it at deploy time instead of
+      # storing a secret in this file.
+      - key: CLIPR_API_KEY
+        sync: false
+      # Set this to the web app's origin once it is known. Left open here
+      # because a blueprint cannot know the app's URL before the app exists.
+      - key: CLIPR_CORS_ORIGINS
+        value: "*"
+      - key: CLIPR_DATA_DIR
+        value: /data
+      # One video at a time. Each job already parallelises across the cores it
+      # has; raising this makes every job slower rather than adding throughput.
+      - key: CLIPR_CONCURRENT_JOBS
+        value: "1"
+
+    # Without this, every deploy and every restart deletes customers' clips.
+    # Render's container filesystem is ephemeral, and this is the single most
+    # common way a working deployment quietly loses data.
+    disk:
+      name: clipr-data
+      mountPath: /data
+      sizeGB: 20
